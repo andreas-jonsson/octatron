@@ -88,7 +88,7 @@ func createWorker(file string) *testWorker {
 	return w
 }
 
-func TestOctatron(t *testing.T) {
+func start() {
 	workers := make([]Worker, 1)
 
 	for i := range workers {
@@ -107,4 +107,14 @@ func TestOctatron(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func TestOctatron(t *testing.T) {
+	start()
+}
+
+func BenchmarkOctatron(b *testing.B) {
+    for i := 0; i < b.N; i++ {
+        start()
+    }
 }
