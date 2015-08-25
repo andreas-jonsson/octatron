@@ -19,7 +19,8 @@
 package octatron_test
 
 import (
-    "octatron"
+    "github.com/andreas-t-jonsson/octatron"
+    "testing"
     "os"
     "fmt"
     "bufio"
@@ -81,7 +82,7 @@ func createWorker(file string) *Worker {
     return w
 }
 
-func main() {
+func TestOctatron(t *testing.T) {
     workers := make([]octatron.Worker, 1)
 
     for i := range workers {

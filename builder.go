@@ -42,7 +42,7 @@ func processSample(data *workerData, sample *Sample) {
 
 func BuildTree(workers []Worker, cfg *TreeConfig) (*TreeResult, error) {
     errorChan := make(chan error)
-    data := make(workerData, len(workers))
+    data := make([]workerData, len(workers))
 
     voxelSize := cfg.Bounds.Size / float64(cfg.VoxelsPerAxis)
 
