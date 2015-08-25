@@ -16,11 +16,10 @@
 /* along with Octatron.  If not, see <http://www.gnu.org/licenses/>.    */
 /************************************************************************/
 
-package octatron_test
+package main
 
 import (
     "github.com/andreas-t-jonsson/octatron"
-    "testing"
     "os"
     "fmt"
     "bufio"
@@ -82,7 +81,7 @@ func createWorker(file string) *Worker {
     return w
 }
 
-func TestOctatron(t *testing.T) {
+func main() {
     workers := make([]octatron.Worker, 1)
 
     for i := range workers {
