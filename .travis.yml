@@ -1,0 +1,10 @@
+language: go
+go:
+  - 1.5
+
+notifications:
+  email:
+    recipients:
+      - mail@andreasjonsson.se
+    on_success: change
+    on_failure: always

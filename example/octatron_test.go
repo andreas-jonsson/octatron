@@ -16,11 +16,10 @@
 /* along with Octatron.  If not, see <http://www.gnu.org/licenses/>.    */
 /************************************************************************/
 
-package main
+package octatron_test
 
 import (
-    "github.com/andreas-t-jonsson/octatron"
-    //"../../octatron"
+    "octatron"
     "os"
     "fmt"
     "bufio"
