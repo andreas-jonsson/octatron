@@ -16,36 +16,38 @@
 /* along with Octatron.  If not, see <http://www.gnu.org/licenses/>.    */
 /************************************************************************/
 
-package main
+package octatron_test
 
 import (
-    "github.com/andreas-t-jonsson/octatron"
+    "./"
+    "testing"
+
     "os"
     "fmt"
     "bufio"
 )
 
-type Sample struct {
+type sample struct {
     pos octatron.Point
     color octatron.Color
 }
 
-func (s *Sample) Color() octatron.Color {
+func (s *sample) Color() octatron.Color {
     return s.color
 }
 
-func (s *Sample) Position() octatron.Point {
+func (s *sample) Position() octatron.Point {
  	return s.pos
 }
 
-type Worker struct {
+type worker struct {
     file *os.File
 }
 
-func (w *Worker) Run(volume octatron.Box, samples chan octatron.Sample) error {
+func (w *worker) Run(volume octatron.Box, samples chan octatron.Sample) error {
     scanner := bufio.NewScanner(w.file)
     for scanner.Scan() {
-        s := new(Sample)
+        s := new(sample)
 
         _, err := fmt.Sscan(scanner.Text(), &s.pos.X, &s.pos.Y, &s.pos.Z, &s.color.R, &s.color.G, &s.color.B)
         if err != nil {
@@ -65,15 +67,15 @@ func (w *Worker) Run(volume octatron.Box, samples chan octatron.Sample) error {
     return scanner.Err()
 }
 
-func (w *Worker) Stop() {
+func (w *worker) Stop() {
  	w.file.Close()
 }
 
-func createWorker(file string) *Worker {
+func createWorker(file string) *worker {
     var err error
-    w := new(Worker)
+    w := new(worker)
 
-    w.file, err = os.Open("small.xyz")
+    w.file, err = os.Open(file)
     if err != nil {
         panic(err)
     }
@@ -81,14 +83,14 @@ func createWorker(file string) *Worker {
     return w
 }
 
-func main() {
+func TestOctatron(t *testing.T) {
     workers := make([]octatron.Worker, 1)
 
     for i := range workers {
-        workers[i] = createWorker("small.xyz")
+        workers[i] = createWorker("test.xyz")
     }
 
-    file, err := os.Create("small.oct")
+    file, err := os.Create("test.oct")
     if err != nil {
         panic(err)
     }
