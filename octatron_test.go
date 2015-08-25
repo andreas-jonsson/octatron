@@ -49,10 +49,17 @@ func (w *worker) Run(volume octatron.Box, samples chan octatron.Sample) error {
 	for scanner.Scan() {
 		s := new(sample)
 
-		_, err := fmt.Sscan(scanner.Text(), &s.pos.X, &s.pos.Y, &s.pos.Z, &s.color.R, &s.color.G, &s.color.B)
+        var unknown float64
+        var r, g, b int
+
+		_, err := fmt.Sscan(scanner.Text(), &s.pos.X, &s.pos.Y, &s.pos.Z, &unknown, &r, &g, &b)
 		if err != nil {
 			return err
 		}
+
+        s.color.R = float32(r)
+        s.color.G = float32(g)
+        s.color.B = float32(b)
 
 		if volume.Intersect(s.pos) {
 			samples <- s
