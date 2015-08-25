@@ -94,7 +94,7 @@ func TestOctatron(t *testing.T) {
 	workers := make([]octatron.Worker, 1)
 
 	for i := range workers {
-		workers[i] = createWorker("test.data")
+		workers[i] = createWorker("test.xyz")
 	}
 
 	file, err := os.Create("test.oct")
