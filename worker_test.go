@@ -16,38 +16,36 @@
 /* along with Octatron.  If not, see <http://www.gnu.org/licenses/>.    */
 /************************************************************************/
 
-package octatron_test
+package octatron
 
 import (
-	"./"
 	"testing"
-
 	"bufio"
 	"fmt"
 	"os"
 )
 
-type sample struct {
-	pos   octatron.Point
-	color octatron.Color
+type testSample struct {
+	pos   Point
+	color Color
 }
 
-func (s *sample) Color() octatron.Color {
+func (s *testSample) Color() Color {
 	return s.color
 }
 
-func (s *sample) Position() octatron.Point {
+func (s *testSample) Position() Point {
 	return s.pos
 }
 
-type worker struct {
+type testWorker struct {
 	file *os.File
 }
 
-func (w *worker) Run(volume octatron.Box, samples chan octatron.Sample) error {
+func (w *testWorker) Run(volume Box, samples chan Sample) error {
 	scanner := bufio.NewScanner(w.file)
 	for scanner.Scan() {
-		s := new(sample)
+		s := new(testSample)
 
         var unknown float64
         var r, g, b int
@@ -74,13 +72,13 @@ func (w *worker) Run(volume octatron.Box, samples chan octatron.Sample) error {
 	return scanner.Err()
 }
 
-func (w *worker) Stop() {
+func (w *testWorker) Stop() {
 	w.file.Close()
 }
 
-func createWorker(file string) *worker {
+func createWorker(file string) *testWorker {
 	var err error
-	w := new(worker)
+	w := new(testWorker)
 
 	w.file, err = os.Open(file)
 	if err != nil {
@@ -91,7 +89,7 @@ func createWorker(file string) *worker {
 }
 
 func TestOctatron(t *testing.T) {
-	workers := make([]octatron.Worker, 1)
+	workers := make([]Worker, 1)
 
 	for i := range workers {
 		workers[i] = createWorker("test.xyz")
@@ -103,9 +101,9 @@ func TestOctatron(t *testing.T) {
 	}
 	defer file.Close()
 
-	bounds := octatron.Box{octatron.Point{0.0, 0.0, 0.0}, 1000.0}
+	bounds := Box{Point{0.0, 0.0, 0.0}, 1000.0}
 
-	_, err = octatron.BuildTree(workers, &octatron.TreeConfig{file, bounds, 10})
+	_, err = BuildTree(workers, &TreeConfig{file, bounds, 10})
 	if err != nil {
 		panic(err)
 	}
