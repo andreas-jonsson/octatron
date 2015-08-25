@@ -19,87 +19,87 @@
 package octatron_test
 
 import (
-    "./"
-    "testing"
+	"./"
+	"testing"
 
-    "os"
-    "fmt"
-    "bufio"
+	"bufio"
+	"fmt"
+	"os"
 )
 
 type sample struct {
-    pos octatron.Point
-    color octatron.Color
+	pos   octatron.Point
+	color octatron.Color
 }
 
 func (s *sample) Color() octatron.Color {
-    return s.color
+	return s.color
 }
 
 func (s *sample) Position() octatron.Point {
- 	return s.pos
+	return s.pos
 }
 
 type worker struct {
-    file *os.File
+	file *os.File
 }
 
 func (w *worker) Run(volume octatron.Box, samples chan octatron.Sample) error {
-    scanner := bufio.NewScanner(w.file)
-    for scanner.Scan() {
-        s := new(sample)
+	scanner := bufio.NewScanner(w.file)
+	for scanner.Scan() {
+		s := new(sample)
 
-        _, err := fmt.Sscan(scanner.Text(), &s.pos.X, &s.pos.Y, &s.pos.Z, &s.color.R, &s.color.G, &s.color.B)
-        if err != nil {
-            return err
-        }
+		_, err := fmt.Sscan(scanner.Text(), &s.pos.X, &s.pos.Y, &s.pos.Z, &s.color.R, &s.color.G, &s.color.B)
+		if err != nil {
+			return err
+		}
 
-        if volume.Intersect(s.pos) {
-            samples <- s
-        }
-    }
+		if volume.Intersect(s.pos) {
+			samples <- s
+		}
+	}
 
-    _, err := w.file.Seek(0, 0)
-    if err != nil {
-        return err
-    }
+	_, err := w.file.Seek(0, 0)
+	if err != nil {
+		return err
+	}
 
-    return scanner.Err()
+	return scanner.Err()
 }
 
 func (w *worker) Stop() {
- 	w.file.Close()
+	w.file.Close()
 }
 
 func createWorker(file string) *worker {
-    var err error
-    w := new(worker)
+	var err error
+	w := new(worker)
 
-    w.file, err = os.Open(file)
-    if err != nil {
-        panic(err)
-    }
+	w.file, err = os.Open(file)
+	if err != nil {
+		panic(err)
+	}
 
-    return w
+	return w
 }
 
 func TestOctatron(t *testing.T) {
-    workers := make([]octatron.Worker, 1)
+	workers := make([]octatron.Worker, 1)
 
-    for i := range workers {
-        workers[i] = createWorker("test.xyz")
-    }
+	for i := range workers {
+		workers[i] = createWorker("test.xyz")
+	}
 
-    file, err := os.Create("test.oct")
-    if err != nil {
-        panic(err)
-    }
-    defer file.Close()
+	file, err := os.Create("test.oct")
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
 
-    bounds := octatron.Box{octatron.Point{0.0, 0.0, 0.0}, 1000.0}
+	bounds := octatron.Box{octatron.Point{0.0, 0.0, 0.0}, 1000.0}
 
-    _, err = octatron.BuildTree(workers, &octatron.TreeConfig{file, bounds, 10})
-    if err != nil {
-        panic(err)
-    }
+	_, err = octatron.BuildTree(workers, &octatron.TreeConfig{file, bounds, 10})
+	if err != nil {
+		panic(err)
+	}
 }

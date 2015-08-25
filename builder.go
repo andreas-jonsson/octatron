@@ -19,21 +19,20 @@
 package octatron
 
 import (
-    "io"
-    "sync"
+	"io"
+	"sync"
 )
 
 type TreeResult struct {
 }
 
 type TreeConfig struct {
-    Writer io.Writer
-    Bounds Box
-    VoxelsPerAxis int
+	Writer        io.Writer
+	Bounds        Box
+	VoxelsPerAxis int
 }
 
 type workerData struct {
-
 }
 
 func processSample(data *workerData, sample *Sample) {
@@ -41,45 +40,45 @@ func processSample(data *workerData, sample *Sample) {
 }
 
 func BuildTree(workers []Worker, cfg *TreeConfig) (*TreeResult, error) {
-    errorChan := make(chan error)
-    data := make([]workerData, len(workers))
+	errorChan := make(chan error, 10)
+	data := make([]workerData, len(workers))
 
-    voxelSize := cfg.Bounds.Size / float64(cfg.VoxelsPerAxis)
+	voxelSize := cfg.Bounds.Size / float64(cfg.VoxelsPerAxis)
 
-    var wgWorkers sync.WaitGroup
-    for idx, worker := range workers {
-        wgWorkers.Add(1)
+	var wgWorkers sync.WaitGroup
+	for idx, worker := range workers {
+		wgWorkers.Add(1)
 
-        go func() {
-            defer wgWorkers.Done()
+		go func() {
+			defer wgWorkers.Done()
 
-            sampleBox := Box{cfg.Bounds.Pos, voxelSize}
-            sampleChan := make(chan Sample, 10)
+			sampleBox := Box{cfg.Bounds.Pos, voxelSize}
+			sampleChan := make(chan Sample, 10)
 
-            go func() {
-                err := worker.Run(sampleBox, sampleChan)
-                if err != nil {
-                    errorChan <- err
-                }
-                close(sampleChan)
-            }()
+			go func() {
+				err := worker.Run(sampleBox, sampleChan)
+				if err != nil {
+					errorChan <- err
+				}
+				close(sampleChan)
+			}()
 
-            for {
-                sample, more := <-sampleChan
-                processSample(&data[idx], &sample)
-                if !more {
-                    break
-                }
-            }
-        }()
-    }
+			for {
+				sample, more := <-sampleChan
+				processSample(&data[idx], &sample)
+				if !more {
+					break
+				}
+			}
+		}()
+	}
 
-    wgWorkers.Wait()
+	wgWorkers.Wait()
 
-    select {
-    case err := <-errorChan:
-            return nil, err
-        default:
-            return &TreeResult{}, nil
-    }
+	select {
+	case err := <-errorChan:
+		return nil, err
+	default:
+		return &TreeResult{}, nil
+	}
 }
