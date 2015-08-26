@@ -21,64 +21,116 @@ package octatron
 import (
 	"io"
 	"sync"
+	"sync/atomic"
 )
 
 type TreeResult struct {
 }
 
 type TreeConfig struct {
-	Writer        io.Writer
+	Writer        io.WriteSeeker
 	Bounds        Box
 	VoxelsPerAxis int
 }
 
-type workerData struct {
+type workerPrivateData struct {
+	err error
+	worker Worker
 }
 
-func processSample(data *workerData, sample *Sample) {
+func processSample(data *workerPrivateData, sample *Sample) {
 
+}
+
+func processData(data *workerPrivateData, sampleChan <-chan Sample) error {
+	for {
+		sample, more := <-sampleChan
+		processSample(data, &sample)
+		if !more {
+			err := data.err
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+	}
+}
+
+func collectData(workerData *workerPrivateData, node *treeNode, sampleChan chan<- Sample) {
+	err := workerData.worker.Run(node.bounds, sampleChan)
+	if err != nil {
+		workerData.err = err
+	}
+	close(sampleChan)
 }
 
 func BuildTree(workers []Worker, cfg *TreeConfig) (*TreeResult, error) {
-	errorChan := make(chan error, 10)
-	data := make([]workerData, len(workers))
+	var volumeTraversed uint64
+	vpa := uint64(cfg.VoxelsPerAxis)
+	totalVolume := vpa * vpa * vpa
 
-	voxelSize := cfg.Bounds.Size / float64(cfg.VoxelsPerAxis)
+	numWorkers := len(workers)
+	workerData := make([]workerPrivateData, numWorkers)
+
+	var wgWorkersIdle sync.WaitGroup
+	wgWorkersIdle.Add(numWorkers)
+
+	nodeMapShutdownChan, nodeMapInChan, nodeMapOutChan := startNodeCache(numWorkers)
+	nodeMapInChan <- newRootNode(cfg.Bounds, cfg.VoxelsPerAxis)
+
+	defer func() {
+		nodeMapShutdownChan <- struct{}{}
+	}()
 
 	var wgWorkers sync.WaitGroup
-	for idx, worker := range workers {
-		wgWorkers.Add(1)
+	wgWorkers.Add(numWorkers)
 
+	for idx, worker := range workers {
+		// Spawn worker
 		go func() {
 			defer wgWorkers.Done()
 
-			sampleBox := Box{cfg.Bounds.Pos, voxelSize}
-			sampleChan := make(chan Sample, 10)
+			data := &workerData[idx]
+			data.worker = worker
 
-			go func() {
-				err := worker.Run(sampleBox, sampleChan)
-				if err != nil {
-					errorChan <- err
-				}
-				close(sampleChan)
-			}()
-
+			// Process jobs
 			for {
-				sample, more := <-sampleChan
-				processSample(&data[idx], &sample)
+				node, more := <-nodeMapOutChan
 				if !more {
-					break
+					return
+				}
+
+				sampleChan := make(chan Sample, 10)
+				go collectData(data, node, sampleChan)
+				if processData(data, sampleChan) != nil {
+					return
+				}
+
+				// This is a leaf
+				if node.numSamples == 0 {
+					parent := node.parent
+					if parent != nil {
+						parent.children[node.childIndex] = nil
+					}
+
+					vpa := uint64(node.voxelsPerAxis)
+					volume := vpa * vpa * vpa
+					newVolume := atomic.AddUint64(&volumeTraversed, volume)
+
+					// Are we done with the octree
+					if newVolume == totalVolume {
+						//nodeMapShutdownChan <- struct{}{}
+					}
 				}
 			}
 		}()
 	}
 
 	wgWorkers.Wait()
-
-	select {
-	case err := <-errorChan:
-		return nil, err
-	default:
-		return &TreeResult{}, nil
+	for _, data := range workerData {
+		if data.err != nil {
+			return nil, data.err
+		}
 	}
+	return &TreeResult{}, nil
 }

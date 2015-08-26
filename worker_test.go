@@ -42,22 +42,16 @@ type testWorker struct {
 	file *os.File
 }
 
-func (w *testWorker) Run(volume Box, samples chan Sample) error {
+func (w *testWorker) Run(volume Box, samples chan<- Sample) error {
 	scanner := bufio.NewScanner(w.file)
 	for scanner.Scan() {
 		s := new(testSample)
 
         var unknown float64
-        var r, g, b int
-
-		_, err := fmt.Sscan(scanner.Text(), &s.pos.X, &s.pos.Y, &s.pos.Z, &unknown, &r, &g, &b)
+		_, err := fmt.Sscan(scanner.Text(), &s.pos.X, &s.pos.Y, &s.pos.Z, &unknown, &s.color.R, &s.color.G, &s.color.B)
 		if err != nil {
 			return err
 		}
-
-        s.color.R = float32(r)
-        s.color.G = float32(g)
-        s.color.B = float32(b)
 
 		if volume.Intersect(s.pos) {
 			samples <- s
@@ -109,11 +103,11 @@ func start() {
 	}
 }
 
-func TestOctatron(t *testing.T) {
+func TestWorker(t *testing.T) {
 	start()
 }
 
-func BenchmarkOctatron(b *testing.B) {
+func BenchmarkWorker(b *testing.B) {
     for i := 0; i < b.N; i++ {
         start()
     }
