@@ -30,4 +30,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ###### Commercial license
 
+```
 Contact mail@andreasjonsson.se for more information.
+```
