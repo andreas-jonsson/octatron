@@ -44,14 +44,14 @@ func (b Box) Intersect(p Point) bool {
 }
 
 type treeNode struct {
-	color Color
-	bounds Box
-	fileOffset uint64
-	parent *treeNode
-	childIndex int
-	numSamples int
+	color         Color
+	bounds        Box
+	fileOffset    uint64
+	parent        *treeNode
+	childIndex    int
+	numSamples    int
 	voxelsPerAxis int
-	children [8]*treeNode
+	children      [8]*treeNode
 }
 
 func newRootNode(bounds Box, vpa int) *treeNode {

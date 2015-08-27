@@ -34,7 +34,7 @@ type TreeConfig struct {
 }
 
 type workerPrivateData struct {
-	err error
+	err    error
 	worker Worker
 }
 
@@ -46,7 +46,7 @@ func processData(data *workerPrivateData, sampleChan <-chan Sample) error {
 	for {
 		sample, more := <-sampleChan
 		processSample(data, &sample)
-		if !more {
+		if more == false {
 			err := data.err
 			if err != nil {
 				return err
@@ -96,7 +96,7 @@ func BuildTree(workers []Worker, cfg *TreeConfig) (*TreeResult, error) {
 			// Process jobs
 			for {
 				node, more := <-nodeMapOutChan
-				if !more {
+				if more == false {
 					return
 				}
 

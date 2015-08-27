@@ -19,10 +19,10 @@
 package octatron
 
 import (
-	"testing"
 	"bufio"
 	"fmt"
 	"os"
+	"testing"
 )
 
 type testSample struct {
@@ -47,13 +47,13 @@ func (w *testWorker) Run(volume Box, samples chan<- Sample) error {
 	for scanner.Scan() {
 		s := new(testSample)
 
-        var unknown float64
-		_, err := fmt.Sscan(scanner.Text(), &s.pos.X, &s.pos.Y, &s.pos.Z, &unknown, &s.color.R, &s.color.G, &s.color.B)
+		var ref float64
+		_, err := fmt.Sscan(scanner.Text(), &s.pos.X, &s.pos.Y, &s.pos.Z, &ref, &s.color.R, &s.color.G, &s.color.B)
 		if err != nil {
 			return err
 		}
 
-		if volume.Intersect(s.pos) {
+		if volume.Intersect(s.pos) == true {
 			samples <- s
 		}
 	}
@@ -108,7 +108,7 @@ func TestWorker(t *testing.T) {
 }
 
 func BenchmarkWorker(b *testing.B) {
-    for i := 0; i < b.N; i++ {
-        start()
-    }
+	for i := 0; i < b.N; i++ {
+		start()
+	}
 }
