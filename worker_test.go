@@ -22,6 +22,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"runtime"
 	"testing"
 )
 
@@ -82,8 +83,8 @@ func createWorker(file string) *testWorker {
 	return w
 }
 
-func start() {
-	workers := make([]Worker, 1)
+func start(numWorkers int) {
+	workers := make([]Worker, numWorkers)
 
 	for i := range workers {
 		workers[i] = createWorker("test.xyz")
@@ -97,18 +98,23 @@ func start() {
 
 	bounds := Box{Point{0.0, 0.0, 0.0}, 1000.0}
 
-	_, err = BuildTree(workers, &TreeConfig{file, bounds, 10})
+	err = BuildTree(workers, &BuildConfig{file, bounds, 10, Mip_R8G8B8A8_Branch32})
 	if err != nil {
 		panic(err)
 	}
 }
 
-func TestWorker(t *testing.T) {
-	start()
+func TestSingleWorker(t *testing.T) {
+	start(1)
+}
+
+func TestMultiWorker(t *testing.T) {
+	start(100)
 }
 
 func BenchmarkWorker(b *testing.B) {
+	num := runtime.NumCPU()
 	for i := 0; i < b.N; i++ {
-		start()
+		start(num)
 	}
 }

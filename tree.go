@@ -18,10 +18,27 @@
 
 package octatron
 
-import "runtime"
+import (
+	"runtime"
+	"io"
+	"sync"
+	"encoding/binary"
+)
 
 type Color struct {
 	R, G, B, A float32
+}
+
+func (color *Color) writeColor(writer io.Writer, format OctreeFormat) error {
+	switch format {
+		case Mip_R8G8B8_Branch32:
+			err := binary.Write(writer, binary.BigEndian, byte(color.R))
+			err = binary.Write(writer, binary.BigEndian, byte(color.G))
+			err = binary.Write(writer, binary.BigEndian, byte(color.B))
+			return err
+		default:
+			return unsupportedFormatError
+	}
 }
 
 type Point struct {
@@ -88,11 +105,48 @@ func startNodeCache(channelSize int) (shutdown chan<- struct{}, in chan<- *treeN
 				break
 			}
 
-			if !didWork {
+			if didWork == false {
 				runtime.Gosched()
 			}
 		}
 	}()
 
 	return shutdownChan, inChan, outChan
+}
+
+func writeTail(seeker io.Seeker, format OctreeFormat) error {
+	var err error
+	switch format {
+		case Mip_R8G8B8_Branch32:
+			_, err = seeker.Seek(3, 1)
+		default:
+			return unsupportedFormatError
+	}
+	return err
+}
+
+func (node *treeNode) serialize(writer io.WriteSeeker, mutex *sync.Mutex, format OctreeFormat, nodeInChan chan<- *treeNode) error {
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	err := node.color.writeColor(writer, format)
+	if err != nil {
+		return err
+	}
+
+	err = writeTail(writer, format)
+	if err != nil {
+		return err
+	}
+
+
+
+
+
+	// Patch parent
+	if node.parent != nil {
+
+	}
+
+	return nil
 }

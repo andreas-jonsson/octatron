@@ -24,13 +24,11 @@ import (
 	"sync/atomic"
 )
 
-type TreeResult struct {
-}
-
-type TreeConfig struct {
+type BuildConfig struct {
 	Writer        io.WriteSeeker
 	Bounds        Box
 	VoxelsPerAxis int
+	Format        OctreeFormat
 }
 
 type workerPrivateData struct {
@@ -64,7 +62,7 @@ func collectData(workerData *workerPrivateData, node *treeNode, sampleChan chan<
 	close(sampleChan)
 }
 
-func BuildTree(workers []Worker, cfg *TreeConfig) (*TreeResult, error) {
+func BuildTree(workers []Worker, cfg *BuildConfig) error {
 	var volumeTraversed uint64
 	vpa := uint64(cfg.VoxelsPerAxis)
 	totalVolume := vpa * vpa * vpa
@@ -72,8 +70,7 @@ func BuildTree(workers []Worker, cfg *TreeConfig) (*TreeResult, error) {
 	numWorkers := len(workers)
 	workerData := make([]workerPrivateData, numWorkers)
 
-	var wgWorkersIdle sync.WaitGroup
-	wgWorkersIdle.Add(numWorkers)
+	writeMutex := &sync.Mutex{}
 
 	nodeMapShutdownChan, nodeMapInChan, nodeMapOutChan := startNodeCache(numWorkers)
 	nodeMapInChan <- newRootNode(cfg.Bounds, cfg.VoxelsPerAxis)
@@ -86,12 +83,12 @@ func BuildTree(workers []Worker, cfg *TreeConfig) (*TreeResult, error) {
 	wgWorkers.Add(numWorkers)
 
 	for idx, worker := range workers {
+		data := &workerData[idx]
+		data.worker = worker
+
 		// Spawn worker
 		go func() {
 			defer wgWorkers.Done()
-
-			data := &workerData[idx]
-			data.worker = worker
 
 			// Process jobs
 			for {
@@ -121,6 +118,8 @@ func BuildTree(workers []Worker, cfg *TreeConfig) (*TreeResult, error) {
 					if newVolume == totalVolume {
 						nodeMapShutdownChan <- struct{}{}
 					}
+				} else {
+					node.serialize(cfg.Writer, writeMutex, cfg.Format, nodeMapInChan)
 				}
 			}
 		}()
@@ -129,8 +128,8 @@ func BuildTree(workers []Worker, cfg *TreeConfig) (*TreeResult, error) {
 	wgWorkers.Wait()
 	for _, data := range workerData {
 		if data.err != nil {
-			return nil, data.err
+			return data.err
 		}
 	}
-	return &TreeResult{}, nil
+	return nil
 }
