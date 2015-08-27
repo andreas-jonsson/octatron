@@ -1,5 +1,7 @@
 # Octatron
 
+[![Join the chat at https://gitter.im/andreas-t-jonsson/octatron](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/andreas-t-jonsson/octatron?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Build](https://travis-ci.org/andreas-t-jonsson/octatron.png)](https://travis-ci.org/andreas-t-jonsson/octatron)
 [![Coverage](http://gocover.io/_badge/github.com/andreas-t-jonsson/octatron)](http://gocover.io/github.com/andreas-t-jonsson/octatron)
 [![GoDoc](https://godoc.org/andreas-t-jonsson/octatron?status.svg)](https://godoc.org/github.com/andreas-t-jonsson/octatron)
