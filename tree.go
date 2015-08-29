@@ -140,6 +140,16 @@ func (node *treeNode) serialize(writer io.WriteSeeker, mutex *sync.Mutex, format
 	}
 
 
+	if node.voxelsPerAxis > 1 {
+		childSize := node.bounds.Size / 2
+
+		child := &treeNode{parent: node}
+		child.bounds.Size = childSize
+		child.bounds.Pos = node.bounds.Pos
+		child.voxelsPerAxis = node.voxelsPerAxis / 2
+
+		nodeInChan <- child
+	}
 
 
 

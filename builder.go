@@ -55,7 +55,7 @@ func processData(data *workerPrivateData, sampleChan <-chan Sample) error {
 }
 
 func collectData(workerData *workerPrivateData, node *treeNode, sampleChan chan<- Sample) {
-	err := workerData.worker.Run(node.bounds, sampleChan)
+	err := workerData.worker.Start(node.bounds, sampleChan)
 	if err != nil {
 		workerData.err = err
 	}

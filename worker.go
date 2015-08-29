@@ -24,6 +24,6 @@ type Sample interface {
 }
 
 type Worker interface {
-	Run(volume Box, samples chan<- Sample) error
+	Start(bounds Box, samples chan<- Sample) error
 	Stop()
 }

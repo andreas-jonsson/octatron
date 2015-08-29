@@ -43,7 +43,7 @@ type testWorker struct {
 	file *os.File
 }
 
-func (w *testWorker) Run(volume Box, samples chan<- Sample) error {
+func (w *testWorker) Start(bounds Box, samples chan<- Sample) error {
 	scanner := bufio.NewScanner(w.file)
 	for scanner.Scan() {
 		s := new(testSample)
@@ -54,7 +54,7 @@ func (w *testWorker) Run(volume Box, samples chan<- Sample) error {
 			return err
 		}
 
-		if volume.Intersect(s.pos) == true {
+		if bounds.Intersect(s.pos) == true {
 			samples <- s
 		}
 	}
@@ -98,7 +98,7 @@ func start(numWorkers int) {
 
 	bounds := Box{Point{0.0, 0.0, 0.0}, 1000.0}
 
-	err = BuildTree(workers, &BuildConfig{file, bounds, 10, Mip_R8G8B8A8_Branch32})
+	err = BuildTree(workers, &BuildConfig{file, bounds, 8, Mip_R8G8B8A8_Branch32})
 	if err != nil {
 		panic(err)
 	}
