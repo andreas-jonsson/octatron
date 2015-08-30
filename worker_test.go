@@ -98,7 +98,7 @@ func start(numWorkers int) {
 
 	bounds := Box{Point{0.0, 0.0, 0.0}, 1000.0}
 
-	err = BuildTree(workers, &BuildConfig{file, bounds, 8, Mip_R8G8B8A8_Branch32})
+	err = BuildTree(workers, &BuildConfig{file, bounds, 8, Mip_R8G8B8_Branch32})
 	if err != nil {
 		panic(err)
 	}

@@ -64,6 +64,12 @@ func collectData(workerData *workerPrivateData, node *treeNode, sampleChan chan<
 	close(sampleChan)
 }
 
+func incVolume(volumeTraversed *uint64, voxelsPerAxis int) uint64 {
+	vpa := uint64(voxelsPerAxis)
+	volume := vpa * vpa * vpa
+	return atomic.AddUint64(volumeTraversed, volume)
+}
+
 func BuildTree(workers []Worker, cfg *BuildConfig) error {
 	var volumeTraversed uint64
 	vpa := uint64(cfg.VoxelsPerAxis)
@@ -102,6 +108,7 @@ func BuildTree(workers []Worker, cfg *BuildConfig) error {
 				sampleChan := make(chan Sample, 10)
 				go collectData(data, node, sampleChan)
 				if processData(data, node, sampleChan) != nil {
+					incVolume(&volumeTraversed, node.voxelsPerAxis)
 					return
 				}
 
@@ -112,16 +119,21 @@ func BuildTree(workers []Worker, cfg *BuildConfig) error {
 						parent.children[node.childIndex] = nil
 					}
 
-					vpa := uint64(node.voxelsPerAxis)
-					volume := vpa * vpa * vpa
-					newVolume := atomic.AddUint64(&volumeTraversed, volume)
-
 					// Are we done with the octree
-					if newVolume == totalVolume {
+					if incVolume(&volumeTraversed, node.voxelsPerAxis) == totalVolume {
 						nodeMapShutdownChan <- struct{}{}
 					}
 				} else {
-					node.serialize(cfg.Writer, writeMutex, cfg.Format, nodeMapInChan)
+					hasChildren, err := node.serialize(cfg.Writer, writeMutex, cfg.Format, nodeMapInChan)
+					if err != nil {
+						incVolume(&volumeTraversed, node.voxelsPerAxis)
+						data.err = err
+						return
+					} else if (hasChildren == false) {
+						if incVolume(&volumeTraversed, node.voxelsPerAxis) == totalVolume {
+							nodeMapShutdownChan <- struct{}{}
+						}
+					}
 				}
 			}
 		}()

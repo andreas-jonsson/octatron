@@ -129,11 +129,17 @@ func (node *treeNode) spawnChildren(zOffset float64, nodeInChan chan<- *treeNode
 	childSize := node.bounds.Size / 2
 	npv := node.voxelsPerAxis / 2
 
+	childIndexStart := 0
+	if zOffset > 0.0 {
+		childIndexStart += 4
+	}
+
 	child := &treeNode{parent: node}
 	child.bounds.Size = childSize
 	child.bounds.Pos = node.bounds.Pos
 	child.bounds.Pos.Z += zOffset
 	child.voxelsPerAxis = npv
+	child.childIndex = childIndexStart
 
 	nodeInChan <- child
 
@@ -143,6 +149,7 @@ func (node *treeNode) spawnChildren(zOffset float64, nodeInChan chan<- *treeNode
 	child.bounds.Pos.X += childSize
 	child.bounds.Pos.Z += zOffset
 	child.voxelsPerAxis = npv
+	child.childIndex = childIndexStart + 1
 
 	nodeInChan <- child
 
@@ -152,6 +159,7 @@ func (node *treeNode) spawnChildren(zOffset float64, nodeInChan chan<- *treeNode
 	child.bounds.Pos.Y += childSize
 	child.bounds.Pos.Z += zOffset
 	child.voxelsPerAxis = npv
+	child.childIndex = childIndexStart + 2
 
 	nodeInChan <- child
 
@@ -162,27 +170,32 @@ func (node *treeNode) spawnChildren(zOffset float64, nodeInChan chan<- *treeNode
 	child.bounds.Pos.Y += childSize
 	child.bounds.Pos.Z += zOffset
 	child.voxelsPerAxis = npv
+	child.childIndex = childIndexStart + 3
 
 	nodeInChan <- child
 }
 
-func (node *treeNode) serialize(writer io.WriteSeeker, mutex *sync.Mutex, format OctreeFormat, nodeInChan chan<- *treeNode) error {
+func (node *treeNode) serialize(writer io.WriteSeeker, mutex *sync.Mutex, format OctreeFormat, nodeInChan chan<- *treeNode) (bool, error) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
+	hasChildren := true
+
 	err := node.color.writeColor(writer, format)
 	if err != nil {
-		return err
+		return hasChildren, err
 	}
 
 	err = writeTail(writer, format)
 	if err != nil {
-		return err
+		return hasChildren, err
 	}
 
 	if node.voxelsPerAxis > 1 {
 		node.spawnChildren(0.0, nodeInChan)
 		node.spawnChildren(node.bounds.Size / 2, nodeInChan)
+	} else {
+		hasChildren = false
 	}
 
 
@@ -197,5 +210,5 @@ func (node *treeNode) serialize(writer io.WriteSeeker, mutex *sync.Mutex, format
 
 	}
 
-	return nil
+	return hasChildren, nil
 }
