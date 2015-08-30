@@ -125,6 +125,47 @@ func writeTail(seeker io.Seeker, format OctreeFormat) error {
 	return err
 }
 
+func (node *treeNode) spawnChildren(zOffset float64, nodeInChan chan<- *treeNode) {
+	childSize := node.bounds.Size / 2
+	npv := node.voxelsPerAxis / 2
+
+	child := &treeNode{parent: node}
+	child.bounds.Size = childSize
+	child.bounds.Pos = node.bounds.Pos
+	child.bounds.Pos.Z += zOffset
+	child.voxelsPerAxis = npv
+
+	nodeInChan <- child
+
+	child = &treeNode{parent: node}
+	child.bounds.Size = childSize
+	child.bounds.Pos = node.bounds.Pos
+	child.bounds.Pos.X += childSize
+	child.bounds.Pos.Z += zOffset
+	child.voxelsPerAxis = npv
+
+	nodeInChan <- child
+
+	child = &treeNode{parent: node}
+	child.bounds.Size = childSize
+	child.bounds.Pos = node.bounds.Pos
+	child.bounds.Pos.Y += childSize
+	child.bounds.Pos.Z += zOffset
+	child.voxelsPerAxis = npv
+
+	nodeInChan <- child
+
+	child = &treeNode{parent: node}
+	child.bounds.Size = childSize
+	child.bounds.Pos = node.bounds.Pos
+	child.bounds.Pos.X += childSize
+	child.bounds.Pos.Y += childSize
+	child.bounds.Pos.Z += zOffset
+	child.voxelsPerAxis = npv
+
+	nodeInChan <- child
+}
+
 func (node *treeNode) serialize(writer io.WriteSeeker, mutex *sync.Mutex, format OctreeFormat, nodeInChan chan<- *treeNode) error {
 	mutex.Lock()
 	defer mutex.Unlock()
@@ -139,17 +180,15 @@ func (node *treeNode) serialize(writer io.WriteSeeker, mutex *sync.Mutex, format
 		return err
 	}
 
-
 	if node.voxelsPerAxis > 1 {
-		childSize := node.bounds.Size / 2
-
-		child := &treeNode{parent: node}
-		child.bounds.Size = childSize
-		child.bounds.Pos = node.bounds.Pos
-		child.voxelsPerAxis = node.voxelsPerAxis / 2
-
-		nodeInChan <- child
+		node.spawnChildren(0.0, nodeInChan)
+		node.spawnChildren(node.bounds.Size / 2, nodeInChan)
 	}
+
+
+
+
+
 
 
 

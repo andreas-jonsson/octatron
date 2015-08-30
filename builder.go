@@ -40,10 +40,9 @@ func processSample(data *workerPrivateData, sample *Sample) {
 
 }
 
-func processData(data *workerPrivateData, sampleChan <-chan Sample) error {
+func processData(data *workerPrivateData, node *treeNode, sampleChan <-chan Sample) error {
 	for {
 		sample, more := <-sampleChan
-		processSample(data, &sample)
 		if more == false {
 			err := data.err
 			if err != nil {
@@ -51,6 +50,9 @@ func processData(data *workerPrivateData, sampleChan <-chan Sample) error {
 			}
 			return nil
 		}
+
+		processSample(data, &sample)
+		node.numSamples++
 	}
 }
 
@@ -99,7 +101,7 @@ func BuildTree(workers []Worker, cfg *BuildConfig) error {
 
 				sampleChan := make(chan Sample, 10)
 				go collectData(data, node, sampleChan)
-				if processData(data, sampleChan) != nil {
+				if processData(data, node, sampleChan) != nil {
 					return
 				}
 
