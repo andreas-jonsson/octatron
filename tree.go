@@ -29,15 +29,15 @@ type Color struct {
 	R, G, B, A float32
 }
 
-func (color *Color) writeColor(writer io.Writer, format OctreeFormat) error {
+func (color *Color) writeColor(writer io.Writer, format OctreeFormat) (int, error) {
 	switch format {
 		case Mip_R8G8B8_Branch32:
 			err := binary.Write(writer, binary.BigEndian, byte(color.R))
 			err = binary.Write(writer, binary.BigEndian, byte(color.G))
 			err = binary.Write(writer, binary.BigEndian, byte(color.B))
-			return err
+			return 3, err
 		default:
-			return unsupportedFormatError
+			return 0, unsupportedFormatError
 	}
 }
 
@@ -63,12 +63,12 @@ func (b Box) Intersect(p Point) bool {
 type treeNode struct {
 	color         Color
 	bounds        Box
-	fileOffset    uint64
+	fileOffset    int64
+	colorSize 	  int
 	parent        *treeNode
 	childIndex    int
-	numSamples    int
 	voxelsPerAxis int
-	children      [8]*treeNode
+	numSamples    int
 }
 
 func newRootNode(bounds Box, vpa int) *treeNode {
@@ -114,11 +114,25 @@ func startNodeCache(channelSize int) (shutdown chan<- struct{}, in chan<- *treeN
 	return shutdownChan, inChan, outChan
 }
 
-func writeTail(seeker io.Seeker, format OctreeFormat) error {
-	var err error
+func indexSize(format OctreeFormat) (int, error) {
 	switch format {
 		case Mip_R8G8B8_Branch32:
-			_, err = seeker.Seek(3, 1)
+			return 4, nil
+		default:
+			return 0, unsupportedFormatError
+	}
+}
+
+func writeTail(seeker io.Seeker, format OctreeFormat) error {
+	size, err := indexSize(format)
+	if err != nil {
+		return err
+	}
+
+	size *= 8
+	switch format {
+		case Mip_R8G8B8_Branch32:
+			_, err = seeker.Seek(int64(size), 1)
 		default:
 			return unsupportedFormatError
 	}
@@ -175,21 +189,46 @@ func (node *treeNode) spawnChildren(zOffset float64, nodeInChan chan<- *treeNode
 	nodeInChan <- child
 }
 
-func (node *treeNode) serialize(writer io.WriteSeeker, mutex *sync.Mutex, format OctreeFormat, nodeInChan chan<- *treeNode) (bool, error) {
+func (node *treeNode) patchParent(writer io.WriteSeeker, mutex *sync.Mutex, format OctreeFormat) error {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	hasChildren := true
+	parent := node.parent
+	size, err := indexSize(format)
 
-	err := node.color.writeColor(writer, format)
+	_, err = writer.Seek(parent.fileOffset + int64(parent.colorSize + node.childIndex * size), 0)
 	if err != nil {
+		return err
+	}
+
+	// TODO Should write proper child-index format
+	return binary.Write(writer, binary.BigEndian, uint32(node.fileOffset))
+}
+
+func (node *treeNode) serialize(writer io.WriteSeeker, mutex *sync.Mutex, format OctreeFormat, nodeInChan chan<- *treeNode) (bool, error) {
+	var (
+		size int
+		err error
+		hasChildren bool = true
+	)
+
+	mutex.Lock()
+	node.fileOffset, err = writer.Seek(0, 1)
+
+	size, err = node.color.writeColor(writer, format)
+	if err != nil {
+		mutex.Unlock()
 		return hasChildren, err
 	}
+	node.colorSize += size
 
 	err = writeTail(writer, format)
 	if err != nil {
+		mutex.Unlock()
 		return hasChildren, err
 	}
+
+	mutex.Unlock()
 
 	if node.voxelsPerAxis > 1 {
 		node.spawnChildren(0.0, nodeInChan)
@@ -198,16 +237,11 @@ func (node *treeNode) serialize(writer io.WriteSeeker, mutex *sync.Mutex, format
 		hasChildren = false
 	}
 
-
-
-
-
-
-
-
-	// Patch parent
 	if node.parent != nil {
-
+		err := node.patchParent(writer, mutex, format)
+		if err != nil {
+			return hasChildren, err
+		}
 	}
 
 	return hasChildren, nil

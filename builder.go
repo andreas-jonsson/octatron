@@ -29,11 +29,13 @@ type BuildConfig struct {
 	Bounds        Box
 	VoxelsPerAxis int
 	Format        OctreeFormat
+	Interactive   bool
 }
 
 type workerPrivateData struct {
-	err    error
-	worker Worker
+	err        error
+	numSamples uint64
+	worker 	   Worker
 }
 
 func processSample(data *workerPrivateData, sample *Sample) {
@@ -52,7 +54,9 @@ func processData(data *workerPrivateData, node *treeNode, sampleChan <-chan Samp
 		}
 
 		processSample(data, &sample)
+
 		node.numSamples++
+		atomic.AddUint64(&data.numSamples, 1)
 	}
 }
 
@@ -71,12 +75,18 @@ func incVolume(volumeTraversed *uint64, voxelsPerAxis int) uint64 {
 }
 
 func BuildTree(workers []Worker, cfg *BuildConfig) error {
-	var volumeTraversed uint64
+	var (
+		volumeTraversed uint64
+		wgWorkers sync.WaitGroup
+		wgUI *sync.WaitGroup
+	)
+
 	vpa := uint64(cfg.VoxelsPerAxis)
 	totalVolume := vpa * vpa * vpa
 
 	numWorkers := len(workers)
 	workerData := make([]workerPrivateData, numWorkers)
+	wgWorkers.Add(numWorkers)
 
 	writeMutex := &sync.Mutex{}
 
@@ -87,8 +97,10 @@ func BuildTree(workers []Worker, cfg *BuildConfig) error {
 		nodeMapShutdownChan <- struct{}{}
 	}()
 
-	var wgWorkers sync.WaitGroup
-	wgWorkers.Add(numWorkers)
+	if cfg.Interactive == true {
+		wgUI = startUI(workerData, totalVolume, &volumeTraversed)
+		defer wgUI.Wait()
+	}
 
 	for idx, worker := range workers {
 		data := &workerData[idx]
@@ -114,11 +126,6 @@ func BuildTree(workers []Worker, cfg *BuildConfig) error {
 
 				// This is a leaf
 				if node.numSamples == 0 {
-					parent := node.parent
-					if parent != nil {
-						parent.children[node.childIndex] = nil
-					}
-
 					// Are we done with the octree
 					if incVolume(&volumeTraversed, node.voxelsPerAxis) == totalVolume {
 						nodeMapShutdownChan <- struct{}{}
