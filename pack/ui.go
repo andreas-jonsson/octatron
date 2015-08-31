@@ -16,14 +16,38 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-package octatron
+package pack
 
-type Sample interface {
-	Color() Color
-	Position() Point
-}
+import (
+	"fmt"
+	"sync"
+	"sync/atomic"
+	"time"
+)
 
-type Worker interface {
-	Start(bounds Box, samples chan<- Sample) error
-	Stop()
+func startUI(data []workerPrivateData, totalVolume uint64, volumeTraversed *uint64) *sync.WaitGroup {
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	go func() {
+		defer fmt.Println("")
+		for {
+			var numSamples uint64
+			for _, w := range data {
+				numSamples += atomic.LoadUint64(&w.numSamples)
+			}
+
+			traversed := atomic.LoadUint64(volumeTraversed)
+			fmt.Printf("\rProgress %d%%, (%v samples)", int((float32(traversed)/float32(totalVolume))*100.0), numSamples)
+
+			if traversed >= totalVolume {
+				wg.Done()
+				return
+			}
+
+			time.Sleep(500 * time.Millisecond)
+		}
+	}()
+
+	return &wg
 }

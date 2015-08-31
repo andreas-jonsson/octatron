@@ -16,19 +16,14 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-package octatron
+package pack
 
-type OctreeFormat int
+type Sample interface {
+	Color() Color
+	Position() Point
+}
 
-const (
-	Mip_R8G8B8A8_Branch16 OctreeFormat = iota
-	Mip_R8G8B8A8_Branch32
-	Mip_R8G8B8_Branch16
-	Mip_R8G8B8_Branch32
-	Mip_R5G6B5_Branch16
-	Mip_R5G6B5_Branch32
-	Mip_Index8_Branch16
-	Mip_Index8_Branch32
-	Index8_Branch16
-	Index8_Branch32
-)
+type Worker interface {
+	Start(bounds Box, samples chan<- Sample) error
+	Stop()
+}

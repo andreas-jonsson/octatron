@@ -16,7 +16,7 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-package octatron
+package pack
 
 import (
 	"io"
@@ -38,10 +38,6 @@ type workerPrivateData struct {
 	worker     Worker
 }
 
-func processSample(data *workerPrivateData, sample *Sample) {
-
-}
-
 func processData(data *workerPrivateData, node *treeNode, sampleChan <-chan Sample) error {
 	for {
 		sample, more := <-sampleChan
@@ -50,13 +46,18 @@ func processData(data *workerPrivateData, node *treeNode, sampleChan <-chan Samp
 			if err != nil {
 				return err
 			}
+			node.color.div(float32(node.numSamples))
 			return nil
 		}
 
-		processSample(data, &sample)
-
 		node.numSamples++
 		atomic.AddUint64(&data.numSamples, 1)
+
+		// Average voxels color value
+		col := sample.Color()
+		avg := col.sub(&node.color)
+		avg = avg.div(float32(node.numSamples))
+		node.color.add(avg)
 	}
 }
 

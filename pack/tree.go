@@ -16,7 +16,7 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-package octatron
+package pack
 
 import (
 	"encoding/binary"
@@ -27,6 +27,30 @@ import (
 
 type Color struct {
 	R, G, B, A float32
+}
+
+func (color *Color) add(c *Color) *Color {
+	color.R += c.R
+	color.G += c.G
+	color.B += c.B
+	color.A += c.A
+	return color
+}
+
+func (color *Color) sub(c *Color) *Color {
+	color.R -= c.R
+	color.G -= c.G
+	color.B -= c.B
+	color.A -= c.A
+	return color
+}
+
+func (color *Color) div(n float32) *Color {
+	color.R /= n
+	color.G /= n
+	color.B /= n
+	color.A /= n
+	return color
 }
 
 func (color *Color) writeColor(writer io.Writer, format OctreeFormat) (int, error) {
@@ -233,7 +257,7 @@ func (node *treeNode) serialize(writer io.WriteSeeker, mutex *sync.Mutex, format
 
 	if node.voxelsPerAxis > 1 {
 		node.spawnChildren(0.0, nodeInChan)
-		node.spawnChildren(node.bounds.Size/2, nodeInChan)
+		node.spawnChildren(node.bounds.Size / 2, nodeInChan)
 	} else {
 		hasChildren = false
 	}

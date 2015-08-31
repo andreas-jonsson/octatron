@@ -16,7 +16,7 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-package octatron
+package pack
 
 import (
 	"bufio"
@@ -98,7 +98,7 @@ func start(numWorkers int) {
 
 	bounds := Box{Point{0.0, 0.0, 0.0}, 1000.0}
 
-	err = BuildTree(workers, &BuildConfig{file, bounds, 1024, Mip_R8G8B8_Branch32, true})
+	err = BuildTree(workers, &BuildConfig{file, bounds, 1024, Mip_R8G8B8_Branch32, false})
 	if err != nil {
 		panic(err)
 	}
