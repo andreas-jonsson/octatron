@@ -16,37 +16,38 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-package pack
+package main
 
 import (
 	"bufio"
 	"fmt"
 	"os"
+    "flag"
 	"runtime"
-	"testing"
+    "github.com/andreas-t-jonsson/octatron/pack"
 )
 
-type testSample struct {
-	pos   Point
-	color Color
+type Sample struct {
+	pos   pack.Point
+	color pack.Color
 }
 
-func (s *testSample) Color() Color {
+func (s *Sample) Color() pack.Color {
 	return s.color
 }
 
-func (s *testSample) Position() Point {
+func (s *Sample) Position() pack.Point {
 	return s.pos
 }
 
-type testWorker struct {
+type Worker struct {
 	file *os.File
 }
 
-func (w *testWorker) Start(bounds Box, samples chan<- Sample) error {
+func (w *Worker) Start(bounds pack.Box, samples chan<- pack.Sample) error {
 	scanner := bufio.NewScanner(w.file)
 	for scanner.Scan() {
-		s := new(testSample)
+		s := new(Sample)
 
 		var ref float64
 		_, err := fmt.Sscan(scanner.Text(), &s.pos.X, &s.pos.Y, &s.pos.Z, &ref, &s.color.R, &s.color.G, &s.color.B)
@@ -67,50 +68,52 @@ func (w *testWorker) Start(bounds Box, samples chan<- Sample) error {
 	return scanner.Err()
 }
 
-func (w *testWorker) Stop() {
+func (w *Worker) Stop() {
 	w.file.Close()
 }
 
-func createWorker(file string) *testWorker {
+func createWorker(file string) (*Worker, error) {
 	var err error
-	w := new(testWorker)
-
+	w := new(Worker)
 	w.file, err = os.Open(file)
-	if err != nil {
-		panic(err)
-	}
-
-	return w
+	return w, err
 }
 
-func start(numWorkers int) {
-	workers := make([]Worker, numWorkers)
+var (
+    input string
+    output string
+)
+
+func init() {
+    flag.StringVar(&input, "in", "in.xyz", "file to process")
+    flag.StringVar(&output, "out", "out.oct", "file to write")
+}
+
+func main() {
+    flag.Parse()
+
+    var err error
+	workers := make([]pack.Worker, runtime.NumCPU())
 
 	for i := range workers {
-		workers[i] = createWorker("test.xyz")
+		workers[i], err = createWorker(input)
+        if err != nil {
+            fmt.Println(err)
+            os.Exit(-1)
+    	}
 	}
 
-	file, err := os.Create("test.oct")
+	file, err := os.Create(output)
 	if err != nil {
-		panic(err)
+        fmt.Println(err)
+        os.Exit(-2)
 	}
 	defer file.Close()
 
-	bounds := Box{Point{0.0, 0.0, 0.0}, 1000.0}
-
-	err = BuildTree(workers, &BuildConfig{file, bounds, 1024, Mip_R8G8B8_Branch32, false})
-	if err != nil {
-		panic(err)
-	}
-}
-
-func TestWorker(t *testing.T) {
-	start(4)
-}
-
-func BenchmarkWorker(b *testing.B) {
-	num := runtime.NumCPU()
-	for i := 0; i < b.N; i++ {
-		start(num)
+	bounds := pack.Box{pack.Point{0.0, 0.0, 0.0}, 1000.0}
+	err = pack.BuildTree(workers, &pack.BuildConfig{file, bounds, 1024, pack.Mip_R8G8B8_Branch32, true})
+    if err != nil {
+        fmt.Println(err)
+        os.Exit(-3)
 	}
 }
