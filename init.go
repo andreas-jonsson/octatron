@@ -20,8 +20,12 @@ package octatron
 
 import "errors"
 
-var unsupportedFormatError error
+var (
+	unsupportedFormatError,
+	voxelsPowerOfTwoError error
+)
 
 func init() {
 	unsupportedFormatError = errors.New("unsupported octree-format")
+	voxelsPowerOfTwoError = errors.New("voxels must be a power of two")
 }

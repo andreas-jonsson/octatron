@@ -35,7 +35,7 @@ type BuildConfig struct {
 type workerPrivateData struct {
 	err        error
 	numSamples uint64
-	worker 	   Worker
+	worker     Worker
 }
 
 func processSample(data *workerPrivateData, sample *Sample) {
@@ -77,11 +77,15 @@ func incVolume(volumeTraversed *uint64, voxelsPerAxis int) uint64 {
 func BuildTree(workers []Worker, cfg *BuildConfig) error {
 	var (
 		volumeTraversed uint64
-		wgWorkers sync.WaitGroup
-		wgUI *sync.WaitGroup
+		wgWorkers       sync.WaitGroup
+		wgUI            *sync.WaitGroup
 	)
 
 	vpa := uint64(cfg.VoxelsPerAxis)
+	if vpa == 0 || (vpa&(vpa-1)) != 0 {
+		return voxelsPowerOfTwoError
+	}
+
 	totalVolume := vpa * vpa * vpa
 
 	numWorkers := len(workers)
@@ -136,7 +140,7 @@ func BuildTree(workers []Worker, cfg *BuildConfig) error {
 						incVolume(&volumeTraversed, node.voxelsPerAxis)
 						data.err = err
 						return
-					} else if (hasChildren == false) {
+					} else if hasChildren == false {
 						if incVolume(&volumeTraversed, node.voxelsPerAxis) == totalVolume {
 							nodeMapShutdownChan <- struct{}{}
 						}

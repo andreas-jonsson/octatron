@@ -98,18 +98,14 @@ func start(numWorkers int) {
 
 	bounds := Box{Point{0.0, 0.0, 0.0}, 1000.0}
 
-	err = BuildTree(workers, &BuildConfig{file, bounds, 8, Mip_R8G8B8_Branch32})
+	err = BuildTree(workers, &BuildConfig{file, bounds, 1024, Mip_R8G8B8_Branch32, true})
 	if err != nil {
 		panic(err)
 	}
 }
 
-func TestSingleWorker(t *testing.T) {
-	start(1)
-}
-
-func TestMultiWorker(t *testing.T) {
-	start(100)
+func TestWorker(t *testing.T) {
+	start(4)
 }
 
 func BenchmarkWorker(b *testing.B) {

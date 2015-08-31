@@ -20,9 +20,9 @@ package octatron
 
 import (
 	"fmt"
-	"time"
 	"sync"
 	"sync/atomic"
+	"time"
 )
 
 func startUI(data []workerPrivateData, totalVolume uint64, volumeTraversed *uint64) *sync.WaitGroup {
@@ -38,7 +38,7 @@ func startUI(data []workerPrivateData, totalVolume uint64, volumeTraversed *uint
 			}
 
 			traversed := atomic.LoadUint64(volumeTraversed)
-			fmt.Printf("\rProgress %d%%, (%v samples)", int((float32(traversed) / float32(totalVolume)) * 100.0), numSamples)
+			fmt.Printf("\rProgress %d%%, (%v samples)", int((float32(traversed)/float32(totalVolume))*100.0), numSamples)
 
 			if traversed >= totalVolume {
 				wg.Done()
