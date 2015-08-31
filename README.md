@@ -1,10 +1,16 @@
 # Octatron
 
 [![Build](https://travis-ci.org/andreas-t-jonsson/octatron.png)](https://travis-ci.org/andreas-t-jonsson/octatron)
-[![Coverage](http://gocover.io/_badge/github.com/andreas-t-jonsson/octatron/cmd/main)](http://gocover.io/github.com/andreas-t-jonsson/octatron/cmd/main)
-[![GoDoc](https://godoc.org/andreas-t-jonsson/octatron?status.svg)](https://godoc.org/github.com/andreas-t-jonsson/octatron)
 [![Join the chat at https://gitter.im/andreas-t-jonsson/octatron](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/andreas-t-jonsson/octatron?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Bountysource](https://api.bountysource.com/badge/team?team_id=95482&style=bounties_received)](https://www.bountysource.com/teams/octatron)
+
+## Documentation
+
+*Pack:* [![Coverage](http://gocover.io/_badge/github.com/andreas-t-jonsson/octatron/pack)](http://gocover.io/github.com/andreas-t-jonsson/octatron/pack)
+[![GoDoc](https://godoc.org/andreas-t-jonsson/octatron?status.svg)](https://godoc.org/github.com/andreas-t-jonsson/octatron/pack)
+
+*Render:* [![Coverage](http://gocover.io/_badge/github.com/andreas-t-jonsson/octatron/pack)](http://gocover.io/github.com/andreas-t-jonsson/octatron/render)
+[![GoDoc](https://godoc.org/andreas-t-jonsson/octatron?status.svg)](https://godoc.org/github.com/andreas-t-jonsson/octatron/render)
 
 ## License
 
