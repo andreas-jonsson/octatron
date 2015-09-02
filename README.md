@@ -1,16 +1,14 @@
 # Octatron
 
-[![Build](https://travis-ci.org/andreas-t-jonsson/octatron.png)](https://travis-ci.org/andreas-t-jonsson/octatron)
-[![Join the chat at https://gitter.im/andreas-t-jonsson/octatron](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/andreas-t-jonsson/octatron?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Bountysource](https://api.bountysource.com/badge/team?team_id=95482&style=bounties_received)](https://www.bountysource.com/teams/octatron)
-
-## Documentation
-
-*Pack:* [![Coverage](http://gocover.io/_badge/github.com/andreas-t-jonsson/octatron/pack)](http://gocover.io/github.com/andreas-t-jonsson/octatron/pack)
+[![Build](https://drone.io/github.com/andreas-t-jonsson/octatron/status.png)](https://drone.io/github.com/andreas-t-jonsson/octatron/latest)
+[![Coverage](https://coveralls.io/repos/andreas-t-jonsson/octatron/badge.svg?branch=master&service=github)](https://coveralls.io/github/andreas-t-jonsson/octatron?branch=master)
 [![GoDoc](https://godoc.org/andreas-t-jonsson/octatron?status.svg)](https://godoc.org/github.com/andreas-t-jonsson/octatron/pack)
+[![Chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/andreas-t-jonsson/octatron?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Bountysource](https://api.bountysource.com/badge/team?team_id=95482)](https://www.bountysource.com/teams/octatron)
 
-*Render:* [![Coverage](http://gocover.io/_badge/github.com/andreas-t-jonsson/octatron/pack)](http://gocover.io/github.com/andreas-t-jonsson/octatron/render)
-[![GoDoc](https://godoc.org/andreas-t-jonsson/octatron?status.svg)](https://godoc.org/github.com/andreas-t-jonsson/octatron/render)
+## About
+
+Todo...
 
 ## License
 
