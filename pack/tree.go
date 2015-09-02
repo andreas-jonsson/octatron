@@ -29,6 +29,13 @@ type Color struct {
 	R, G, B, A float32
 }
 
+func (color *Color) Scale(n float32) {
+	color.R *= n
+	color.G *= n
+	color.B *= n
+	color.A *= n
+}
+
 func (color *Color) add(c *Color) *Color {
 	color.R += c.R
 	color.G += c.G
@@ -54,14 +61,23 @@ func (color *Color) div(n float32) *Color {
 }
 
 func (color *Color) writeColor(writer io.Writer, format OctreeFormat) (int, error) {
+	c := *color
+	c.div(256.0)
+
 	switch format {
-	case Mip_R8G8B8_Branch32:
-		err := binary.Write(writer, binary.BigEndian, byte(color.R))
-		err = binary.Write(writer, binary.BigEndian, byte(color.G))
-		err = binary.Write(writer, binary.BigEndian, byte(color.B))
+	case MIP_R8G8B8A8_UI32:
+		err := binary.Write(writer, binary.BigEndian, byte(c.R))
+		err = binary.Write(writer, binary.BigEndian, byte(c.G))
+		err = binary.Write(writer, binary.BigEndian, byte(c.B))
+		err = binary.Write(writer, binary.BigEndian, byte(c.A))
+		return 4, err
+	case MIP_R8G8B8_UI32:
+		err := binary.Write(writer, binary.BigEndian, byte(c.R))
+		err = binary.Write(writer, binary.BigEndian, byte(c.G))
+		err = binary.Write(writer, binary.BigEndian, byte(c.B))
 		return 3, err
 	default:
-		return 0, unsupportedFormatError
+		return 0, errUnsupportedFormat
 	}
 }
 
@@ -140,12 +156,10 @@ func startNodeCache(channelSize int) (shutdown chan<- struct{}, in chan<- *treeN
 }
 
 func indexSize(format OctreeFormat) (int, error) {
-	switch format {
-	case Mip_R8G8B8_Branch32:
-		return 4, nil
-	default:
-		return 0, unsupportedFormatError
+	if format != MIP_R8G8B8_UI32 && format != MIP_R8G8B8A8_UI32 {
+		return 0, errUnsupportedFormat
 	}
+	return 4, nil
 }
 
 func writeTail(seeker io.Seeker, format OctreeFormat) error {
@@ -153,14 +167,7 @@ func writeTail(seeker io.Seeker, format OctreeFormat) error {
 	if err != nil {
 		return err
 	}
-
-	size *= 8
-	switch format {
-	case Mip_R8G8B8_Branch32:
-		_, err = seeker.Seek(int64(size), 1)
-	default:
-		return unsupportedFormatError
-	}
+	_, err = seeker.Seek(int64(size * 8), 1)
 	return err
 }
 
@@ -221,12 +228,10 @@ func (node *treeNode) patchParent(writer io.WriteSeeker, mutex *sync.Mutex, form
 	parent := node.parent
 	size, err := indexSize(format)
 
-	_, err = writer.Seek(parent.fileOffset+int64(parent.colorSize+node.childIndex*size), 0)
-	if err != nil {
+	if _, err = writer.Seek(parent.fileOffset+int64(parent.colorSize+node.childIndex*size), 0); err != nil {
 		return err
 	}
 
-	// TODO Should write proper child-index format
 	return binary.Write(writer, binary.BigEndian, uint32(node.fileOffset))
 }
 
@@ -247,8 +252,7 @@ func (node *treeNode) serialize(writer io.WriteSeeker, mutex *sync.Mutex, format
 	}
 	node.colorSize += size
 
-	err = writeTail(writer, format)
-	if err != nil {
+	if err = writeTail(writer, format); err != nil {
 		mutex.Unlock()
 		return hasChildren, err
 	}
@@ -257,7 +261,7 @@ func (node *treeNode) serialize(writer io.WriteSeeker, mutex *sync.Mutex, format
 
 	if node.voxelsPerAxis > 1 {
 		node.spawnChildren(0.0, nodeInChan)
-		node.spawnChildren(node.bounds.Size / 2, nodeInChan)
+		node.spawnChildren(node.bounds.Size/2, nodeInChan)
 	} else {
 		hasChildren = false
 	}

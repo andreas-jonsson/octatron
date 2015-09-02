@@ -55,6 +55,7 @@ func (w *testWorker) Start(bounds Box, samples chan<- Sample) error {
 		}
 
 		if bounds.Intersect(s.pos) == true {
+			s.color.Scale(256.0)
 			samples <- s
 		}
 	}
@@ -98,7 +99,7 @@ func start(numWorkers int) {
 
 	bounds := Box{Point{0.0, 0.0, 0.0}, 1000.0}
 
-	err = BuildTree(workers, &BuildConfig{file, bounds, 1024, Mip_R8G8B8_Branch32, false})
+	err = BuildTree(workers, &BuildConfig{file, bounds, 1024, MIP_R8G8B8A8_UI32, false})
 	if err != nil {
 		panic(err)
 	}

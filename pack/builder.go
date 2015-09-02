@@ -84,7 +84,7 @@ func BuildTree(workers []Worker, cfg *BuildConfig) error {
 
 	vpa := uint64(cfg.VoxelsPerAxis)
 	if vpa == 0 || (vpa&(vpa-1)) != 0 {
-		return voxelsPowerOfTwoError
+		return errVoxelsPowerOfTwo
 	}
 
 	totalVolume := vpa * vpa * vpa

@@ -21,11 +21,11 @@ package pack
 import "errors"
 
 var (
-	unsupportedFormatError,
-	voxelsPowerOfTwoError error
+	errUnsupportedFormat,
+	errVoxelsPowerOfTwo error
 )
 
 func init() {
-	unsupportedFormatError = errors.New("unsupported octree-format")
-	voxelsPowerOfTwoError = errors.New("voxels must be a power of two")
+	errUnsupportedFormat = errors.New("unsupported octree-format")
+	errVoxelsPowerOfTwo = errors.New("voxels must be a power of two")
 }

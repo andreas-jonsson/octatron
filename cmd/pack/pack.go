@@ -20,11 +20,11 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
+	"github.com/andreas-t-jonsson/octatron/pack"
 	"os"
-    "flag"
 	"runtime"
-    "github.com/andreas-t-jonsson/octatron/pack"
 )
 
 type Sample struct {
@@ -56,6 +56,7 @@ func (w *Worker) Start(bounds pack.Box, samples chan<- pack.Sample) error {
 		}
 
 		if bounds.Intersect(s.pos) == true {
+			s.color.Scale(256.0)
 			samples <- s
 		}
 	}
@@ -80,40 +81,40 @@ func createWorker(file string) (*Worker, error) {
 }
 
 var (
-    input string
-    output string
+	input  string
+	output string
 )
 
 func init() {
-    flag.StringVar(&input, "in", "in.xyz", "file to process")
-    flag.StringVar(&output, "out", "out.oct", "file to write")
+	flag.StringVar(&input, "in", "in.xyz", "file to process")
+	flag.StringVar(&output, "out", "out.oct", "file to write")
 }
 
 func main() {
-    flag.Parse()
+	flag.Parse()
 
-    var err error
+	var err error
 	workers := make([]pack.Worker, runtime.NumCPU())
 
 	for i := range workers {
 		workers[i], err = createWorker(input)
-        if err != nil {
-            fmt.Println(err)
-            os.Exit(-1)
-    	}
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(-1)
+		}
 	}
 
 	file, err := os.Create(output)
 	if err != nil {
-        fmt.Println(err)
-        os.Exit(-2)
+		fmt.Println(err)
+		os.Exit(-2)
 	}
 	defer file.Close()
 
 	bounds := pack.Box{pack.Point{0.0, 0.0, 0.0}, 1000.0}
-	err = pack.BuildTree(workers, &pack.BuildConfig{file, bounds, 1024, pack.Mip_R8G8B8_Branch32, true})
-    if err != nil {
-        fmt.Println(err)
-        os.Exit(-3)
+	err = pack.BuildTree(workers, &pack.BuildConfig{file, bounds, 1024, pack.MIP_R8G8B8A8_UI32, true})
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(-3)
 	}
 }
