@@ -162,12 +162,12 @@ func indexSize(format OctreeFormat) (int, error) {
 	return 4, nil
 }
 
-func writeTail(seeker io.Seeker, format OctreeFormat) error {
+func writeTail(writer io.Writer, format OctreeFormat) error {
 	size, err := indexSize(format)
 	if err != nil {
 		return err
 	}
-	_, err = seeker.Seek(int64(size * 8), 1)
+	_, err = writer.Write(make([]byte, size * 8))
 	return err
 }
 
@@ -228,11 +228,18 @@ func (node *treeNode) patchParent(writer io.WriteSeeker, mutex *sync.Mutex, form
 	parent := node.parent
 	size, err := indexSize(format)
 
+	offset, _ := writer.Seek(0, 1)
 	if _, err = writer.Seek(parent.fileOffset+int64(parent.colorSize+node.childIndex*size), 0); err != nil {
 		return err
 	}
 
-	return binary.Write(writer, binary.BigEndian, uint32(node.fileOffset))
+	err = binary.Write(writer, binary.BigEndian, uint32(node.fileOffset))
+	if err != nil {
+		return err
+	}
+
+	_, err = writer.Seek(offset, 0)
+	return err
 }
 
 func (node *treeNode) serialize(writer io.WriteSeeker, mutex *sync.Mutex, format OctreeFormat, nodeInChan chan<- *treeNode) (bool, error) {
@@ -260,7 +267,7 @@ func (node *treeNode) serialize(writer io.WriteSeeker, mutex *sync.Mutex, format
 	mutex.Unlock()
 
 	if node.voxelsPerAxis > 1 {
-		node.spawnChildren(0.0, nodeInChan)
+		node.spawnChildren(0, nodeInChan)
 		node.spawnChildren(node.bounds.Size/2, nodeInChan)
 	} else {
 		hasChildren = false

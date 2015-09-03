@@ -97,9 +97,9 @@ func start(numWorkers int) {
 	}
 	defer file.Close()
 
-	bounds := Box{Point{0.0, 0.0, 0.0}, 1000.0}
+	bounds := Box{Point{782, 602, 48}, 10.0}
 
-	err = BuildTree(workers, &BuildConfig{file, bounds, 1024, MIP_R8G8B8A8_UI32, false})
+	err = BuildTree(workers, &BuildConfig{file, bounds, 4096, MIP_R8G8B8A8_UI32, false})
 	if err != nil {
 		panic(err)
 	}
