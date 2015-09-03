@@ -189,6 +189,7 @@ func gluPerspective(fovy float64, aspect float64, zNear float64, zFar float64) {
 type renderData struct {
 	yrot, xrot float64
 	zoom float64
+	minNodeSize float32
 	nodes []octreeNode
 	cloud []cloudSample
 	box uint32
@@ -217,12 +218,17 @@ func windowLoop(window *sdl.Window) {
 			case *sdl.QuitEvent:
 				return
 			case *sdl.KeyDownEvent:
-				if t.Keysym.Sym == sdl.K_ESCAPE {
+				switch t.Keysym.Sym {
+				case sdl.K_ESCAPE:
 					return
-				} else if t.Keysym.Sym == sdl.K_SPACE {
+				case sdl.K_SPACE:
 					data.renderSections = !data.renderSections
-				} else if t.Keysym.Sym == sdl.K_RETURN {
+				case sdl.K_RETURN:
 					data.renderCloud = !data.renderCloud
+				case sdl.K_PLUS:
+					data.minNodeSize += 0.1
+				case sdl.K_MINUS:
+					data.minNodeSize -= 0.1
 				}
 			case *sdl.MouseButtonEvent:
 				if t.State == 1 {
@@ -346,7 +352,7 @@ func renderTree(data *renderData, node *octreeNode, pos point3d, size float32) {
 		}
 
 		// Is this a leaf
-		if num == 0 {
+		if num == 0 || size < data.minNodeSize {
 			renderNode(data, node.Color, pos, size)
 			return
 		}
