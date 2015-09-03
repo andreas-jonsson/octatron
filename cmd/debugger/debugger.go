@@ -26,6 +26,7 @@ import (
 	"fmt"
 	"math"
 	"runtime"
+	"bufio"
 	"encoding/binary"
 )
 
@@ -35,8 +36,19 @@ const (
 	winHeight = 600
 
 	nodeSize = 4 + 8 * 4
-	rotSpeed float64 = 10
+	rotSpeed = 10.0
+
+	cloudScale = 1
+	cloudPointSize = 0.005
+	cloudOffsetX = -788
+	cloudOffsetY = -602
+	cloudOffsetZ = -48
 )
+
+type cloudSample struct {
+	Pos point3d
+	Color [3]byte
+}
 
 type octreeNode struct {
 	Color [4]byte
@@ -49,6 +61,10 @@ type point3d struct {
 
 func (p *point3d) add(x *point3d) point3d {
 	return point3d{p.X + x.X, p.Y + x.Y, p.Z + x.Z}
+}
+
+func (p *point3d) scale(n float32) point3d {
+	return point3d{p.X * n, p.Y * n, p.Z * n}
 }
 
 func init() {
@@ -174,8 +190,9 @@ type renderData struct {
 	yrot, xrot float64
 	zoom float64
 	nodes []octreeNode
+	cloud []cloudSample
 	box uint32
-	renderSections bool
+	renderSections, renderCloud bool
 }
 
 func windowLoop(window *sdl.Window) {
@@ -183,7 +200,8 @@ func windowLoop(window *sdl.Window) {
 
 	data.renderSections = true
 	data.zoom = -7
-	data.nodes = loadTree("pack/test.oct")
+	data.nodes = loadTree("pack/test_norm.oct")
+	data.cloud = loadCloud("pack/test.xyz")
 	data.box = genBox()
 	defer gl.DeleteLists(data.box, 1)
 
@@ -203,6 +221,8 @@ func windowLoop(window *sdl.Window) {
 					return
 				} else if t.Keysym.Sym == sdl.K_SPACE {
 					data.renderSections = !data.renderSections
+				} else if t.Keysym.Sym == sdl.K_RETURN {
+					data.renderCloud = !data.renderCloud
 				}
 			case *sdl.MouseButtonEvent:
 				if t.State == 1 {
@@ -221,13 +241,51 @@ func windowLoop(window *sdl.Window) {
 		}
 
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-		renderTree(data, &data.nodes[0], point3d{0,0,0}, 100)
+
+		if data.renderCloud == true {
+			renderCloud(data, data.cloud)
+		} else {
+			renderTree(data, &data.nodes[0], point3d{0,0,0}, 100)
+		}
+
 		sdl.GL_SwapWindow(window)
 
 		if glErr := gl.GetError(); glErr != gl.NO_ERROR {
 			panic(fmt.Errorf("GL error: %x", glErr))
 		}
 	}
+}
+
+func loadCloud(file string) []cloudSample {
+	samples := make([]cloudSample, 0)
+
+	fp, err := os.Open(file)
+	if err != nil {
+		panic(err)
+	}
+	defer fp.Close()
+
+	scanner := bufio.NewScanner(fp)
+	for scanner.Scan() {
+		var s cloudSample
+		var ref float64
+
+		_, err := fmt.Sscan(scanner.Text(), &s.Pos.X, &s.Pos.Y, &s.Pos.Z, &ref, &s.Color[0], &s.Color[1], &s.Color[2])
+		if err != nil {
+			panic(err)
+		}
+
+		s.Pos = s.Pos.add(&point3d{cloudOffsetX, cloudOffsetY, cloudOffsetZ})
+		s.Pos = s.Pos.scale(cloudScale)
+		samples = append(samples, s)
+	}
+
+	err = scanner.Err()
+	if err != nil {
+		panic(err)
+	}
+
+	return samples
 }
 
 func loadTree(file string) []octreeNode {
@@ -316,7 +374,21 @@ func renderNode(data *renderData, color [4]byte, pos point3d, size float32) {
 	gl.Scalef(size, size, size)
 
 	gl.Color3f(float32(color[0]) / 256, float32(color[1]) / 256, float32(color[2]) / 256)
-
 	gl.CallList(data.box)
-	//renderBox()
+}
+
+func renderCloud(data *renderData, samples []cloudSample) {
+	for _, s := range samples {
+		gl.LoadIdentity()
+
+		gl.Translated(0,0,data.zoom)
+		gl.Rotated(data.xrot, 1,0,0)
+		gl.Rotated(data.yrot, 0,1,0)
+
+		gl.Translatef(s.Pos.X, s.Pos.Y, s.Pos.Z)
+		gl.Scaled(cloudPointSize, cloudPointSize, cloudPointSize)
+
+		gl.Color3f(float32(s.Color[0]) / 256, float32(s.Color[1]) / 256, float32(s.Color[2]) / 256)
+		gl.CallList(data.box)
+	}
 }

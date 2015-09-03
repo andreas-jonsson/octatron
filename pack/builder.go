@@ -56,7 +56,7 @@ func processData(data *workerPrivateData, node *treeNode, sampleChan <-chan Samp
 		// Average voxels color value
 		col := sample.Color()
 		avg := col.sub(&node.color)
-		avg = avg.div(float32(node.numSamples))
+		avg.div(float32(node.numSamples))
 		node.color.add(avg)
 	}
 }

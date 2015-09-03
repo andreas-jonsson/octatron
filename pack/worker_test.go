@@ -88,16 +88,16 @@ func start(numWorkers int) {
 	workers := make([]Worker, numWorkers)
 
 	for i := range workers {
-		workers[i] = createWorker("test.xyz")
+		workers[i] = createWorker("test_norm.xyz")
 	}
 
-	file, err := os.Create("test.oct")
+	file, err := os.Create("test_norm.oct")
 	if err != nil {
 		panic(err)
 	}
 	defer file.Close()
 
-	bounds := Box{Point{782, 602, 48}, 10.0}
+	bounds := Box{Point{0, 0, 0}, 100}
 
 	err = BuildTree(workers, &BuildConfig{file, bounds, 4096, MIP_R8G8B8A8_UI32, false})
 	if err != nil {
