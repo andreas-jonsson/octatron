@@ -35,6 +35,7 @@ type BuildConfig struct {
 type workerPrivateData struct {
 	err        error
 	numSamples uint64
+	numRequests uint64
 	worker     Worker
 }
 
@@ -67,6 +68,7 @@ func collectData(workerData *workerPrivateData, node *treeNode, sampleChan chan<
 		workerData.err = err
 	}
 	close(sampleChan)
+	atomic.AddUint64(&workerData.numRequests, 1)
 }
 
 func incVolume(volumeTraversed *uint64, voxelsPerAxis int) uint64 {

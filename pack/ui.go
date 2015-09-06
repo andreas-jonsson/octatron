@@ -32,14 +32,15 @@ func startUI(data []workerPrivateData, totalVolume uint64, volumeTraversed *uint
 	go func() {
 		defer fmt.Println("")
 		for {
-			var numSamples uint64
+			var numSamples, numRequests  uint64
 			for _, w := range data {
 				numSamples += atomic.LoadUint64(&w.numSamples)
+				numRequests += atomic.LoadUint64(&w.numRequests)
 			}
 
 			leafs := atomic.LoadUint64(numLeafs)
 			traversed := atomic.LoadUint64(volumeTraversed)
-			fmt.Printf("\rProgress %d%%, (%v samples, %v leafs)", int((float32(traversed)/float32(totalVolume))*100.0), numSamples, leafs)
+			fmt.Printf("\rProgress %d%%, (%v samples, %v requests, %v leafs)", int((float32(traversed)/float32(totalVolume))*100.0), numSamples, numRequests, leafs)
 
 			if traversed >= totalVolume {
 				wg.Done()
