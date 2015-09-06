@@ -22,12 +22,12 @@ import (
 	"github.com/go-gl/gl/v3.2-compatibility/gl"
 	"github.com/veandco/go-sdl2/sdl"
 
-	"os"
-	"fmt"
-	"math"
-	"runtime"
 	"bufio"
 	"encoding/binary"
+	"fmt"
+	"math"
+	"os"
+	"runtime"
 )
 
 const (
@@ -35,23 +35,23 @@ const (
 	winWidth  = 800
 	winHeight = 600
 
-	nodeSize = 4 + 8 * 4
+	nodeSize = 4 + 8*4
 	rotSpeed = 10.0
 
-	cloudScale = 1
+	cloudScale     = 1
 	cloudPointSize = 0.005
-	cloudOffsetX = -788
-	cloudOffsetY = -602
-	cloudOffsetZ = -48
+	cloudOffsetX   = -788
+	cloudOffsetY   = -602
+	cloudOffsetZ   = -48
 )
 
 type cloudSample struct {
-	Pos point3d
+	Pos   point3d
 	Color [3]byte
 }
 
 type octreeNode struct {
-	Color [4]byte
+	Color    [4]byte
 	Children [8]uint32
 }
 
@@ -61,6 +61,10 @@ type point3d struct {
 
 func (p *point3d) add(x *point3d) point3d {
 	return point3d{p.X + x.X, p.Y + x.Y, p.Z + x.Z}
+}
+
+func (p *point3d) addn(n float32) point3d {
+	return point3d{p.X + n, p.Y + n, p.Z + n}
 }
 
 func (p *point3d) scale(n float32) point3d {
@@ -120,13 +124,13 @@ func printGLInfo() {
 
 func setupGL() {
 	gl.ShadeModel(gl.FLAT)
-    gl.ClearColor(0.75,0.75,0.75,1.0)
+	gl.ClearColor(0.75, 0.75, 0.75, 1.0)
 
-    gl.Enable(gl.DEPTH_TEST)
+	gl.Enable(gl.DEPTH_TEST)
 
 	gl.Viewport(0, 0, winWidth, winHeight)
 	gl.Hint(gl.PERSPECTIVE_CORRECTION_HINT, gl.NICEST)
-	gluPerspective(45, float64(winWidth) / winHeight, 0.1, 1000.0)
+	gluPerspective(45, float64(winWidth)/winHeight, 10, 1000)
 
 	gl.MatrixMode(gl.MODELVIEW)
 	gl.LoadIdentity()
@@ -134,35 +138,35 @@ func setupGL() {
 
 func renderBox() {
 	gl.Begin(gl.QUADS)
-	gl.Vertex3f( 1,  1, -1)
-	gl.Vertex3f(-1,  1, -1)
-	gl.Vertex3f(-1,  1,  1)
-	gl.Vertex3f( 1,  1,  1)
+	gl.Vertex3f(1, 1, 0)
+	gl.Vertex3f(0, 1, 0)
+	gl.Vertex3f(0, 1, 1)
+	gl.Vertex3f(1, 1, 1)
 
-	gl.Vertex3f( 1, -1,  1)
-	gl.Vertex3f(-1, -1,  1)
-	gl.Vertex3f(-1, -1, -1)
-	gl.Vertex3f( 1, -1, -1)
+	gl.Vertex3f(1, 0, 1)
+	gl.Vertex3f(0, 0, 1)
+	gl.Vertex3f(0, 0, 0)
+	gl.Vertex3f(1, 0, 0)
 
-	gl.Vertex3f( 1,  1,  1)
-	gl.Vertex3f(-1,  1,  1)
-	gl.Vertex3f(-1, -1,  1)
-	gl.Vertex3f( 1, -1,  1)
+	gl.Vertex3f(1, 1, 1)
+	gl.Vertex3f(0, 1, 1)
+	gl.Vertex3f(0, 0, 1)
+	gl.Vertex3f(1, 0, 1)
 
-	gl.Vertex3f( 1, -1, -1)
-	gl.Vertex3f(-1, -1, -1)
-	gl.Vertex3f(-1,  1, -1)
-	gl.Vertex3f( 1,  1, -1)
+	gl.Vertex3f(1, 0, 0)
+	gl.Vertex3f(0, 0, 0)
+	gl.Vertex3f(0, 1, 0)
+	gl.Vertex3f(1, 1, 0)
 
-	gl.Vertex3f(-1,  1,  1)
-	gl.Vertex3f(-1,  1, -1)
-	gl.Vertex3f(-1, -1, -1)
-	gl.Vertex3f(-1, -1,  1)
+	gl.Vertex3f(0, 1, 1)
+	gl.Vertex3f(0, 1, 0)
+	gl.Vertex3f(0, 0, 0)
+	gl.Vertex3f(0, 0, 1)
 
-	gl.Vertex3f( 1,  1, -1)
-	gl.Vertex3f( 1,  1,  1)
-	gl.Vertex3f( 1, -1,  1)
-	gl.Vertex3f( 1, -1, -1)
+	gl.Vertex3f(1, 1, 0)
+	gl.Vertex3f(1, 1, 1)
+	gl.Vertex3f(1, 0, 1)
+	gl.Vertex3f(1, 0, 0)
 	gl.End()
 }
 
@@ -175,24 +179,24 @@ func genBox() uint32 {
 }
 
 func gluPerspective(fovy float64, aspect float64, zNear float64, zFar float64) {
-    gl.MatrixMode(gl.PROJECTION)
-    gl.LoadIdentity()
+	gl.MatrixMode(gl.PROJECTION)
+	gl.LoadIdentity()
 
-    ymax := zNear * math.Tan(fovy * math.Pi / 360)
-    ymin := -ymax
-    xmin := ymin * aspect
-    xmax := ymax * aspect
+	ymax := zNear * math.Tan(fovy*math.Pi/360)
+	ymin := -ymax
+	xmin := ymin * aspect
+	xmax := ymax * aspect
 
-    gl.Frustum(xmin, xmax, ymin, ymax, zNear, zFar)
+	gl.Frustum(xmin, xmax, ymin, ymax, zNear, zFar)
 }
 
 type renderData struct {
-	yrot, xrot float64
-	zoom float64
-	minNodeSize float32
-	nodes []octreeNode
-	cloud []cloudSample
-	box uint32
+	yrot, xrot                  float64
+	zoom                        float64
+	minNodeSize                 float32
+	nodes                       []octreeNode
+	cloud                       []cloudSample
+	box                         uint32
 	renderSections, renderCloud bool
 }
 
@@ -200,8 +204,8 @@ func windowLoop(window *sdl.Window) {
 	data := &renderData{}
 
 	data.renderSections = true
-	data.zoom = -7
-	data.nodes = loadTree("pack/test_norm.oct")
+	data.zoom = -250
+	data.nodes = loadTree("pack/test.oct")
 	data.cloud = loadCloud("pack/test.xyz")
 	data.box = genBox()
 	defer gl.DeleteLists(data.box, 1)
@@ -226,9 +230,9 @@ func windowLoop(window *sdl.Window) {
 				case sdl.K_RETURN:
 					data.renderCloud = !data.renderCloud
 				case sdl.K_PLUS:
-					data.minNodeSize += 0.1
+					data.minNodeSize += 1.0
 				case sdl.K_MINUS:
-					data.minNodeSize -= 0.1
+					data.minNodeSize -= 1.0
 				}
 			case *sdl.MouseButtonEvent:
 				if t.State == 1 {
@@ -251,7 +255,7 @@ func windowLoop(window *sdl.Window) {
 		if data.renderCloud == true {
 			renderCloud(data, data.cloud)
 		} else {
-			renderTree(data, &data.nodes[0], point3d{0,0,0}, 100)
+			renderTree(data, &data.nodes[0], point3d{0, 0, 0}, 100)
 		}
 
 		sdl.GL_SwapWindow(window)
@@ -314,7 +318,7 @@ func loadTree(file string) []octreeNode {
 			panic(err)
 		}
 
-		p := int((float32(i + 1) / float32(numNodes)) * 100)
+		p := int((float32(i+1) / float32(numNodes)) * 100)
 		if p > prog {
 			fmt.Printf("\rLoading: %v%%", p)
 			prog = p
@@ -326,28 +330,24 @@ func loadTree(file string) []octreeNode {
 }
 
 var childPositions = []point3d{
-	point3d{-1,-1,-1},point3d{1,-1,-1},point3d{-1,1,-1},point3d{1,1,-1},
-	point3d{-1,-1,1},point3d{1,-1,1},point3d{-1,1,1},point3d{1,1,1},
+	point3d{0, 0, 0}, point3d{1, 0, 0}, point3d{0, 1, 0}, point3d{1, 1, 0},
+	point3d{0, 0, 1}, point3d{1, 0, 1}, point3d{0, 1, 1}, point3d{1, 1, 1},
 }
 
 func renderTree(data *renderData, node *octreeNode, pos point3d, size float32) {
 	var candidates [8]*octreeNode
-	var candidatesPos [8]*point3d
+	var candidatesPos [8]point3d
 
 	for {
 		num := 0
+		childSize := size * 0.5
 		for i, child := range node.Children {
-			childPos := &childPositions[i]
 			if child != 0 {
-				candidates[num] = &data.nodes[child / nodeSize]
+				candidates[num] = &data.nodes[child/nodeSize]
+				childPos := childPositions[i].scale(childSize)
+				childPos = pos.add(&childPos)
 				candidatesPos[num] = childPos
 				num++
-			}
-
-			if data.renderSections == true {
-				gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
-				renderNode(data, [4]byte{0,255,0,255}, pos.add(childPos), size * 0.5)
-				gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
 			}
 		}
 
@@ -355,31 +355,34 @@ func renderTree(data *renderData, node *octreeNode, pos point3d, size float32) {
 		if num == 0 || size < data.minNodeSize {
 			renderNode(data, node.Color, pos, size)
 			return
+		} else if data.renderSections == true {
+			gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
+			renderNode(data, [4]byte{0, 255, 0, 255}, pos, size)
+			gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
 		}
 
 		num--
-		size *= 0.5
-
 		for i := 0; i < num; i++ {
-			renderTree(data, candidates[i], pos.add(candidatesPos[i]), size)
+			renderTree(data, candidates[i], candidatesPos[i], childSize)
 		}
 
 		node = candidates[num]
-		pos = pos.add(candidatesPos[num])
+		pos = candidatesPos[num]
+		size = childSize
 	}
 }
 
 func renderNode(data *renderData, color [4]byte, pos point3d, size float32) {
 	gl.LoadIdentity()
 
-	gl.Translated(0,0,data.zoom)
-	gl.Rotated(data.xrot, 1,0,0)
-	gl.Rotated(data.yrot, 0,1,0)
+	gl.Translated(0, 0, data.zoom)
+	gl.Rotated(data.xrot, 1, 0, 0)
+	gl.Rotated(data.yrot, 0, 1, 0)
 
-	gl.Translatef(pos.X * size, pos.Y * size, pos.Z * size)
+	gl.Translatef(pos.X, pos.Y, pos.Z)
 	gl.Scalef(size, size, size)
 
-	gl.Color3f(float32(color[0]) / 256, float32(color[1]) / 256, float32(color[2]) / 256)
+	gl.Color3f(float32(color[0])/256, float32(color[1])/256, float32(color[2])/256)
 	gl.CallList(data.box)
 }
 
@@ -387,14 +390,14 @@ func renderCloud(data *renderData, samples []cloudSample) {
 	for _, s := range samples {
 		gl.LoadIdentity()
 
-		gl.Translated(0,0,data.zoom)
-		gl.Rotated(data.xrot, 1,0,0)
-		gl.Rotated(data.yrot, 0,1,0)
+		gl.Translated(0, 0, data.zoom)
+		gl.Rotated(data.xrot, 1, 0, 0)
+		gl.Rotated(data.yrot, 0, 1, 0)
 
 		gl.Translatef(s.Pos.X, s.Pos.Y, s.Pos.Z)
 		gl.Scaled(cloudPointSize, cloudPointSize, cloudPointSize)
 
-		gl.Color3f(float32(s.Color[0]) / 256, float32(s.Color[1]) / 256, float32(s.Color[2]) / 256)
+		gl.Color3f(float32(s.Color[0])/256, float32(s.Color[1])/256, float32(s.Color[2])/256)
 		gl.CallList(data.box)
 	}
 }

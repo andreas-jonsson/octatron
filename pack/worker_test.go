@@ -20,11 +20,16 @@ package pack
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"os"
 	"runtime"
 	"testing"
 )
+
+const memLimitMB = 16
 
 type testSample struct {
 	pos   Point
@@ -40,11 +45,13 @@ func (s *testSample) Position() Point {
 }
 
 type testWorker struct {
-	file *os.File
+	file   *os.File
+	mem    []byte
+	reader io.Reader
 }
 
 func (w *testWorker) Start(bounds Box, samples chan<- Sample) error {
-	scanner := bufio.NewScanner(w.file)
+	scanner := bufio.NewScanner(w.reader)
 	for scanner.Scan() {
 		s := new(testSample)
 
@@ -60,16 +67,22 @@ func (w *testWorker) Start(bounds Box, samples chan<- Sample) error {
 		}
 	}
 
-	_, err := w.file.Seek(0, 0)
-	if err != nil {
-		return err
+	if w.file != nil {
+		_, err := w.file.Seek(0, 0)
+		if err != nil {
+			return err
+		}
+	} else {
+		w.reader = bytes.NewReader(w.mem)
 	}
 
 	return scanner.Err()
 }
 
 func (w *testWorker) Stop() {
-	w.file.Close()
+	if w.file != nil {
+		w.file.Close()
+	}
 }
 
 func createWorker(file string) *testWorker {
@@ -81,6 +94,25 @@ func createWorker(file string) *testWorker {
 		panic(err)
 	}
 
+	size, err := w.file.Seek(0, 2)
+	if err != nil {
+		panic(err)
+	}
+
+	size = size / 1024 / 1024
+	if size < memLimitMB {
+		w.file.Close()
+		w.file = nil
+
+		fmt.Printf("Worker [%p], caching file in memory! (%vMB < %vMB)\n", w, size, memLimitMB)
+
+		w.mem, err = ioutil.ReadFile(file)
+		if err != nil {
+			panic(err)
+		}
+		w.reader = bytes.NewReader(w.mem)
+	}
+
 	return w
 }
 
@@ -88,18 +120,18 @@ func start(numWorkers int) {
 	workers := make([]Worker, numWorkers)
 
 	for i := range workers {
-		workers[i] = createWorker("test_norm.xyz")
+		workers[i] = createWorker("test.xyz")
 	}
 
-	file, err := os.Create("test_norm.oct")
+	file, err := os.Create("test.oct")
 	if err != nil {
 		panic(err)
 	}
 	defer file.Close()
 
-	bounds := Box{Point{0, 0, 0}, 100}
+	bounds := Box{Point{0, 0, 0}, 80}
 
-	err = BuildTree(workers, &BuildConfig{file, bounds, 4096, MIP_R8G8B8A8_UI32, false})
+	err = BuildTree(workers, &BuildConfig{file, bounds, 8, MIP_R8G8B8A8_UI32, true})
 	if err != nil {
 		panic(err)
 	}

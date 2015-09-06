@@ -167,7 +167,7 @@ func writeTail(writer io.Writer, format OctreeFormat) error {
 	if err != nil {
 		return err
 	}
-	_, err = writer.Write(make([]byte, size * 8))
+	_, err = writer.Write(make([]byte, size*8))
 	return err
 }
 

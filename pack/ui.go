@@ -25,7 +25,7 @@ import (
 	"time"
 )
 
-func startUI(data []workerPrivateData, totalVolume uint64, volumeTraversed *uint64) *sync.WaitGroup {
+func startUI(data []workerPrivateData, totalVolume uint64, volumeTraversed *uint64, numLeafs *uint64) *sync.WaitGroup {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
@@ -37,8 +37,9 @@ func startUI(data []workerPrivateData, totalVolume uint64, volumeTraversed *uint
 				numSamples += atomic.LoadUint64(&w.numSamples)
 			}
 
+			leafs := atomic.LoadUint64(numLeafs)
 			traversed := atomic.LoadUint64(volumeTraversed)
-			fmt.Printf("\rProgress %d%%, (%v samples)", int((float32(traversed)/float32(totalVolume))*100.0), numSamples)
+			fmt.Printf("\rProgress %d%%, (%v samples, %v leafs)", int((float32(traversed)/float32(totalVolume))*100.0), numSamples, leafs)
 
 			if traversed >= totalVolume {
 				wg.Done()

@@ -77,9 +77,9 @@ func incVolume(volumeTraversed *uint64, voxelsPerAxis int) uint64 {
 
 func BuildTree(workers []Worker, cfg *BuildConfig) error {
 	var (
-		volumeTraversed uint64
-		wgWorkers       sync.WaitGroup
-		wgUI            *sync.WaitGroup
+		volumeTraversed, numLeafs uint64
+		wgWorkers                 sync.WaitGroup
+		wgUI                      *sync.WaitGroup
 	)
 
 	vpa := uint64(cfg.VoxelsPerAxis)
@@ -103,7 +103,7 @@ func BuildTree(workers []Worker, cfg *BuildConfig) error {
 	}()
 
 	if cfg.Interactive == true {
-		wgUI = startUI(workerData, totalVolume, &volumeTraversed)
+		wgUI = startUI(workerData, totalVolume, &volumeTraversed, &numLeafs)
 		defer wgUI.Wait()
 	}
 
@@ -142,6 +142,7 @@ func BuildTree(workers []Worker, cfg *BuildConfig) error {
 						data.err = err
 						return
 					} else if hasChildren == false {
+						atomic.AddUint64(&numLeafs, 1)
 						if incVolume(&volumeTraversed, node.voxelsPerAxis) == totalVolume {
 							nodeMapShutdownChan <- struct{}{}
 						}
