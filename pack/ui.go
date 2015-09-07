@@ -32,7 +32,7 @@ func startUI(data []workerPrivateData, totalVolume uint64, volumeTraversed *uint
 	go func() {
 		defer fmt.Println("")
 		for {
-			var numSamples, numRequests  uint64
+			var numSamples, numRequests uint64
 			for _, w := range data {
 				numSamples += atomic.LoadUint64(&w.numSamples)
 				numRequests += atomic.LoadUint64(&w.numRequests)

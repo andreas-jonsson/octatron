@@ -18,7 +18,7 @@
 
 package pack
 
-type OctreeFormat int
+type OctreeFormat byte
 
 const (
 	MIP_R8G8B8A8_UI32 OctreeFormat = iota

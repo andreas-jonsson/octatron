@@ -21,6 +21,7 @@ package main
 import (
 	"github.com/go-gl/gl/v3.2-compatibility/gl"
 	"github.com/veandco/go-sdl2/sdl"
+	"github.com/andreas-t-jonsson/octatron/pack"
 
 	"bufio"
 	"encoding/binary"
@@ -127,6 +128,7 @@ func setupGL() {
 	gl.ClearColor(0.75, 0.75, 0.75, 1.0)
 
 	gl.Enable(gl.DEPTH_TEST)
+	gl.LineWidth(1)
 
 	gl.Viewport(0, 0, winWidth, winHeight)
 	gl.Hint(gl.PERSPECTIVE_CORRECTION_HINT, gl.NICEST)
@@ -200,6 +202,24 @@ type renderData struct {
 	renderSections, renderCloud bool
 }
 
+func drawAxis(data *renderData) {
+/*
+	gl.LoadIdentity()
+
+	gl.Translated(0, 0, -3)
+	gl.Rotated(data.xrot, 1, 0, 0)
+	gl.Rotated(data.yrot, 0, 1, 0)
+
+	gl.LineWidth(2.5)
+	gl.Begin(gl.LINES)
+	gl.Color3f(255,0,0)
+	gl.Vertex3f(10, 0, 0)
+	gl.Vertex3f(-10, 0, 0)
+	gl.End()
+	gl.LineWidth(1)
+*/
+}
+
 func windowLoop(window *sdl.Window) {
 	data := &renderData{}
 
@@ -258,6 +278,10 @@ func windowLoop(window *sdl.Window) {
 			renderTree(data, &data.nodes[0], point3d{0, 0, 0}, 100)
 		}
 
+		gl.Disable(gl.DEPTH_TEST)
+		drawAxis(data)
+		gl.Enable(gl.DEPTH_TEST)
+
 		sdl.GL_SwapWindow(window)
 
 		if glErr := gl.GetError(); glErr != gl.NO_ERROR {
@@ -307,6 +331,16 @@ func loadTree(file string) []octreeNode {
 
 	size, _ := fp.Seek(0, 2)
 	fp.Seek(0, 0)
+
+	var header pack.Header
+	err = binary.Read(fp, binary.BigEndian, &header)
+	if err != nil {
+		panic(err)
+	}
+
+	if header.Format != pack.MIP_R8G8B8A8_UI32 {
+		panic("Format must be: MIP_R8G8B8A8_UI32")
+	}
 
 	numNodes := int(size) / nodeSize
 	nodes := make([]octreeNode, numNodes)

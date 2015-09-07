@@ -108,7 +108,7 @@ type treeNode struct {
 
 	childIndex,
 	voxelsPerAxis,
-	numSamples,
+	numSamplesInNode,
 	colorSize int
 }
 

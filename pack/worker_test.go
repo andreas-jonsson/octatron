@@ -111,6 +111,12 @@ func createWorker(file string) *testWorker {
 			panic(err)
 		}
 		w.reader = bytes.NewReader(w.mem)
+	} else {
+		_, err := w.file.Seek(0, 0)
+		if err != nil {
+			panic(err)
+		}
+		w.reader = w.file
 	}
 
 	return w
@@ -118,7 +124,6 @@ func createWorker(file string) *testWorker {
 
 func start(numWorkers int) {
 	workers := make([]Worker, numWorkers)
-
 	for i := range workers {
 		workers[i] = createWorker("test.xyz")
 	}

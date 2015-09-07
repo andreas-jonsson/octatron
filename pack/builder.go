@@ -22,7 +22,23 @@ import (
 	"io"
 	"sync"
 	"sync/atomic"
+	"encoding/binary"
 )
+
+const (
+	binaryVersion byte = 0
+	flags byte = 0x1
+)
+
+type Header struct {
+	Sign [4]byte
+	Version byte
+	Format OctreeFormat
+	Flags byte
+	Unused byte
+	NumLeafs uint64
+	VoxelsPerAxis uint32
+}
 
 type BuildConfig struct {
 	Writer        io.WriteSeeker
@@ -47,17 +63,17 @@ func processData(data *workerPrivateData, node *treeNode, sampleChan <-chan Samp
 			if err != nil {
 				return err
 			}
-			node.color.div(float32(node.numSamples))
+			node.color.div(float32(node.numSamplesInNode))
 			return nil
 		}
 
-		node.numSamples++
+		node.numSamplesInNode++
 		atomic.AddUint64(&data.numSamples, 1)
 
 		// Average voxels color value
 		col := sample.Color()
 		avg := col.sub(&node.color)
-		avg.div(float32(node.numSamples))
+		avg.div(float32(node.numSamplesInNode))
 		node.color.add(avg)
 	}
 }
@@ -67,14 +83,22 @@ func collectData(workerData *workerPrivateData, node *treeNode, sampleChan chan<
 	if err != nil {
 		workerData.err = err
 	}
-	close(sampleChan)
 	atomic.AddUint64(&workerData.numRequests, 1)
+	close(sampleChan)
 }
 
 func incVolume(volumeTraversed *uint64, voxelsPerAxis int) uint64 {
 	vpa := uint64(voxelsPerAxis)
 	volume := vpa * vpa * vpa
 	return atomic.AddUint64(volumeTraversed, volume)
+}
+
+func writeHeader(writer io.Writer, header *Header) error {
+	err := binary.Write(writer, binary.BigEndian, header)
+	if err != nil {
+		return nil
+	}
+	return err
 }
 
 func BuildTree(workers []Worker, cfg *BuildConfig) error {
@@ -104,14 +128,31 @@ func BuildTree(workers []Worker, cfg *BuildConfig) error {
 		nodeMapShutdownChan <- struct{}{}
 	}()
 
+	for idx, worker := range workers {
+		data := &workerData[idx]
+		data.worker = worker
+	}
+
 	if cfg.Interactive == true {
 		wgUI = startUI(workerData, totalVolume, &volumeTraversed, &numLeafs)
 		defer wgUI.Wait()
 	}
 
-	for idx, worker := range workers {
+	var header Header
+	header.Sign[0] = 0x1b
+	header.Sign[1] = 0x6f
+	header.Sign[2] = 0x63
+	header.Sign[3] = 0x74
+	header.Version = binaryVersion
+	header.Format = cfg.Format
+	header.Unused = 0x0
+	header.NumLeafs = 0
+	header.VoxelsPerAxis = uint32(cfg.VoxelsPerAxis)
+
+	writeHeader(cfg.Writer, &header)
+
+	for idx, _ := range workers {
 		data := &workerData[idx]
-		data.worker = worker
 
 		// Spawn worker
 		go func() {
@@ -132,7 +173,7 @@ func BuildTree(workers []Worker, cfg *BuildConfig) error {
 				}
 
 				// This is a leaf
-				if node.numSamples == 0 {
+				if node.numSamplesInNode == 0 {
 					// Are we done with the octree
 					if incVolume(&volumeTraversed, node.voxelsPerAxis) == totalVolume {
 						nodeMapShutdownChan <- struct{}{}
@@ -159,6 +200,16 @@ func BuildTree(workers []Worker, cfg *BuildConfig) error {
 		if data.err != nil {
 			return data.err
 		}
+	}
+
+	header.NumLeafs = numLeafs
+	if _, err := cfg.Writer.Seek(0, 0); err != nil {
+		return err
+	}
+
+	writeHeader(cfg.Writer, &header)
+	if _, err := cfg.Writer.Seek(0, 2); err != nil {
+		return err
 	}
 	return nil
 }
