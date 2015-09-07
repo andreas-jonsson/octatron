@@ -60,7 +60,7 @@ func (color *Color) div(n float32) *Color {
 	return color
 }
 
-func (color *Color) writeColor(writer io.Writer, format OctreeFormat) (int, error) {
+func (color *Color) writeColor(writer io.Writer, format OctreeFormat) error {
 	c := *color
 	c.div(256.0)
 
@@ -70,14 +70,9 @@ func (color *Color) writeColor(writer io.Writer, format OctreeFormat) (int, erro
 		err = binary.Write(writer, binary.BigEndian, byte(c.G))
 		err = binary.Write(writer, binary.BigEndian, byte(c.B))
 		err = binary.Write(writer, binary.BigEndian, byte(c.A))
-		return 4, err
-	case MIP_R8G8B8_UI32:
-		err := binary.Write(writer, binary.BigEndian, byte(c.R))
-		err = binary.Write(writer, binary.BigEndian, byte(c.G))
-		err = binary.Write(writer, binary.BigEndian, byte(c.B))
-		return 3, err
+		return err
 	default:
-		return 0, errUnsupportedFormat
+		return errUnsupportedFormat
 	}
 }
 
@@ -108,8 +103,7 @@ type treeNode struct {
 
 	childIndex,
 	voxelsPerAxis,
-	numSamplesInNode,
-	colorSize int
+	numSamplesInNode int
 }
 
 func newRootNode(bounds Box, vpa int) *treeNode {
@@ -155,19 +149,8 @@ func startNodeCache(channelSize int) (shutdown chan<- struct{}, in chan<- *treeN
 	return shutdownChan, inChan, outChan
 }
 
-func indexSize(format OctreeFormat) (int, error) {
-	if format != MIP_R8G8B8_UI32 && format != MIP_R8G8B8A8_UI32 {
-		return 0, errUnsupportedFormat
-	}
-	return 4, nil
-}
-
 func writeTail(writer io.Writer, format OctreeFormat) error {
-	size, err := indexSize(format)
-	if err != nil {
-		return err
-	}
-	_, err = writer.Write(make([]byte, size*8))
+	_, err := writer.Write(make([]byte, format.IndexSize() * 8))
 	return err
 }
 
@@ -226,14 +209,12 @@ func (node *treeNode) patchParent(writer io.WriteSeeker, mutex *sync.Mutex, form
 	defer mutex.Unlock()
 
 	parent := node.parent
-	size, err := indexSize(format)
-
 	offset, _ := writer.Seek(0, 1)
-	if _, err = writer.Seek(parent.fileOffset+int64(parent.colorSize+node.childIndex*size), 0); err != nil {
+	if _, err := writer.Seek(parent.fileOffset+int64(format.ColorSize()+node.childIndex*format.IndexSize()), 0); err != nil {
 		return err
 	}
 
-	err = binary.Write(writer, binary.BigEndian, uint32(node.fileOffset))
+	err := binary.Write(writer, binary.BigEndian, uint32(node.fileOffset / int64(format.NodeSize())))
 	if err != nil {
 		return err
 	}
@@ -244,7 +225,6 @@ func (node *treeNode) patchParent(writer io.WriteSeeker, mutex *sync.Mutex, form
 
 func (node *treeNode) serialize(writer io.WriteSeeker, mutex *sync.Mutex, format OctreeFormat, nodeInChan chan<- *treeNode) (bool, error) {
 	var (
-		size        int
 		err         error
 		hasChildren bool = true
 	)
@@ -252,12 +232,11 @@ func (node *treeNode) serialize(writer io.WriteSeeker, mutex *sync.Mutex, format
 	mutex.Lock()
 	node.fileOffset, err = writer.Seek(0, 1)
 
-	size, err = node.color.writeColor(writer, format)
+	err = node.color.writeColor(writer, format)
 	if err != nil {
 		mutex.Unlock()
 		return hasChildren, err
 	}
-	node.colorSize += size
 
 	if err = writeTail(writer, format); err != nil {
 		mutex.Unlock()

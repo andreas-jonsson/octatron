@@ -36,7 +36,6 @@ const (
 	winWidth  = 800
 	winHeight = 600
 
-	nodeSize = 4 + 8*4
 	rotSpeed = 10.0
 
 	cloudScale     = 1
@@ -226,7 +225,7 @@ func windowLoop(window *sdl.Window) {
 	data.renderSections = true
 	data.zoom = -250
 	data.nodes = loadTree("pack/test.oct")
-	data.cloud = loadCloud("pack/test.xyz")
+	//data.cloud = loadCloud("pack/test.xyz")
 	data.box = genBox()
 	defer gl.DeleteLists(data.box, 1)
 
@@ -248,7 +247,7 @@ func windowLoop(window *sdl.Window) {
 				case sdl.K_SPACE:
 					data.renderSections = !data.renderSections
 				case sdl.K_RETURN:
-					data.renderCloud = !data.renderCloud
+					//data.renderCloud = !data.renderCloud
 				case sdl.K_PLUS:
 					data.minNodeSize += 1.0
 				case sdl.K_MINUS:
@@ -329,9 +328,6 @@ func loadTree(file string) []octreeNode {
 	}
 	defer fp.Close()
 
-	size, _ := fp.Seek(0, 2)
-	fp.Seek(0, 0)
-
 	var header pack.Header
 	err = binary.Read(fp, binary.BigEndian, &header)
 	if err != nil {
@@ -342,7 +338,12 @@ func loadTree(file string) []octreeNode {
 		panic("Format must be: MIP_R8G8B8A8_UI32")
 	}
 
-	numNodes := int(size) / nodeSize
+	curr, _ := fp.Seek(0, 1)
+	size, _ := fp.Seek(0, 2)
+	fp.Seek(curr, 0)
+	size -= curr
+
+	numNodes := int(size) / header.Format.NodeSize()
 	nodes := make([]octreeNode, numNodes)
 
 	prog := -1
@@ -377,7 +378,8 @@ func renderTree(data *renderData, node *octreeNode, pos point3d, size float32) {
 		childSize := size * 0.5
 		for i, child := range node.Children {
 			if child != 0 {
-				candidates[num] = &data.nodes[child/nodeSize]
+				fmt.Println("######",len(data.nodes),child)
+				candidates[num] = &data.nodes[child]
 				childPos := childPositions[i].scale(childSize)
 				childPos = pos.add(&childPos)
 				candidatesPos[num] = childPos
