@@ -101,6 +101,11 @@ func writeHeader(writer io.Writer, header *Header) error {
 	return err
 }
 
+func CompressTree(oct io.Reader, ocz io.Writer) error {
+	panic("Not implemented!")
+	return nil
+}
+
 func BuildTree(workers []Worker, cfg *BuildConfig) error {
 	var (
 		volumeTraversed, numLeafs uint64

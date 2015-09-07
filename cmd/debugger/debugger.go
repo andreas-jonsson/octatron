@@ -378,7 +378,6 @@ func renderTree(data *renderData, node *octreeNode, pos point3d, size float32) {
 		childSize := size * 0.5
 		for i, child := range node.Children {
 			if child != 0 {
-				fmt.Println("######",len(data.nodes),child)
 				candidates[num] = &data.nodes[child]
 				childPos := childPositions[i].scale(childSize)
 				childPos = pos.add(&childPos)

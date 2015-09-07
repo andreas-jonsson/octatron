@@ -18,52 +18,57 @@
 
 package pack
 
-import "os"
+import (
+	"bufio"
+	"io"
+	"os"
+	"fmt"
+	"testing"
+)
 
-type Sample interface {
-	Color() Color
-	Position() Point
+type filterSample struct {
+	pos   Point
+	color Color
 }
 
-type Worker interface {
-	Start(bounds Box, samples chan<- Sample) error
-	Stop()
+func (s *filterSample) Color() Color {
+	return s.color
 }
 
-type defaultWorker struct {
-	file *os.File
-	size int64
+func (s *filterSample) Position() Point {
+	return s.pos
 }
 
-const defaultNodeSize = 8 * 3 + 4 * 4 // x,y,z + r,g,b,a
+func filter(input io.Reader, samples chan<- Sample) error {
+	scanner := bufio.NewScanner(input)
+	for scanner.Scan() {
+		s := new(filterSample)
 
-func (w *defaultWorker) Start(bounds Box, samples chan<- Sample) error {
-	return nil
-}
+		var ref float64
+		_, err := fmt.Sscan(scanner.Text(), &s.pos.X, &s.pos.Y, &s.pos.Z, &ref, &s.color.R, &s.color.G, &s.color.B)
+		if err != nil {
+			return err
+		}
 
-func (w *defaultWorker) Stop() {
-	w.file.Close()
-}
-
-func NewDefaultWorker(inputFile string) (Worker, error) {
-	var err error
-	w := new(defaultWorker)
-
-	w.file, err = os.Open(inputFile)
-	if err != nil {
-		return w, err
+		samples <- s
 	}
 
-	w.size, err = w.file.Seek(0, 2)
-	if err != nil {
-		w.file.Close()
-		return w, err
-	}
+	return scanner.Err()
+}
 
-	_, err = w.file.Seek(0, 0)
-	if err != nil {
-		w.file.Close()
-		return w, err
+func TestFilter(t *testing.T) {
+	in, _ := os.Open("test.xyz")
+	defer in.Close()
+
+	out, _ := os.Create("test.bin")
+	defer out.Close()
+
+	var cfg FilterConfig
+	cfg.Writer = out
+	cfg.Reader = in
+	cfg.Function = filter
+
+	if err := FilterInput(&cfg); err != nil {
+		panic(err)
 	}
-	return w, nil
 }

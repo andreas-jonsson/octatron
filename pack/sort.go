@@ -18,52 +18,42 @@
 
 package pack
 
-import "os"
+import (
+	"io"
+	"encoding/binary"
+)
 
-type Sample interface {
-	Color() Color
-	Position() Point
+type FilterConfig struct {
+	Writer        io.Writer
+	Reader        io.Reader
+	Function 	  func(io.Reader, chan<- Sample) error
 }
 
-type Worker interface {
-	Start(bounds Box, samples chan<- Sample) error
-	Stop()
-}
-
-type defaultWorker struct {
-	file *os.File
-	size int64
-}
-
-const defaultNodeSize = 8 * 3 + 4 * 4 // x,y,z + r,g,b,a
-
-func (w *defaultWorker) Start(bounds Box, samples chan<- Sample) error {
-	return nil
-}
-
-func (w *defaultWorker) Stop() {
-	w.file.Close()
-}
-
-func NewDefaultWorker(inputFile string) (Worker, error) {
+func FilterInput(cfg *FilterConfig) error {
 	var err error
-	w := new(defaultWorker)
+	errPtr := &err
+	channel := make(chan Sample, 10)
 
-	w.file, err = os.Open(inputFile)
-	if err != nil {
-		return w, err
-	}
+	go func() {
+		*errPtr = cfg.Function(cfg.Reader, channel)
+		close(channel)
+	}()
 
-	w.size, err = w.file.Seek(0, 2)
-	if err != nil {
-		w.file.Close()
-		return w, err
-	}
+	for {
+		samp, more := <-channel
+		if more == false {
+			break
+		}
 
-	_, err = w.file.Seek(0, 0)
-	if err != nil {
-		w.file.Close()
-		return w, err
+		err := binary.Write(cfg.Writer, binary.BigEndian, samp.Position())
+		if err != nil {
+			return err
+		}
+
+		err = binary.Write(cfg.Writer, binary.BigEndian, samp.Color())
+		if err != nil {
+			return err
+		}
 	}
-	return w, nil
+	return err
 }
