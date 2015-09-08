@@ -22,7 +22,6 @@ import (
 	"io"
 	"os"
 	"sort"
-	"fmt"
 	"io/ioutil"
 	"encoding/binary"
 )
@@ -93,8 +92,8 @@ func FilterInput(cfg *FilterConfig) error {
 	return err
 }
 
-func SortInput(reader io.ReadSeeker, writer io.Writer, slices int) error {
-	files, err := sortData(reader, writer, slices)
+func SortInput(reader io.ReadSeeker, writer io.Writer, bufferSizeMB int) error {
+	files, err := sortData(reader, writer, bufferSizeMB)
 	if err != nil {
 		return err
 	}
@@ -110,19 +109,21 @@ func SortInput(reader io.ReadSeeker, writer io.Writer, slices int) error {
 	return nil
 }
 
-func sortData(reader io.ReadSeeker, writer io.Writer, slices int) ([]string, error) {
-	files := make([]string, slices)
-
+func sortData(reader io.ReadSeeker, writer io.Writer, bufferSizeMB int) ([]string, error) {
 	size, err := reader.Seek(0, 2)
 	if err != nil {
-		return files, err
+		return nil, err
 	}
 
 	numNodes := size / defaultNodeSize
-	if numNodes % int64(slices) != 0 {
-		return files, fmt.Errorf("nodes must be divideble with slice number (%v %% %v == 0)", numNodes, slices)
+	numSlices := (size / int64(bufferSizeMB * 1024 * 1024)) / defaultNodeSize
+
+	for numSlices == 0 || numNodes % int64(numSlices) != 0 {
+		numSlices++
 	}
-	numNodesInBuffer := numNodes / int64(slices)
+
+	numNodesInBuffer := numNodes / int64(numSlices)
+	files := make([]string, numSlices)
 
 	_, err = reader.Seek(0, 0)
 	if err != nil {
