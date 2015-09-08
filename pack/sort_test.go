@@ -23,29 +23,18 @@ import (
 	"io"
 	"os"
 	"fmt"
+	"sort"
+	"encoding/binary"
 	"testing"
 )
-
-type filterSample struct {
-	pos   Point
-	color Color
-}
-
-func (s *filterSample) Color() Color {
-	return s.color
-}
-
-func (s *filterSample) Position() Point {
-	return s.pos
-}
 
 func filter(input io.Reader, samples chan<- Sample) error {
 	scanner := bufio.NewScanner(input)
 	for scanner.Scan() {
 		s := new(filterSample)
 
-		var ref float64
-		_, err := fmt.Sscan(scanner.Text(), &s.pos.X, &s.pos.Y, &s.pos.Z, &ref, &s.color.R, &s.color.G, &s.color.B)
+		//var ref float64
+		_, err := fmt.Sscan(scanner.Text(), &s.Pos.X, &s.Pos.Y, &s.Pos.Z, &s.Col.R, &s.Col.G, &s.Col.B)
 		if err != nil {
 			return err
 		}
@@ -56,8 +45,8 @@ func filter(input io.Reader, samples chan<- Sample) error {
 	return scanner.Err()
 }
 
-func TestFilter(t *testing.T) {
-	in, _ := os.Open("test.xyz")
+func startFilter() {
+	in, _ := os.Open("test2.xyz")
 	defer in.Close()
 
 	out, _ := os.Create("test.bin")
@@ -71,4 +60,51 @@ func TestFilter(t *testing.T) {
 	if err := FilterInput(&cfg); err != nil {
 		panic(err)
 	}
+}
+
+func startSort() {
+	in, _ := os.Open("test.bin")
+	defer in.Close()
+
+	out, _ := os.Create("test.ord")
+	defer out.Close()
+
+	if err := SortInput(in, out, 5); err != nil {
+		panic(err)
+	}
+}
+
+func verifySort() {
+	fp, err := os.Open("test.ord")
+	if err != nil {
+		panic(err)
+	}
+	defer fp.Close()
+
+	size, err := fp.Seek(0, 2)
+	if err != nil {
+		panic(err)
+	}
+
+	numNodes := size / defaultNodeSize
+	_, err = fp.Seek(0, 0)
+	if err != nil {
+		panic(err)
+	}
+
+	samples := make(sampleSlice, numNodes)
+	err = binary.Read(fp, binary.BigEndian, samples)
+	if err != nil {
+		panic(err)
+	}
+
+	if sort.IsSorted(samples) == false {
+		panic("data was not sorted")
+	}
+}
+
+func TestFilter(t *testing.T) {
+	startFilter()
+	startSort()
+	verifySort()
 }

@@ -18,7 +18,11 @@
 
 package pack
 
-import "os"
+import (
+	"io"
+	"os"
+	"encoding/binary"
+)
 
 type Sample interface {
 	Color() Color
@@ -32,13 +36,21 @@ type Worker interface {
 
 type defaultWorker struct {
 	file *os.File
-	size int64
 }
 
 const defaultNodeSize = 8 * 3 + 4 * 4 // x,y,z + r,g,b,a
 
 func (w *defaultWorker) Start(bounds Box, samples chan<- Sample) error {
-	return nil
+	for {
+		sample := new(filterSample)
+		err := binary.Read(w.file, binary.BigEndian, samples)
+		if err == io.EOF {
+			return nil
+		} else if err != nil {
+			return err
+		}
+		samples <- sample
+	}
 }
 
 func (w *defaultWorker) Stop() {
@@ -54,16 +66,5 @@ func NewDefaultWorker(inputFile string) (Worker, error) {
 		return w, err
 	}
 
-	w.size, err = w.file.Seek(0, 2)
-	if err != nil {
-		w.file.Close()
-		return w, err
-	}
-
-	_, err = w.file.Seek(0, 0)
-	if err != nil {
-		w.file.Close()
-		return w, err
-	}
 	return w, nil
 }

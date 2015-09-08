@@ -20,17 +20,54 @@ package pack
 
 import (
 	"io"
+	"os"
+	"sort"
+	"fmt"
+	"io/ioutil"
 	"encoding/binary"
 )
 
 type FilterConfig struct {
-	Writer        io.Writer
 	Reader        io.Reader
+	Writer        io.Writer
 	Function 	  func(io.Reader, chan<- Sample) error
 }
 
+type filterSample struct {
+	Pos Point
+	Col Color
+}
+
+func (s *filterSample) Color() Color {
+	return s.Col
+}
+
+func (s *filterSample) Position() Point {
+	return s.Pos
+}
+
+type sampleSlice []filterSample
+
+func (s sampleSlice) Len() int {
+	return len(s)
+}
+
+func (s sampleSlice) Less(i, j int) bool {
+	return s[i].Pos.X < s[j].Pos.X
+}
+
+func (s sampleSlice) Swap(i, j int) {
+	tmp := s[i]
+	s[i] = s[j]
+	s[j] = tmp
+}
+
 func FilterInput(cfg *FilterConfig) error {
-	var err error
+	var (
+		err   error
+		fsamp filterSample
+	)
+
 	errPtr := &err
 	channel := make(chan Sample, 10)
 
@@ -45,15 +82,156 @@ func FilterInput(cfg *FilterConfig) error {
 			break
 		}
 
-		err := binary.Write(cfg.Writer, binary.BigEndian, samp.Position())
-		if err != nil {
-			return err
-		}
+		fsamp.Pos = samp.Position()
+		fsamp.Col = samp.Color()
 
-		err = binary.Write(cfg.Writer, binary.BigEndian, samp.Color())
+		err := binary.Write(cfg.Writer, binary.BigEndian, fsamp)
 		if err != nil {
 			return err
 		}
 	}
 	return err
+}
+
+func SortInput(reader io.ReadSeeker, writer io.Writer, slices int) error {
+	files, err := sortData(reader, writer, slices)
+	if err != nil {
+		return err
+	}
+
+	if err = mergeData(files, writer); err != nil {
+		return err
+	}
+
+	for _, f := range files {
+		os.Remove(f)
+	}
+
+	return nil
+}
+
+func sortData(reader io.ReadSeeker, writer io.Writer, slices int) ([]string, error) {
+	files := make([]string, slices)
+
+	size, err := reader.Seek(0, 2)
+	if err != nil {
+		return files, err
+	}
+
+	numNodes := size / defaultNodeSize
+	if numNodes % int64(slices) != 0 {
+		return files, fmt.Errorf("nodes must be divideble with slice number (%v %% %v == 0)", numNodes, slices)
+	}
+	numNodesInBuffer := numNodes / int64(slices)
+
+	_, err = reader.Seek(0, 0)
+	if err != nil {
+		return files, err
+	}
+
+	samples := make(sampleSlice, numNodesInBuffer)
+
+	for i, _ := range files {
+		err = binary.Read(reader, binary.BigEndian, samples)
+		if err != nil {
+			return files, err
+		}
+
+		sort.Sort(samples)
+
+		var file *os.File
+		file, err = ioutil.TempFile("", "")
+		if err != nil {
+			return files, err
+		}
+		files[i] = file.Name()
+
+		err = binary.Write(file, binary.BigEndian, samples)
+		if err != nil {
+			return files, err
+		}
+		file.Close()
+	}
+
+	return files, nil
+}
+
+func mergeData(files []string, writer io.Writer) error {
+	var err error
+
+	numFiles := len(files)
+	fps := make([]io.ReadCloser, numFiles)
+	unsorted := make([]*filterSample, numFiles)
+	hasData := make([]bool, numFiles)
+
+	for i, f := range files {
+		unsorted[i] = new(filterSample)
+		fps[i], err = os.Open(f)
+		if err != nil {
+			return err
+		}
+	}
+
+	for {
+		numUnsorted := 0
+		for i := 0; i < numFiles; i++ {
+			if unsorted[i] == nil {
+				continue
+			}
+
+			numUnsorted++
+			if hasData[i] == true {
+				continue
+			}
+
+			err = binary.Read(fps[i], binary.BigEndian, unsorted[i])
+			if err == io.EOF {
+				unsorted[i] = nil
+				numUnsorted--
+				continue
+			} else if err != nil {
+				return err
+			}
+			hasData[i] = true
+		}
+
+		if numUnsorted == 0 {
+			break
+		}
+
+		idx, err := stepMerge(writer, unsorted)
+		if err != nil {
+			return err
+		}
+		hasData[idx] = false
+	}
+
+	for _, fp := range fps {
+		fp.Close()
+	}
+	return nil
+}
+
+func stepMerge(writer io.Writer, unsorted []*filterSample) (int, error) {
+	var (
+		minIdx int
+		minSamp *filterSample
+	)
+
+	for idx, sample := range unsorted {
+		if sample == nil {
+			continue
+		}
+
+		if minSamp == nil || minSamp.Pos.X > sample.Pos.X {
+			minIdx = idx
+			minSamp = sample
+		}
+	}
+
+	if err := binary.Write(writer, binary.BigEndian, minSamp); err != nil {
+		return minIdx, err
+	}
+
+	return minIdx, nil
 }
