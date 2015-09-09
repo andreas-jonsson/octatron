@@ -338,6 +338,10 @@ func loadTree(file string) []octreeNode {
 		panic("Format must be: MIP_R8G8B8A8_UI32")
 	}
 
+	if header.Compressed() == true {
+		panic("compression is not supported")
+	}
+
 	curr, _ := fp.Seek(0, 1)
 	size, _ := fp.Seek(0, 2)
 	fp.Seek(curr, 0)

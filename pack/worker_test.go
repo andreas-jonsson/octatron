@@ -44,6 +44,22 @@ func start(numWorkers int, input string, constructor func(string) (Worker, error
 	if err != nil {
 		panic(err)
 	}
+
+	_, err = file.Seek(0, 0)
+	if err != nil {
+		panic(err)
+	}
+
+	zip, err := os.Create("test.ocz")
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	err = CompressTree(file, zip)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func TestXSortedWorker(t *testing.T) {

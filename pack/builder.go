@@ -20,14 +20,17 @@ package pack
 
 import (
 	"io"
+	"errors"
 	"sync"
 	"sync/atomic"
 	"encoding/binary"
+	"compress/gzip"
 )
 
 const (
 	binaryVersion byte = 0
-	flags byte = 0x1
+	endianMask byte = 0x1
+	compressedMask byte = 0x2
 )
 
 type Header struct {
@@ -38,6 +41,14 @@ type Header struct {
 	Unused byte
 	NumLeafs uint64
 	VoxelsPerAxis uint32
+}
+
+func (h *Header) BigEndian() bool {
+	return h.Flags & endianMask == endianMask
+}
+
+func (h *Header) Compressed() bool {
+	return h.Flags & compressedMask == compressedMask
 }
 
 type BuildConfig struct {
@@ -102,7 +113,40 @@ func writeHeader(writer io.Writer, header *Header) error {
 }
 
 func CompressTree(oct io.Reader, ocz io.Writer) error {
-	panic("Not implemented!")
+	var header Header
+	err := binary.Read(oct, binary.BigEndian, &header)
+	if err != nil {
+		return err
+	}
+
+	if header.Compressed() == true {
+		return errors.New("input is compressed")
+	}
+	header.Flags = header.Flags & compressedMask
+
+	err = binary.Write(ocz, binary.BigEndian, header)
+	if err != nil {
+		return err
+	}
+
+	// We expect format to be 4 byte aligned
+	var buffer [4]byte
+	zip := gzip.NewWriter(ocz)
+
+	for {
+		err = binary.Read(oct, binary.BigEndian, &buffer)
+		if err == io.EOF {
+			zip.Close()
+			return nil
+		} else if err != nil {
+			return err
+		}
+
+		err = binary.Write(zip, binary.BigEndian, buffer)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
