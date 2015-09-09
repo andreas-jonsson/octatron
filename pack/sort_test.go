@@ -69,7 +69,7 @@ func startSort() {
 	out, _ := os.Create("test.ord")
 	defer out.Close()
 
-	if err := XSortInput(in, out, 100); err != nil {
+	if err := XSortInput(in, out, 5); err != nil {
 		panic(err)
 	}
 }

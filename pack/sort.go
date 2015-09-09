@@ -93,8 +93,8 @@ func FilterInput(cfg *FilterConfig) error {
 	return err
 }
 
-func XSortInput(reader io.ReadSeeker, writer io.Writer, bufferSizeMB int) error {
-	files, err := sortData(reader, writer, bufferSizeMB)
+func XSortInput(reader io.ReadSeeker, writer io.Writer, numSlices int) error {
+	files, err := sortData(reader, writer, numSlices)
 	if err != nil {
 		return err
 	}
@@ -110,15 +110,13 @@ func XSortInput(reader io.ReadSeeker, writer io.Writer, bufferSizeMB int) error 
 	return nil
 }
 
-func sortData(reader io.ReadSeeker, writer io.Writer, bufferSizeMB int) ([]string, error) {
+func sortData(reader io.ReadSeeker, writer io.Writer, numSlices int) ([]string, error) {
 	size, err := reader.Seek(0, 2)
 	if err != nil {
 		return nil, err
 	}
 
 	numNodes := size / defaultNodeSize
-	numSlices := (size / int64(bufferSizeMB * 1024 * 1024)) / defaultNodeSize
-
 	for numSlices == 0 || numNodes % int64(numSlices) != 0 {
 		numSlices++
 	}
