@@ -34,7 +34,7 @@ func filter(input io.Reader, samples chan<- Sample) error {
 		s := new(filterSample)
 
 		//var ref float64
-		_, err := fmt.Sscan(scanner.Text(), &s.Pos.X, &s.Pos.Y, &s.Pos.Z, &s.Col.R, &s.Col.G, &s.Col.B)
+		_, err := fmt.Sscan(scanner.Text(), &s.Pos.X, &s.Pos.Y, &s.Pos.Z, &s.R, &s.G, &s.B)
 		if err != nil {
 			return err
 		}
