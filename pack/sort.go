@@ -122,12 +122,14 @@ func XSortInput(reader io.ReadSeeker, writer io.Writer, numSlices int) error {
 		return err
 	}
 
+	defer func() {
+		for _, f := range files {
+			os.Remove(f)
+		}
+	}()
+
 	if err = mergeData(files, writer); err != nil {
 		return err
-	}
-
-	for _, f := range files {
-		os.Remove(f)
 	}
 
 	return nil

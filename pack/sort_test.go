@@ -109,5 +109,5 @@ func verifySort() {
 func TestFilter(t *testing.T) {
 	startFilter()
 	startSort()
-	//verifySort()
+	verifySort()
 }
