@@ -84,6 +84,7 @@ func FilterInput(cfg *FilterConfig) error {
 		fsamp.Pos = samp.Position()
 		fsamp.Col = samp.Color()
 
+		fsamp.Col.div(256)
 		err := binary.Write(cfg.Writer, binary.BigEndian, fsamp)
 		if err != nil {
 			return err
@@ -92,7 +93,7 @@ func FilterInput(cfg *FilterConfig) error {
 	return err
 }
 
-func SortInput(reader io.ReadSeeker, writer io.Writer, bufferSizeMB int) error {
+func XSortInput(reader io.ReadSeeker, writer io.Writer, bufferSizeMB int) error {
 	files, err := sortData(reader, writer, bufferSizeMB)
 	if err != nil {
 		return err

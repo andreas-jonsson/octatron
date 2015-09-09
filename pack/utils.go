@@ -18,93 +18,29 @@
 
 package pack
 
-import (
-	"bufio"
-	"io"
-	"os"
-	"fmt"
-	"sort"
-	"encoding/binary"
-	"testing"
-)
+import "io"
 
-func filter(input io.Reader, samples chan<- Sample) error {
-	scanner := bufio.NewScanner(input)
-	for scanner.Scan() {
-		s := new(filterSample)
+func FileSize(seeker io.Seeker) (int64, error) {
+	var (
+		offset int64
+		size int64
+		err error
+	)
 
-		//var ref float64
-		_, err := fmt.Sscan(scanner.Text(), &s.Pos.X, &s.Pos.Y, &s.Pos.Z, &s.Col.R, &s.Col.G, &s.Col.B)
-		if err != nil {
-			return err
-		}
-
-		samples <- s
-	}
-
-	return scanner.Err()
-}
-
-func startFilter() {
-	in, _ := os.Open("test.xyz")
-	defer in.Close()
-
-	out, _ := os.Create("test.bin")
-	defer out.Close()
-
-	var cfg FilterConfig
-	cfg.Writer = out
-	cfg.Reader = in
-	cfg.Function = filter
-
-	if err := FilterInput(&cfg); err != nil {
-		panic(err)
-	}
-}
-
-func startSort() {
-	in, _ := os.Open("test.bin")
-	defer in.Close()
-
-	out, _ := os.Create("test.ord")
-	defer out.Close()
-
-	if err := XSortInput(in, out, 100); err != nil {
-		panic(err)
-	}
-}
-
-func verifySort() {
-	fp, err := os.Open("test.ord")
+	offset, err = seeker.Seek(0, 1)
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
-	defer fp.Close()
 
-	size, err := fp.Seek(0, 2)
+	size, err = seeker.Seek(0, 2)
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
 
-	numNodes := size / defaultNodeSize
-	_, err = fp.Seek(0, 0)
+	_, err = seeker.Seek(offset, 0)
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
 
-	samples := make(sampleSlice, numNodes)
-	err = binary.Read(fp, binary.BigEndian, samples)
-	if err != nil {
-		panic(err)
-	}
-
-	if sort.IsSorted(samples) == false {
-		panic("data was not sorted")
-	}
-}
-
-func TestFilter(t *testing.T) {
-	startFilter()
-	startSort()
-	//verifySort()
+	return size, err
 }

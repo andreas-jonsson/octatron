@@ -19,113 +19,18 @@
 package pack
 
 import (
-	"bufio"
-	"bytes"
-	"fmt"
-	"io"
-	"io/ioutil"
 	"os"
-	"runtime"
 	"testing"
 )
 
-const memLimitMB = 16
-
-type testSample struct {
-	pos   Point
-	color Color
-}
-
-func (s *testSample) Color() Color {
-	return s.color
-}
-
-func (s *testSample) Position() Point {
-	return s.pos
-}
-
-type testWorker struct {
-	file   *os.File
-	mem    []byte
-	reader io.Reader
-}
-
-func (w *testWorker) Start(bounds Box, samples chan<- Sample) error {
-	scanner := bufio.NewScanner(w.reader)
-	for scanner.Scan() {
-		s := new(testSample)
-
-		var ref float64
-		_, err := fmt.Sscan(scanner.Text(), &s.pos.X, &s.pos.Y, &s.pos.Z, &ref, &s.color.R, &s.color.G, &s.color.B)
-		if err != nil {
-			return err
-		}
-
-		if bounds.Intersect(s.pos) == true {
-			s.color.Scale(256.0)
-			samples <- s
-		}
-	}
-
-	if w.file != nil {
-		_, err := w.file.Seek(0, 0)
-		if err != nil {
-			return err
-		}
-	} else {
-		w.reader = bytes.NewReader(w.mem)
-	}
-
-	return scanner.Err()
-}
-
-func (w *testWorker) Stop() {
-	if w.file != nil {
-		w.file.Close()
-	}
-}
-
-func createWorker(file string) *testWorker {
-	var err error
-	w := new(testWorker)
-
-	w.file, err = os.Open(file)
-	if err != nil {
-		panic(err)
-	}
-
-	size, err := w.file.Seek(0, 2)
-	if err != nil {
-		panic(err)
-	}
-
-	size = size / 1024 / 1024
-	if size < memLimitMB {
-		w.file.Close()
-		w.file = nil
-
-		fmt.Printf("Worker [%p], caching file in memory! (%vMB < %vMB)\n", w, size, memLimitMB)
-
-		w.mem, err = ioutil.ReadFile(file)
-		if err != nil {
-			panic(err)
-		}
-		w.reader = bytes.NewReader(w.mem)
-	} else {
-		_, err := w.file.Seek(0, 0)
-		if err != nil {
-			panic(err)
-		}
-		w.reader = w.file
-	}
-
-	return w
-}
-
-func start(numWorkers int) {
+func start(numWorkers int, input string, constructor func(string) (Worker, error)) {
 	workers := make([]Worker, numWorkers)
 	for i := range workers {
-		workers[i] = createWorker("test.xyz")
+		var err error
+		workers[i], err = constructor(input)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	file, err := os.Create("test.oct")
@@ -135,20 +40,19 @@ func start(numWorkers int) {
 	defer file.Close()
 
 	bounds := Box{Point{0, 0, 0}, 80}
-
 	err = BuildTree(workers, &BuildConfig{file, bounds, 8, MIP_R8G8B8A8_UI32, true})
 	if err != nil {
 		panic(err)
 	}
 }
 
-func TestWorker(t *testing.T) {
-	start(4)
+func TestXSortedWorker(t *testing.T) {
+	startFilter()
+	startSort()
+	start(4, "test.ord", NewXSortedWorker)
 }
 
-func BenchmarkWorker(b *testing.B) {
-	num := runtime.NumCPU()
-	for i := 0; i < b.N; i++ {
-		start(num)
-	}
+func TestUnsortedWorker(t *testing.T) {
+	startFilter()
+	start(4, "test.bin", NewUnsortedWorker)
 }
