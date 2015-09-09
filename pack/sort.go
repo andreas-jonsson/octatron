@@ -22,6 +22,7 @@ import (
 	"io"
 	"os"
 	"sort"
+	"math"
 	"io/ioutil"
 	"encoding/binary"
 )
@@ -61,11 +62,17 @@ func (s sampleSlice) Swap(i, j int) {
 	s[j] = tmp
 }
 
-func FilterInput(cfg *FilterConfig) error {
+func FilterInput(cfg *FilterConfig) (Box, error) {
 	var (
 		err   error
 		fsamp filterSample
+		ret    Box
 	)
+
+	min := math.MaxFloat64
+	max := -math.MaxFloat64
+	minPos := Point{min, min, min}
+	maxPos := Point{max, max, max}
 
 	errPtr := &err
 	channel := make(chan Sample, 10)
@@ -83,14 +90,30 @@ func FilterInput(cfg *FilterConfig) error {
 
 		fsamp.Pos = samp.Position()
 		fsamp.Col = samp.Color()
+		minMax(&minPos, &maxPos, &fsamp.Pos)
 
 		fsamp.Col.div(256)
 		err := binary.Write(cfg.Writer, binary.BigEndian, fsamp)
 		if err != nil {
-			return err
+			return ret, err
 		}
 	}
-	return err
+
+	len := Point{maxPos.X - minPos.X, maxPos.Y - minPos.Y, maxPos.Z - minPos.Z}
+	ret.Size = math.Max(math.Max(len.X, len.Y), len.Z)
+	ret.Pos = minPos
+
+	return ret, err
+}
+
+func minMax(min *Point, max *Point, pos *Point) {
+	min.X = math.Min(min.X, pos.X)
+	min.Y = math.Min(min.Y, pos.Y)
+	min.Z = math.Min(min.Z, pos.Z)
+
+	max.X = math.Max(max.X, pos.X)
+	max.Y = math.Max(max.Y, pos.Y)
+	max.Z = math.Max(max.Z, pos.Z)
 }
 
 func XSortInput(reader io.ReadSeeker, writer io.Writer, numSlices int) error {

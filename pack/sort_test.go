@@ -57,9 +57,12 @@ func startFilter() {
 	cfg.Reader = in
 	cfg.Function = filter
 
-	if err := FilterInput(&cfg); err != nil {
+	bounds, err := FilterInput(&cfg)
+	if err != nil {
 		panic(err)
 	}
+
+	fmt.Println("Bounding box:", bounds)
 }
 
 func startSort() {
