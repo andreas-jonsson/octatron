@@ -35,11 +35,18 @@ type FilterConfig struct {
 
 type filterSample struct {
 	Pos Point
-	Col Color
+	R, G, B, A byte
 }
 
 func (s *filterSample) Color() Color {
-	return s.Col
+	return Color{float32(s.R) / 256, float32(s.G) / 256, float32(s.B) / 256, float32(s.A) / 256}
+}
+
+func (s *filterSample) setColor(c Color) {
+	s.R = byte(c.R * 256)
+	s.G = byte(c.G * 256)
+	s.B = byte(c.B * 256)
+	s.A = byte(c.A * 256)
 }
 
 func (s *filterSample) Position() Point {
@@ -89,10 +96,9 @@ func FilterInput(cfg *FilterConfig) (Box, error) {
 		}
 
 		fsamp.Pos = samp.Position()
-		fsamp.Col = samp.Color()
+		fsamp.setColor(samp.Color())
 		minMax(&minPos, &maxPos, &fsamp.Pos)
 
-		fsamp.Col.div(256)
 		err := binary.Write(cfg.Writer, binary.BigEndian, fsamp)
 		if err != nil {
 			return ret, err

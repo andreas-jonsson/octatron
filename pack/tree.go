@@ -62,10 +62,10 @@ func (color *Color) div(n float32) *Color {
 
 func (color *Color) writeColor(writer io.Writer, format OctreeFormat) error {
 	c := *color
-	c.Scale(256.0)
 
 	switch format {
 	case MIP_R8G8B8A8_UI32:
+		c.Scale(256)
 		err := binary.Write(writer, binary.BigEndian, byte(c.R))
 		err = binary.Write(writer, binary.BigEndian, byte(c.G))
 		err = binary.Write(writer, binary.BigEndian, byte(c.B))

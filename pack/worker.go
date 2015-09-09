@@ -35,7 +35,7 @@ type Worker interface {
 	Stop()
 }
 
-const defaultNodeSize = 8 * 3 + 4 * 4 // x,y,z + r,g,b,a
+const defaultNodeSize = 8 * 3 + 4 // x,y,z float64 + r,g,b,a uint8
 
 type xSortedWorker struct {
 	file *os.File
