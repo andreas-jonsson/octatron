@@ -41,6 +41,7 @@ func start(numWorkers int, input string, constructor func(string) (Worker, error
 
 	bounds := Box{Point{0, 0, 0}, 80}
 	err = BuildTree(workers, &BuildConfig{file, bounds, 8, MIP_R8G8B8A8_UI32, true})
+	err = BuildTree(workers, &BuildConfig{file, bounds, 8, MIP_R8G8B8A8_UI32, 0, true})
 	if err != nil {
 		panic(err)
 	}

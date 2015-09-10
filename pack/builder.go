@@ -57,6 +57,7 @@ type BuildConfig struct {
 	Bounds        Box
 	VoxelsPerAxis int
 	Format        OctreeFormat
+	Filter        int
 	Interactive   bool
 }
 
@@ -93,11 +94,20 @@ func processData(data *workerPrivateData, node *treeNode, sampleChan <-chan Samp
 	}
 }
 
-func collectData(workerData *workerPrivateData, node *treeNode, sampleChan chan<- Sample) {
-	err := workerData.worker.Start(node.bounds, sampleChan)
+func collectData(workerData *workerPrivateData, filter float64, node *treeNode, sampleChan chan<- Sample) {
+	bounds := node.bounds
+	if filter > 0.0 {
+		bounds.Pos.X -= filter
+		bounds.Pos.Y -= filter
+		bounds.Pos.Z -= filter
+		bounds.Size += filter * 2
+	}
+
+	err := workerData.worker.Start(bounds, sampleChan)
 	if err != nil {
 		workerData.err = err
 	}
+
 	atomic.AddUint64(&workerData.numRequests, 1)
 	close(sampleChan)
 }
@@ -201,6 +211,8 @@ func BuildTree(workers []Worker, cfg *BuildConfig) error {
 	header.NumLeafs = 0
 	header.VoxelsPerAxis = uint32(cfg.VoxelsPerAxis)
 
+	kernelSize := (cfg.Bounds.Size / float64(cfg.VoxelsPerAxis)) * float64(cfg.Filter)
+
 	if err := writeHeader(cfg.Writer, &header); err != nil {
 		return err
 	}
@@ -220,7 +232,7 @@ func BuildTree(workers []Worker, cfg *BuildConfig) error {
 				}
 
 				sampleChan := make(chan Sample, 10)
-				go collectData(data, node, sampleChan)
+				go collectData(data, kernelSize, node, sampleChan)
 				if processData(data, node, sampleChan) != nil {
 					incVolume(&volumeTraversed, node.voxelsPerAxis)
 					return
