@@ -82,11 +82,14 @@ func processData(data *workerPrivateData, node *treeNode, sampleChan <-chan Samp
 		node.numSamplesInNode++
 		atomic.AddUint64(&data.numSamples, 1)
 
-		// Average voxels color value
+		// Kahan summation algorithm
 		col := sample.Color()
-		avg := col.sub(&node.color)
-		avg.div(float32(node.numSamplesInNode))
-		node.color.add(avg)
+		y := *col.sub(&node.acc)
+		tmp := node.color
+		t := *tmp.add(&y)
+		t2 := t
+		node.acc = *t.sub(&node.color).sub(&y)
+        node.color = t2
 	}
 }
 

@@ -96,7 +96,7 @@ func (b Box) Intersect(p Point) bool {
 }
 
 type treeNode struct {
-	color      Color
+	color, acc Color
 	bounds     Box
 	parent     *treeNode
 	fileOffset int64
