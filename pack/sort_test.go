@@ -20,11 +20,11 @@ package pack
 
 import (
 	"bufio"
+	"encoding/binary"
+	"fmt"
 	"io"
 	"os"
-	"fmt"
 	"sort"
-	"encoding/binary"
 	"testing"
 )
 

@@ -23,8 +23,8 @@ import "io"
 func FileSize(seeker io.Seeker) (int64, error) {
 	var (
 		offset int64
-		size int64
-		err error
+		size   int64
+		err    error
 	)
 
 	offset, err = seeker.Seek(0, 1)

@@ -39,5 +39,5 @@ func (f OctreeFormat) ColorSize() int {
 }
 
 func (f OctreeFormat) NodeSize() int {
-	return f.IndexSize() * 8 + f.ColorSize()
+	return f.IndexSize()*8 + f.ColorSize()
 }

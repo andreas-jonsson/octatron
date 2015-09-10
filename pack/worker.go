@@ -19,10 +19,10 @@
 package pack
 
 import (
+	"encoding/binary"
 	"io"
 	"os"
 	"sort"
-	"encoding/binary"
 )
 
 type Sample interface {
@@ -35,7 +35,7 @@ type Worker interface {
 	Stop()
 }
 
-const defaultNodeSize = 8 * 3 + 4 // x,y,z float64 + r,g,b,a uint8
+const defaultNodeSize = 8*3 + 4 // x,y,z float64 + r,g,b,a uint8
 
 type xSortedWorker struct {
 	file *os.File
@@ -45,7 +45,7 @@ type xSortedWorker struct {
 func (w *xSortedWorker) Start(bounds Box, samples chan<- Sample) error {
 	f := func(i int) bool {
 		var samp filterSample
-		_, err := w.file.Seek(int64(i * defaultNodeSize), 0)
+		_, err := w.file.Seek(int64(i*defaultNodeSize), 0)
 		if err != nil {
 			panic(err)
 		}
@@ -58,9 +58,9 @@ func (w *xSortedWorker) Start(bounds Box, samples chan<- Sample) error {
 		return samp.Pos.X >= bounds.Pos.X
 	}
 
-	offset := sort.Search(int(w.size / defaultNodeSize), f)
+	offset := sort.Search(int(w.size/defaultNodeSize), f)
 
-	_, err := w.file.Seek(int64(offset * defaultNodeSize), 0)
+	_, err := w.file.Seek(int64(offset*defaultNodeSize), 0)
 	if err != nil {
 		return err
 	}
@@ -76,7 +76,7 @@ func (w *xSortedWorker) Start(bounds Box, samples chan<- Sample) error {
 
 		if bounds.Intersect(sample.Pos) == true {
 			samples <- &sample
-		} else if sample.Pos.X > bounds.Pos.X + bounds.Size {
+		} else if sample.Pos.X > bounds.Pos.X+bounds.Size {
 			return nil
 		}
 	}

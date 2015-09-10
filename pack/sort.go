@@ -19,22 +19,22 @@
 package pack
 
 import (
+	"encoding/binary"
 	"io"
+	"io/ioutil"
+	"math"
 	"os"
 	"sort"
-	"math"
-	"io/ioutil"
-	"encoding/binary"
 )
 
 type FilterConfig struct {
-	Reader        io.Reader
-	Writer        io.Writer
-	Function 	  func(io.Reader, chan<- Sample) error
+	Reader   io.Reader
+	Writer   io.Writer
+	Function func(io.Reader, chan<- Sample) error
 }
 
 type filterSample struct {
-	Pos Point
+	Pos        Point
 	R, G, B, A byte
 }
 
@@ -73,7 +73,7 @@ func FilterInput(cfg *FilterConfig) (Box, error) {
 	var (
 		err   error
 		fsamp filterSample
-		ret    Box
+		ret   Box
 	)
 
 	min := math.MaxFloat64
@@ -148,7 +148,7 @@ func sortData(reader io.ReadSeeker, writer io.Writer, numSlices int) ([]string, 
 	}
 
 	numNodes := size / defaultNodeSize
-	for numSlices == 0 || numNodes % int64(numSlices) != 0 {
+	for numSlices == 0 || numNodes%int64(numSlices) != 0 {
 		numSlices++
 	}
 
@@ -245,7 +245,7 @@ func mergeData(files []string, writer io.Writer) error {
 
 func stepMerge(writer io.Writer, unsorted []*filterSample) (int, error) {
 	var (
-		minIdx int
+		minIdx  int
 		minSamp *filterSample
 	)
 

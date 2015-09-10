@@ -19,36 +19,37 @@
 package pack
 
 import (
-	"io"
+	"compress/gzip"
+	"encoding/binary"
 	"errors"
+	"io"
 	"sync"
 	"sync/atomic"
-	"encoding/binary"
-	"compress/gzip"
 )
 
 const (
-	binaryVersion byte = 0
-	endianMask byte = 0x1
+	binaryVersion  byte = 0
+	endianMask     byte = 0x1
 	compressedMask byte = 0x2
 )
 
 type Header struct {
-	Sign [4]byte
-	Version byte
-	Format OctreeFormat
-	Flags byte
-	Unused byte
-	NumLeafs uint64
+	Sign          [4]byte
+	Version       byte
+	Format        OctreeFormat
+	Flags         byte
+	Unused        byte
+	NumNodes      uint64
+	NumLeafs      uint64
 	VoxelsPerAxis uint32
 }
 
 func (h *Header) BigEndian() bool {
-	return h.Flags & endianMask == endianMask
+	return h.Flags&endianMask == endianMask
 }
 
 func (h *Header) Compressed() bool {
-	return h.Flags & compressedMask == compressedMask
+	return h.Flags&compressedMask == compressedMask
 }
 
 type BuildConfig struct {
@@ -60,10 +61,10 @@ type BuildConfig struct {
 }
 
 type workerPrivateData struct {
-	err        error
-	numSamples uint64
+	err         error
+	numSamples  uint64
 	numRequests uint64
-	worker     Worker
+	worker      Worker
 }
 
 func processData(data *workerPrivateData, node *treeNode, sampleChan <-chan Sample) error {
@@ -152,9 +153,9 @@ func CompressTree(oct io.Reader, ocz io.Writer) error {
 
 func BuildTree(workers []Worker, cfg *BuildConfig) error {
 	var (
-		volumeTraversed, numLeafs uint64
-		wgWorkers                 sync.WaitGroup
-		wgUI                      *sync.WaitGroup
+		volumeTraversed, numLeafs, numNodes uint64
+		wgWorkers                           sync.WaitGroup
+		wgUI                                *sync.WaitGroup
 	)
 
 	vpa := uint64(cfg.VoxelsPerAxis)
@@ -195,6 +196,7 @@ func BuildTree(workers []Worker, cfg *BuildConfig) error {
 	header.Version = binaryVersion
 	header.Format = cfg.Format
 	header.Unused = 0x0
+	header.NumNodes = 0
 	header.NumLeafs = 0
 	header.VoxelsPerAxis = uint32(cfg.VoxelsPerAxis)
 
@@ -228,6 +230,7 @@ func BuildTree(workers []Worker, cfg *BuildConfig) error {
 						nodeMapShutdownChan <- struct{}{}
 					}
 				} else {
+					atomic.AddUint64(&numNodes, 1)
 					hasChildren, err := node.serialize(cfg.Writer, writeMutex, cfg.Format, nodeMapInChan)
 					if err != nil {
 						incVolume(&volumeTraversed, node.voxelsPerAxis)
@@ -251,6 +254,7 @@ func BuildTree(workers []Worker, cfg *BuildConfig) error {
 		}
 	}
 
+	header.NumNodes = numNodes
 	header.NumLeafs = numLeafs
 	if _, err := cfg.Writer.Seek(0, 0); err != nil {
 		return err

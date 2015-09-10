@@ -150,7 +150,7 @@ func startNodeCache(channelSize int) (shutdown chan<- struct{}, in chan<- *treeN
 }
 
 func writeTail(writer io.Writer, format OctreeFormat) error {
-	_, err := writer.Write(make([]byte, format.IndexSize() * 8))
+	_, err := writer.Write(make([]byte, format.IndexSize()*8))
 	return err
 }
 
@@ -214,7 +214,7 @@ func (node *treeNode) patchParent(writer io.WriteSeeker, mutex *sync.Mutex, form
 		return err
 	}
 
-	err := binary.Write(writer, binary.BigEndian, uint32(node.fileOffset / int64(format.NodeSize())))
+	err := binary.Write(writer, binary.BigEndian, uint32(node.fileOffset/int64(format.NodeSize())))
 	if err != nil {
 		return err
 	}

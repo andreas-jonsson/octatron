@@ -19,9 +19,9 @@
 package main
 
 import (
+	"github.com/andreas-t-jonsson/octatron/pack"
 	"github.com/go-gl/gl/v3.2-compatibility/gl"
 	"github.com/veandco/go-sdl2/sdl"
-	"github.com/andreas-t-jonsson/octatron/pack"
 
 	"bufio"
 	"encoding/binary"
@@ -202,21 +202,21 @@ type renderData struct {
 }
 
 func drawAxis(data *renderData) {
-/*
-	gl.LoadIdentity()
+	/*
+		gl.LoadIdentity()
 
-	gl.Translated(0, 0, -3)
-	gl.Rotated(data.xrot, 1, 0, 0)
-	gl.Rotated(data.yrot, 0, 1, 0)
+		gl.Translated(0, 0, -3)
+		gl.Rotated(data.xrot, 1, 0, 0)
+		gl.Rotated(data.yrot, 0, 1, 0)
 
-	gl.LineWidth(2.5)
-	gl.Begin(gl.LINES)
-	gl.Color3f(255,0,0)
-	gl.Vertex3f(10, 0, 0)
-	gl.Vertex3f(-10, 0, 0)
-	gl.End()
-	gl.LineWidth(1)
-*/
+		gl.LineWidth(2.5)
+		gl.Begin(gl.LINES)
+		gl.Color3f(255,0,0)
+		gl.Vertex3f(10, 0, 0)
+		gl.Vertex3f(-10, 0, 0)
+		gl.End()
+		gl.LineWidth(1)
+	*/
 }
 
 func windowLoop(window *sdl.Window) {
