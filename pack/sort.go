@@ -203,6 +203,12 @@ func mergeData(files []string, writer io.Writer) error {
 		}
 	}
 
+	defer func() {
+		for _, fp := range fps {
+			fp.Close()
+		}
+	}()
+
 	for {
 		numUnsorted := 0
 		for i := 0; i < numFiles; i++ {
@@ -237,9 +243,6 @@ func mergeData(files []string, writer io.Writer) error {
 		hasData[idx] = false
 	}
 
-	for _, fp := range fps {
-		fp.Close()
-	}
 	return nil
 }
 

@@ -25,6 +25,8 @@ import (
 
 	"bufio"
 	"encoding/binary"
+	"compress/gzip"
+	"io"
 	"fmt"
 	"math"
 	"os"
@@ -224,7 +226,7 @@ func windowLoop(window *sdl.Window) {
 
 	data.renderSections = true
 	data.zoom = -250
-	data.nodes = loadTree("pack/test.oct")
+	data.nodes = loadTree("pack/test.ocz")
 	//data.cloud = loadCloud("pack/test.xyz")
 	data.box = genBox()
 	defer gl.DeleteLists(data.box, 1)
@@ -338,21 +340,23 @@ func loadTree(file string) []octreeNode {
 		panic("Format must be: MIP_R8G8B8A8_UI32")
 	}
 
+	var reader io.ReadCloser
 	if header.Compressed() == true {
-		panic("compression is not supported")
+		reader, err = gzip.NewReader(fp)
+		if err != nil {
+			panic(err)
+		}
+		defer reader.Close()
+	} else {
+		reader = fp
 	}
 
-	curr, _ := fp.Seek(0, 1)
-	size, _ := fp.Seek(0, 2)
-	fp.Seek(curr, 0)
-	size -= curr
-
-	numNodes := int(size) / header.Format.NodeSize()
+	numNodes := header.NumNodes
 	nodes := make([]octreeNode, numNodes)
 
 	prog := -1
-	for i := 0; i < numNodes; i++ {
-		err := binary.Read(fp, binary.BigEndian, &nodes[i])
+	for i := uint64(0); i < numNodes; i++ {
+		err := binary.Read(reader, binary.BigEndian, &nodes[i])
 		if err != nil {
 			panic(err)
 		}

@@ -133,21 +133,21 @@ func CompressTree(oct io.Reader, ocz io.Writer) error {
 	// We expect format to be 4 byte aligned
 	var buffer [4]byte
 	zip := gzip.NewWriter(ocz)
+	defer zip.Close()
 
-	for {
-		err = binary.Read(oct, binary.BigEndian, &buffer)
-		if err == io.EOF {
-			zip.Close()
-			return nil
-		} else if err != nil {
-			return err
+	var errRead error
+	for errRead != io.EOF {
+		errRead = binary.Read(oct, binary.BigEndian, &buffer)
+		if errRead != nil && errRead != io.EOF {
+			return errRead
 		}
 
-		err = binary.Write(zip, binary.BigEndian, buffer)
-		if err != nil {
-			return err
+		errWrite := binary.Write(zip, binary.BigEndian, buffer)
+		if errWrite != nil {
+			return errWrite
 		}
 	}
+
 	return nil
 }
 
