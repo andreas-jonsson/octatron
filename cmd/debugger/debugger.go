@@ -25,7 +25,7 @@ import (
 
 	"bufio"
 	"encoding/binary"
-	"compress/gzip"
+	"compress/zlib"
 	"io"
 	"fmt"
 	"math"
@@ -342,7 +342,7 @@ func loadTree(file string) []octreeNode {
 
 	var reader io.ReadCloser
 	if header.Compressed() == true {
-		reader, err = gzip.NewReader(fp)
+		reader, err = zlib.NewReader(fp)
 		if err != nil {
 			panic(err)
 		}

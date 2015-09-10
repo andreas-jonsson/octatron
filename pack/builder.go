@@ -19,7 +19,7 @@
 package pack
 
 import (
-	"compress/gzip"
+	"compress/zlib"
 	"encoding/binary"
 	"errors"
 	"io"
@@ -131,24 +131,22 @@ func CompressTree(oct io.Reader, ocz io.Writer) error {
 	}
 
 	// We expect format to be 4 byte aligned
-	var buffer [4]byte
-	zip := gzip.NewWriter(ocz)
+	var buffer [4096]byte
+	zip := zlib.NewWriter(ocz)
 	defer zip.Close()
 
-	var errRead error
-	for errRead != io.EOF {
-		errRead = binary.Read(oct, binary.BigEndian, &buffer)
+	for {
+		count, errRead := oct.Read(buffer[:])
 		if errRead != nil && errRead != io.EOF {
 			return errRead
+		} else if count == 0 {
+			return nil
 		}
 
-		errWrite := binary.Write(zip, binary.BigEndian, buffer)
-		if errWrite != nil {
-			return errWrite
+		if num, err := zip.Write(buffer[:count]); err != nil || num != count {
+			return err
 		}
 	}
-
-	return nil
 }
 
 func BuildTree(workers []Worker, cfg *BuildConfig) error {
@@ -200,7 +198,9 @@ func BuildTree(workers []Worker, cfg *BuildConfig) error {
 	header.NumLeafs = 0
 	header.VoxelsPerAxis = uint32(cfg.VoxelsPerAxis)
 
-	writeHeader(cfg.Writer, &header)
+	if err := writeHeader(cfg.Writer, &header); err != nil {
+		return err
+	}
 
 	for idx, _ := range workers {
 		data := &workerData[idx]
@@ -254,13 +254,16 @@ func BuildTree(workers []Worker, cfg *BuildConfig) error {
 		}
 	}
 
-	header.NumNodes = numNodes
-	header.NumLeafs = numLeafs
 	if _, err := cfg.Writer.Seek(0, 0); err != nil {
 		return err
 	}
 
-	writeHeader(cfg.Writer, &header)
+	header.NumNodes = numNodes
+	header.NumLeafs = numLeafs
+	if err := writeHeader(cfg.Writer, &header); err != nil {
+		return err
+	}
+
 	if _, err := cfg.Writer.Seek(0, 2); err != nil {
 		return err
 	}

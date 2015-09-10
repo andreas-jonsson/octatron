@@ -54,7 +54,7 @@ func start(numWorkers int, input string, constructor func(string) (Worker, error
 	if err != nil {
 		panic(err)
 	}
-	defer file.Close()
+	defer zip.Close()
 
 	err = CompressTree(file, zip)
 	if err != nil {
