@@ -119,7 +119,7 @@ func start(numWorkers int, input, output string) {
 }
 
 func main() {
-	startFilter("cmd/pack/test.priv.xyz", "test.priv.bin")
+	startFilter("cmd/packer/test.priv.xyz", "test.priv.bin")
 	startSort("test.priv.bin", "test.priv.ord")
 	start(4, "test.priv.ord", "test.priv.oct")
 }
