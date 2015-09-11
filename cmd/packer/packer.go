@@ -95,7 +95,7 @@ func startSort(input, output string) {
 	}
 }
 
-func start(numWorkers int, input, output string) {
+func startBuild(numWorkers int, input, output string) {
 	workers := make([]pack.Worker, numWorkers)
 	for i := range workers {
 		var err error
@@ -118,8 +118,12 @@ func start(numWorkers int, input, output string) {
 	}
 }
 
-func main() {
-	startFilter("cmd/packer/test.priv.xyz", "test.priv.bin")
+func Start() {
+	startFilter("test.priv.xyz", "test.priv.bin")
 	startSort("test.priv.bin", "test.priv.ord")
-	start(4, "test.priv.ord", "test.priv.oct")
+	startBuild(4, "test.priv.ord", "test.priv.oct")
+}
+
+func main() {
+	Start()
 }
