@@ -70,12 +70,7 @@ func startFilter(input, output string) {
 	}
 	defer out.Close()
 
-	var cfg pack.FilterConfig
-	cfg.Writer = out
-	cfg.Reader = in
-	cfg.Function = filter
-
-	bounds, err := pack.FilterInput(&cfg)
+	bounds, err := pack.FilterInput(&pack.FilterConfig{in, out, filter})
 	if err != nil {
 		panic(err)
 	}
