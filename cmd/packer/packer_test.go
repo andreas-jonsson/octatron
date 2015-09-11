@@ -21,8 +21,14 @@ package main_test
 import (
 	"github.com/andreas-t-jonsson/octatron/cmd/packer"
 	"testing"
+	"os"
 )
 
 func TestPacker(t *testing.T) {
+	fp, err := os.Open("test.priv.xyz")
+	if os.IsNotExist(err) == true {
+		t.SkipNow()
+	}
+	fp.Close()
 	main.Start()
 }
