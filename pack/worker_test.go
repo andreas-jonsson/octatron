@@ -27,7 +27,7 @@ func start(numWorkers int, input string, constructor func(string) (Worker, error
 	workers := make([]Worker, numWorkers)
 	for i := range workers {
 		var err error
-		workers[i], err = constructor(input)
+		workers[i], err = constructor(input, nil)
 		if err != nil {
 			panic(err)
 		}

@@ -122,7 +122,7 @@ func minMax(min *Point, max *Point, pos *Point) {
 	max.Z = math.Max(max.Z, pos.Z)
 }
 
-func XSortInput(reader io.ReadSeeker, writer io.Writer, numSlices int) error {
+func SortInput(reader io.ReadSeeker, writer io.Writer, numSlices int) error {
 	files, err := sortData(reader, writer, numSlices)
 	if err != nil {
 		return err

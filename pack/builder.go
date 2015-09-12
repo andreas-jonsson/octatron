@@ -90,7 +90,7 @@ func processData(data *workerPrivateData, node *treeNode, sampleChan <-chan Samp
 		t := *tmp.add(&y)
 		t2 := t
 		node.acc = *t.sub(&node.color).sub(&y)
-        node.color = t2
+		node.color = t2
 	}
 }
 
@@ -217,12 +217,13 @@ func BuildTree(workers []Worker, cfg *BuildConfig) error {
 		return err
 	}
 
-	for idx, _ := range workers {
+	for idx, worker := range workers {
 		data := &workerData[idx]
 
 		// Spawn worker
 		go func() {
 			defer wgWorkers.Done()
+			defer worker.Stop()
 
 			// Process jobs
 			for {

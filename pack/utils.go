@@ -18,7 +18,10 @@
 
 package pack
 
-import "io"
+import (
+	"io"
+	"os"
+)
 
 func FileSize(seeker io.Seeker) (int64, error) {
 	var (
@@ -43,4 +46,13 @@ func FileSize(seeker io.Seeker) (int64, error) {
 	}
 
 	return size, err
+}
+
+func FileSizeByName(file string) (int64, error) {
+	fp, err := os.Open(file)
+	if err != nil {
+		return 0, err
+	}
+	defer fp.Close()
+	return FileSize(fp)
 }

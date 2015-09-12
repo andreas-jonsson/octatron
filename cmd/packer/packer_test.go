@@ -20,8 +20,8 @@ package main_test
 
 import (
 	"github.com/andreas-t-jonsson/octatron/cmd/packer"
-	"testing"
 	"os"
+	"testing"
 )
 
 func TestPacker(t *testing.T) {

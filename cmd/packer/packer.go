@@ -21,10 +21,10 @@ package main
 import (
 	"github.com/andreas-t-jonsson/octatron/pack"
 
+	"bufio"
+	"fmt"
 	"io"
 	"os"
-	"fmt"
-	"bufio"
 )
 
 type cloudSample struct {
@@ -85,16 +85,17 @@ func startSort(input, output string) {
 	out, _ := os.Create(output)
 	defer out.Close()
 
-	if err := pack.XSortInput(in, out, 5); err != nil {
+	if err := pack.SortInput(in, out, 5); err != nil {
 		panic(err)
 	}
 }
 
 func startBuild(numWorkers int, input, output string) {
+	mem := pack.NewWorkerSharedMemory(512)
 	workers := make([]pack.Worker, numWorkers)
 	for i := range workers {
 		var err error
-		workers[i], err = pack.NewXSortedWorker(input)
+		workers[i], err = pack.NewSortedWorker(input, mem)
 		if err != nil {
 			panic(err)
 		}

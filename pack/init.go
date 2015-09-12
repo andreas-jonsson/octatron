@@ -22,10 +22,12 @@ import "errors"
 
 var (
 	errUnsupportedFormat,
+	errInvalidFile,
 	errVoxelsPowerOfTwo error
 )
 
 func init() {
 	errUnsupportedFormat = errors.New("unsupported octree-format")
+	errInvalidFile = errors.New("invalid file")
 	errVoxelsPowerOfTwo = errors.New("voxels must be a power of two")
 }

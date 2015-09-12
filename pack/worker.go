@@ -19,8 +19,10 @@
 package pack
 
 import (
+	"bytes"
 	"encoding/binary"
 	"io"
+	"io/ioutil"
 	"os"
 	"sort"
 )
@@ -35,22 +37,34 @@ type Worker interface {
 	Stop()
 }
 
-const defaultNodeSize = 8*3 + 4 // x,y,z float64 + r,g,b,a uint8
-
-type xSortedWorker struct {
-	file *os.File
-	size int64
+type WorkerSharedMemory struct {
+	maxSize    int64
+	fileName   string
+	sharedFile *[]byte
 }
 
-func (w *xSortedWorker) Start(bounds Box, samples chan<- Sample) error {
+func NewWorkerSharedMemory(maxSizeMB int64) *WorkerSharedMemory {
+	return &WorkerSharedMemory{maxSizeMB * 1024 * 1024, "", nil}
+}
+
+const defaultNodeSize = 8*3 + 4 // x,y,z float64 + r,g,b,a uint8
+
+type sortedWorker struct {
+	file   *os.File
+	size   int64
+	reader io.ReadSeeker
+	pool   *WorkerSharedMemory
+}
+
+func (w *sortedWorker) Start(bounds Box, samples chan<- Sample) error {
 	f := func(i int) bool {
 		var samp filterSample
-		_, err := w.file.Seek(int64(i*defaultNodeSize), 0)
+		_, err := w.reader.Seek(int64(i*defaultNodeSize), 0)
 		if err != nil {
 			panic(err)
 		}
 
-		err = binary.Read(w.file, binary.BigEndian, &samp)
+		err = binary.Read(w.reader, binary.BigEndian, &samp)
 		if err != nil {
 			panic(err)
 		}
@@ -60,14 +74,14 @@ func (w *xSortedWorker) Start(bounds Box, samples chan<- Sample) error {
 
 	offset := sort.Search(int(w.size/defaultNodeSize), f)
 
-	_, err := w.file.Seek(int64(offset*defaultNodeSize), 0)
+	_, err := w.reader.Seek(int64(offset*defaultNodeSize), 0)
 	if err != nil {
 		return err
 	}
 
 	for {
 		var sample filterSample
-		err = binary.Read(w.file, binary.BigEndian, &sample)
+		err = binary.Read(w.reader, binary.BigEndian, &sample)
 		if err == io.EOF {
 			return nil
 		} else if err != nil {
@@ -82,37 +96,64 @@ func (w *xSortedWorker) Start(bounds Box, samples chan<- Sample) error {
 	}
 }
 
-func (w *xSortedWorker) Stop() {
-	w.file.Close()
+func (w *sortedWorker) Stop() {
+	if w.file != nil {
+		w.file.Close()
+	}
 }
 
-func NewXSortedWorker(inputFile string) (Worker, error) {
+func NewSortedWorker(inputFile string, pool *WorkerSharedMemory) (Worker, error) {
 	var err error
-	w := new(xSortedWorker)
+	w := new(sortedWorker)
 
-	w.file, err = os.Open(inputFile)
+	w.size, err = FileSizeByName(inputFile)
 	if err != nil {
 		return w, err
 	}
 
-	w.size, err = FileSize(w.file)
-	if err != nil {
-		return w, err
+	if pool != nil && pool.maxSize < w.size {
+		pool = nil
+	}
+
+	if pool != nil {
+		if pool.sharedFile == nil {
+			data, err := ioutil.ReadFile(inputFile)
+			if err != nil {
+				return w, err
+			}
+
+			pool.fileName = inputFile
+			pool.sharedFile = &data
+		} else if pool.fileName != inputFile {
+			return w, errInvalidFile
+		}
+
+		w.size = int64(len(*pool.sharedFile))
+		w.reader = bytes.NewReader(*pool.sharedFile)
+		w.pool = pool
+	} else {
+		w.file, err = os.Open(inputFile)
+		if err != nil {
+			return w, err
+		}
+		w.reader = w.file
 	}
 
 	return w, nil
 }
 
 type unsortedWorker struct {
-	file *os.File
+	file   *os.File
+	reader io.ReadSeeker
+	pool   *WorkerSharedMemory
 }
 
 func (w *unsortedWorker) Start(bounds Box, samples chan<- Sample) error {
 	for {
 		var sample filterSample
-		err := binary.Read(w.file, binary.BigEndian, &sample)
+		err := binary.Read(w.reader, binary.BigEndian, &sample)
 		if err == io.EOF {
-			w.file.Seek(0, 0)
+			w.reader.Seek(0, 0)
 			return nil
 		} else if err != nil {
 			return err
@@ -125,16 +166,45 @@ func (w *unsortedWorker) Start(bounds Box, samples chan<- Sample) error {
 }
 
 func (w *unsortedWorker) Stop() {
-	w.file.Close()
+	if w.file != nil {
+		w.file.Close()
+	}
 }
 
-func NewUnsortedWorker(inputFile string) (Worker, error) {
+func NewUnsortedWorker(inputFile string, pool *WorkerSharedMemory) (Worker, error) {
 	var err error
 	w := new(unsortedWorker)
 
-	w.file, err = os.Open(inputFile)
-	if err != nil {
-		return w, err
+	if pool != nil {
+		size, err := FileSizeByName(inputFile)
+		if err != nil {
+			return w, err
+		}
+
+		if pool.maxSize < size {
+			pool = nil
+		}
+	}
+
+	if pool != nil {
+		w.pool = pool
+		if pool.sharedFile == nil {
+			data, err := ioutil.ReadFile(inputFile)
+			if err != nil {
+				return w, err
+			}
+
+			pool.fileName = inputFile
+			pool.sharedFile = &data
+		} else if pool.fileName != inputFile {
+			return w, errInvalidFile
+		}
+	} else {
+		w.file, err = os.Open(inputFile)
+		if err != nil {
+			return w, err
+		}
+		w.reader = w.file
 	}
 
 	return w, nil

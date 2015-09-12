@@ -24,10 +24,10 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 
 	"bufio"
-	"encoding/binary"
 	"compress/zlib"
-	"io"
+	"encoding/binary"
 	"fmt"
+	"io"
 	"math"
 	"os"
 	"runtime"
@@ -226,7 +226,7 @@ func windowLoop(window *sdl.Window) {
 
 	data.renderSections = true
 	data.zoom = -250
-	data.nodes = loadTree("pack/test.oct")
+	data.nodes = loadTree("cmd/packer/test.priv.oct")
 	//data.cloud = loadCloud("pack/test.xyz")
 	data.box = genBox()
 	defer gl.DeleteLists(data.box, 1)
