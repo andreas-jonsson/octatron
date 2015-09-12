@@ -187,7 +187,6 @@ func NewUnsortedWorker(inputFile string, pool *WorkerSharedMemory) (Worker, erro
 	}
 
 	if pool != nil {
-		w.pool = pool
 		if pool.sharedFile == nil {
 			data, err := ioutil.ReadFile(inputFile)
 			if err != nil {
@@ -199,6 +198,9 @@ func NewUnsortedWorker(inputFile string, pool *WorkerSharedMemory) (Worker, erro
 		} else if pool.fileName != inputFile {
 			return w, errInvalidFile
 		}
+		
+		w.reader = bytes.NewReader(*pool.sharedFile)
+		w.pool = pool
 	} else {
 		w.file, err = os.Open(inputFile)
 		if err != nil {
