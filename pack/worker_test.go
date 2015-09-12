@@ -23,7 +23,7 @@ import (
 	"testing"
 )
 
-func start(numWorkers int, input string, constructor func(string) (Worker, error)) {
+func start(numWorkers int, input string, constructor func(string, *WorkerSharedMemory) (Worker, error)) {
 	workers := make([]Worker, numWorkers)
 	for i := range workers {
 		var err error
@@ -65,7 +65,7 @@ func start(numWorkers int, input string, constructor func(string) (Worker, error
 func TestXSortedWorker(t *testing.T) {
 	startFilter()
 	startSort()
-	start(4, "test.ord", NewXSortedWorker)
+	start(4, "test.ord", NewSortedWorker)
 }
 
 func TestUnsortedWorker(t *testing.T) {
