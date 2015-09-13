@@ -70,7 +70,7 @@ func start(numWorkers int, input string, constructor func(io.ReadSeeker) (Worker
 
 func TestXSortedWorker(t *testing.T) {
 	startFilter()
-	startExternalSort()
+	startSort()
 	start(4, "test.ord", NewSortedWorker)
 }
 

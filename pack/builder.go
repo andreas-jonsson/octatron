@@ -45,6 +45,7 @@ type workerPrivateData struct {
 }
 
 func processData(data *workerPrivateData, node *treeNode, applyFilter, applyFill bool, sampleChan <-chan Sample) error {
+	var numColorSamples int
 	for {
 		sample, more := <-sampleChan
 		if more == false {
@@ -52,7 +53,7 @@ func processData(data *workerPrivateData, node *treeNode, applyFilter, applyFill
 			if err != nil {
 				return err
 			}
-			node.color.div(float32(node.numSamplesInNode))
+			node.color.div(float32(numColorSamples))
 			return nil
 		}
 
@@ -61,6 +62,8 @@ func processData(data *workerPrivateData, node *treeNode, applyFilter, applyFill
 			node.numSamplesInNode++
 			atomic.AddUint64(&data.numSamples, 1)
 		}
+
+		numColorSamples++
 
 		// Kahan summation algorithm
 		col := sample.Color()

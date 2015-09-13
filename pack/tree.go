@@ -30,11 +30,12 @@ type Color struct {
 	R, G, B, A float32
 }
 
-func (color *Color) Scale(n float32) {
+func (color *Color) scale(n float32) *Color {
 	color.R *= n
 	color.G *= n
 	color.B *= n
 	color.A *= n
+	return color
 }
 
 func (color *Color) add(c *Color) *Color {
@@ -66,14 +67,14 @@ func (color *Color) writeColor(writer io.Writer, format OctreeFormat) error {
 
 	switch format {
 	case MIP_R8G8B8A8_UI32:
-		c.Scale(256)
+		c.scale(256)
 		err := binary.Write(writer, binary.BigEndian, byte(c.R))
 		err = binary.Write(writer, binary.BigEndian, byte(c.G))
 		err = binary.Write(writer, binary.BigEndian, byte(c.B))
 		err = binary.Write(writer, binary.BigEndian, byte(c.A))
 		return err
 	case MIP_R8G8B8A8_UI16:
-		c.Scale(256)
+		c.scale(256)
 		err := binary.Write(writer, binary.BigEndian, byte(c.R))
 		err = binary.Write(writer, binary.BigEndian, byte(c.G))
 		err = binary.Write(writer, binary.BigEndian, byte(c.B))
@@ -81,7 +82,7 @@ func (color *Color) writeColor(writer io.Writer, format OctreeFormat) error {
 		return err
 	case MIP_R5G5B5A1_UI16:
 		a := uint16(c.A) & 0x1
-		c.Scale(32)
+		c.scale(32)
 		r := uint16(c.R) & 0x1f
 		g := uint16(c.G) & 0x1f
 		b := uint16(c.B) & 0x1f
