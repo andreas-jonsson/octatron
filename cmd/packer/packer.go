@@ -41,7 +41,7 @@ func NewWriteSeekerBuffer(data []byte) io.WriteSeeker {
 
 func (writer *writeSeekerBuffer) Write(p []byte) (n int, err error) {
 	s := len(p)
-	for i := 0; i < n; i++ {
+	for i := 0; i < s; i++ {
 		writer.data[writer.offset + int64(i)] = p[i]
 	}
 	writer.offset += int64(s)
@@ -51,7 +51,7 @@ func (writer *writeSeekerBuffer) Write(p []byte) (n int, err error) {
 func (writer *writeSeekerBuffer) Seek(offset int64, whence int) (int64, error) {
 	switch whence {
 	case 0:
-		writer.offset = 0
+		writer.offset = offset
 		return 0, nil
 	case 1:
 		writer.offset += offset
@@ -128,7 +128,7 @@ func startSort(input, output string) {
 	}
 }
 
-const inMemoryWrite = true
+const inMemoryWrite = false
 
 func startBuild(numWorkers int, input, output string) {
 	workers := make([]pack.Worker, numWorkers)
@@ -161,7 +161,7 @@ func startBuild(numWorkers int, input, output string) {
 
 	if inMemoryWrite == true {
 		// Assume input is less or equal in size to output.
-		outputBuffer = make([]byte, len(data))
+		outputBuffer = make([]byte, 0, len(data))
 		writer = NewWriteSeekerBuffer(outputBuffer)
 	} else {
 		writer = file
@@ -169,7 +169,7 @@ func startBuild(numWorkers int, input, output string) {
 
 	//bounds := pack.Box{pack.Point{733, 682, 40.4}, 8.1}
 	bounds := pack.Box{pack.Point{797, 698, 41.881}, 8.5}
-	err = pack.BuildTree(workers, &pack.BuildConfig{writer, bounds, 256, pack.MIP_R8G8B8A8_UI32, 0, true})
+	err = pack.BuildTree(workers, &pack.BuildConfig{writer, bounds, 256, pack.MIP_R8G8B8A8_UI32, 0, false, true})
 	if err != nil {
 		panic(err)
 	}

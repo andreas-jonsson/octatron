@@ -33,6 +33,7 @@ type BuildConfig struct {
 	VoxelsPerAxis int
 	Format        OctreeFormat
 	Filter        int
+	Fill          bool
 	Interactive   bool
 }
 
@@ -43,7 +44,7 @@ type workerPrivateData struct {
 	worker      Worker
 }
 
-func processData(data *workerPrivateData, node *treeNode, sampleChan <-chan Sample) error {
+func processData(data *workerPrivateData, node *treeNode, applyFilter, applyFill bool, sampleChan <-chan Sample) error {
 	for {
 		sample, more := <-sampleChan
 		if more == false {
@@ -55,8 +56,11 @@ func processData(data *workerPrivateData, node *treeNode, sampleChan <-chan Samp
 			return nil
 		}
 
-		node.numSamplesInNode++
-		atomic.AddUint64(&data.numSamples, 1)
+		passFilter := !applyFilter || node.bounds.Intersect(sample.Position())
+		if applyFill == true || passFilter == true {
+			node.numSamplesInNode++
+			atomic.AddUint64(&data.numSamples, 1)
+		}
 
 		// Kahan summation algorithm
 		col := sample.Color()
@@ -209,7 +213,7 @@ func BuildTree(workers []Worker, cfg *BuildConfig) error {
 
 				sampleChan := make(chan Sample, 10)
 				go collectData(data, kernelSize, node, sampleChan)
-				if processData(data, node, sampleChan) != nil {
+				if processData(data, node, kernelSize > 0, cfg.Fill, sampleChan) != nil {
 					incVolume(&volumeTraversed, node.voxelsPerAxis)
 					return
 				}
