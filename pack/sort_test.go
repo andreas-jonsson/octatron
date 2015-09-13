@@ -72,13 +72,25 @@ func startSort() {
 	out, _ := os.Create("test.ord")
 	defer out.Close()
 
-	if err := SortInput(in, out, 5); err != nil {
+	if err := SortInput(in, out); err != nil {
 		panic(err)
 	}
 }
 
-func verifySort() {
-	fp, err := os.Open("test.ord")
+func startExternalSort() {
+	in, _ := os.Open("test.bin")
+	defer in.Close()
+
+	out, _ := os.Create("test.external.ord")
+	defer out.Close()
+
+	if err := ExternalSortInput(in, out, 5); err != nil {
+		panic(err)
+	}
+}
+
+func verifySort(file string) {
+	fp, err := os.Open(file)
 	if err != nil {
 		panic(err)
 	}
@@ -109,5 +121,7 @@ func verifySort() {
 func TestFilter(t *testing.T) {
 	startFilter()
 	startSort()
-	verifySort()
+	verifySort("test.ord")
+	startExternalSort()
+	verifySort("test.external.ord")
 }

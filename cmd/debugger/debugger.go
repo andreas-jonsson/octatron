@@ -330,7 +330,7 @@ func loadTree(file string) []octreeNode {
 	}
 	defer fp.Close()
 
-	var header pack.Header
+	var header pack.OctreeHeader
 	err = binary.Read(fp, binary.BigEndian, &header)
 	if err != nil {
 		panic(err)

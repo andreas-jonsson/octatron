@@ -122,7 +122,35 @@ func minMax(min *Point, max *Point, pos *Point) {
 	max.Z = math.Max(max.Z, pos.Z)
 }
 
-func SortInput(reader io.ReadSeeker, writer io.Writer, numSlices int) error {
+func SortInput(reader io.ReadSeeker, writer io.Writer) error {
+	size, err := reader.Seek(0, 2)
+	if err != nil {
+		return err
+	}
+
+	nodes := make(sampleSlice, size / defaultNodeSize)
+
+	_, err = reader.Seek(0, 0)
+	if err != nil {
+		return err
+	}
+
+	err = binary.Read(reader, binary.BigEndian, nodes)
+	if err != nil {
+		return err
+	}
+
+	sort.Sort(nodes)
+
+	err = binary.Write(writer, binary.BigEndian, nodes)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func ExternalSortInput(reader io.ReadSeeker, writer io.Writer, numSlices int) error {
 	files, err := sortData(reader, writer, numSlices)
 	if err != nil {
 		return err

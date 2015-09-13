@@ -85,7 +85,7 @@ func startSort(input, output string) {
 	out, _ := os.Create(output)
 	defer out.Close()
 
-	if err := pack.SortInput(in, out, 5); err != nil {
+	if err := pack.ExternalSortInput(in, out, 5); err != nil {
 		panic(err)
 	}
 }

@@ -27,31 +27,6 @@ import (
 	"sync/atomic"
 )
 
-const (
-	binaryVersion  byte = 0
-	endianMask     byte = 0x1
-	compressedMask byte = 0x2
-)
-
-type Header struct {
-	Sign          [4]byte
-	Version       byte
-	Format        OctreeFormat
-	Flags         byte
-	Unused        byte
-	NumNodes      uint64
-	NumLeafs      uint64
-	VoxelsPerAxis uint32
-}
-
-func (h *Header) BigEndian() bool {
-	return h.Flags&endianMask == endianMask
-}
-
-func (h *Header) Compressed() bool {
-	return h.Flags&compressedMask == compressedMask
-}
-
 type BuildConfig struct {
 	Writer        io.WriteSeeker
 	Bounds        Box
@@ -118,7 +93,7 @@ func incVolume(volumeTraversed *uint64, voxelsPerAxis int) uint64 {
 	return atomic.AddUint64(volumeTraversed, volume)
 }
 
-func writeHeader(writer io.Writer, header *Header) error {
+func writeHeader(writer io.Writer, header *OctreeHeader) error {
 	err := binary.Write(writer, binary.BigEndian, header)
 	if err != nil {
 		return nil
@@ -127,7 +102,7 @@ func writeHeader(writer io.Writer, header *Header) error {
 }
 
 func CompressTree(oct io.Reader, ocz io.Writer) error {
-	var header Header
+	var header OctreeHeader
 	err := binary.Read(oct, binary.BigEndian, &header)
 	if err != nil {
 		return err
@@ -199,7 +174,7 @@ func BuildTree(workers []Worker, cfg *BuildConfig) error {
 		defer wgUI.Wait()
 	}
 
-	var header Header
+	var header OctreeHeader
 	header.Sign[0] = 0x1b
 	header.Sign[1] = 0x6f
 	header.Sign[2] = 0x63

@@ -64,7 +64,7 @@ func start(numWorkers int, input string, constructor func(string, *WorkerSharedM
 
 func TestXSortedWorker(t *testing.T) {
 	startFilter()
-	startSort()
+	startExternalSort()
 	start(4, "test.ord", NewSortedWorker)
 }
 

@@ -41,3 +41,28 @@ func (f OctreeFormat) ColorSize() int {
 func (f OctreeFormat) NodeSize() int {
 	return f.IndexSize()*8 + f.ColorSize()
 }
+
+const (
+	binaryVersion  byte = 0x0
+	endianMask     byte = 0x1
+	compressedMask byte = 0x2
+)
+
+type OctreeHeader struct {
+	Sign          [4]byte
+	Version       byte
+	Format        OctreeFormat
+	Flags         byte
+	Unused        byte
+	NumNodes      uint64
+	NumLeafs      uint64
+	VoxelsPerAxis uint32
+}
+
+func (h *OctreeHeader) BigEndian() bool {
+	return h.Flags&endianMask == endianMask
+}
+
+func (h *OctreeHeader) Compressed() bool {
+	return h.Flags&compressedMask == compressedMask
+}
