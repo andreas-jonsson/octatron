@@ -19,11 +19,8 @@
 package pack
 
 import (
-	"bytes"
 	"encoding/binary"
 	"io"
-	"io/ioutil"
-	"os"
 	"sort"
 )
 
@@ -37,24 +34,12 @@ type Worker interface {
 	Stop()
 }
 
-type WorkerSharedMemory struct {
-	maxSize    int64
-	fileName   string
-	sharedFile *[]byte
-}
-
-func NewWorkerSharedMemory(maxSizeMB int64) *WorkerSharedMemory {
-	return &WorkerSharedMemory{maxSizeMB * 1024 * 1024, "", nil}
+type sortedWorker struct {
+	size   int64
+	reader io.ReadSeeker
 }
 
 const defaultNodeSize = 8*3 + 4 // x,y,z float64 + r,g,b,a uint8
-
-type sortedWorker struct {
-	file   *os.File
-	size   int64
-	reader io.ReadSeeker
-	pool   *WorkerSharedMemory
-}
 
 func (w *sortedWorker) Start(bounds Box, samples chan<- Sample) error {
 	f := func(i int) bool {
@@ -97,55 +82,23 @@ func (w *sortedWorker) Start(bounds Box, samples chan<- Sample) error {
 }
 
 func (w *sortedWorker) Stop() {
-	if w.file != nil {
-		w.file.Close()
-	}
 }
 
-func NewSortedWorker(inputFile string, pool *WorkerSharedMemory) (Worker, error) {
+func NewSortedWorker(reader io.ReadSeeker) (Worker, error) {
 	var err error
 	w := new(sortedWorker)
 
-	w.size, err = FileSizeByName(inputFile)
+	w.size, err = fileSize(reader)
 	if err != nil {
 		return w, err
 	}
 
-	if pool != nil && pool.maxSize < w.size {
-		pool = nil
-	}
-
-	if pool != nil {
-		if pool.sharedFile == nil {
-			data, err := ioutil.ReadFile(inputFile)
-			if err != nil {
-				return w, err
-			}
-
-			pool.fileName = inputFile
-			pool.sharedFile = &data
-		} else if pool.fileName != inputFile {
-			return w, errInvalidFile
-		}
-
-		w.size = int64(len(*pool.sharedFile))
-		w.reader = bytes.NewReader(*pool.sharedFile)
-		w.pool = pool
-	} else {
-		w.file, err = os.Open(inputFile)
-		if err != nil {
-			return w, err
-		}
-		w.reader = w.file
-	}
-
+	w.reader = reader
 	return w, nil
 }
 
 type unsortedWorker struct {
-	file   *os.File
 	reader io.ReadSeeker
-	pool   *WorkerSharedMemory
 }
 
 func (w *unsortedWorker) Start(bounds Box, samples chan<- Sample) error {
@@ -166,48 +119,8 @@ func (w *unsortedWorker) Start(bounds Box, samples chan<- Sample) error {
 }
 
 func (w *unsortedWorker) Stop() {
-	if w.file != nil {
-		w.file.Close()
-	}
 }
 
-func NewUnsortedWorker(inputFile string, pool *WorkerSharedMemory) (Worker, error) {
-	var err error
-	w := new(unsortedWorker)
-
-	if pool != nil {
-		size, err := FileSizeByName(inputFile)
-		if err != nil {
-			return w, err
-		}
-
-		if pool.maxSize < size {
-			pool = nil
-		}
-	}
-
-	if pool != nil {
-		if pool.sharedFile == nil {
-			data, err := ioutil.ReadFile(inputFile)
-			if err != nil {
-				return w, err
-			}
-
-			pool.fileName = inputFile
-			pool.sharedFile = &data
-		} else if pool.fileName != inputFile {
-			return w, errInvalidFile
-		}
-		
-		w.reader = bytes.NewReader(*pool.sharedFile)
-		w.pool = pool
-	} else {
-		w.file, err = os.Open(inputFile)
-		if err != nil {
-			return w, err
-		}
-		w.reader = w.file
-	}
-
-	return w, nil
+func NewUnsortedWorker(reader io.ReadSeeker) (Worker, error) {
+	return &unsortedWorker{reader}, nil
 }

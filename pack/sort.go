@@ -128,7 +128,7 @@ func SortInput(reader io.ReadSeeker, writer io.Writer) error {
 		return err
 	}
 
-	nodes := make(sampleSlice, size / defaultNodeSize)
+	nodes := make(sampleSlice, size/defaultNodeSize)
 
 	_, err = reader.Seek(0, 0)
 	if err != nil {

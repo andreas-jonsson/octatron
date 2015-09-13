@@ -19,15 +19,21 @@
 package pack
 
 import (
+	"io"
 	"os"
 	"testing"
 )
 
-func start(numWorkers int, input string, constructor func(string, *WorkerSharedMemory) (Worker, error)) {
+func start(numWorkers int, input string, constructor func(io.ReadSeeker) (Worker, error)) {
 	workers := make([]Worker, numWorkers)
 	for i := range workers {
-		var err error
-		workers[i], err = constructor(input, nil)
+		fp, err := os.Open(input)
+		if err != nil {
+			panic(err)
+		}
+		defer fp.Close()
+
+		workers[i], err = constructor(fp)
 		if err != nil {
 			panic(err)
 		}

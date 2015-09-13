@@ -23,7 +23,7 @@ import (
 	"os"
 )
 
-func FileSize(seeker io.Seeker) (int64, error) {
+func fileSize(seeker io.Seeker) (int64, error) {
 	var (
 		offset int64
 		size   int64
@@ -48,11 +48,11 @@ func FileSize(seeker io.Seeker) (int64, error) {
 	return size, err
 }
 
-func FileSizeByName(file string) (int64, error) {
+func fileSizeByName(file string) (int64, error) {
 	fp, err := os.Open(file)
 	if err != nil {
 		return 0, err
 	}
 	defer fp.Close()
-	return FileSize(fp)
+	return fileSize(fp)
 }

@@ -22,8 +22,10 @@ import (
 	"github.com/andreas-t-jonsson/octatron/pack"
 
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 )
 
@@ -85,17 +87,26 @@ func startSort(input, output string) {
 	out, _ := os.Create(output)
 	defer out.Close()
 
-	if err := pack.ExternalSortInput(in, out, 5); err != nil {
+	// This reads the entire file in to memory!
+	// Use ExternalSortInput if the file is to big.
+	if err := pack.SortInput(in, out); err != nil {
 		panic(err)
 	}
 }
 
 func startBuild(numWorkers int, input, output string) {
-	mem := pack.NewWorkerSharedMemory(512)
 	workers := make([]pack.Worker, numWorkers)
+
+	// This reads the entire file in to memory.
+	// Pass it directly to the worker if it is too big.
+	data, err := ioutil.ReadFile(input)
+	if err != nil {
+		panic(err)
+	}
+
 	for i := range workers {
 		var err error
-		workers[i], err = pack.NewSortedWorker(input, mem)
+		workers[i], err = pack.NewSortedWorker(bytes.NewReader(data))
 		if err != nil {
 			panic(err)
 		}
