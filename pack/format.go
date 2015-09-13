@@ -26,16 +26,21 @@ const (
 	MIP_R5G5B5A1_UI16
 )
 
+var (
+	formatIndexSize = [3]int{4,2,2}
+	formatColorSize = [3]int{4,4,2}
+)
+
 func (f OctreeFormat) IndexSize() int {
-	return 4
+	return formatIndexSize[f]
 }
 
 func (f OctreeFormat) ColorSize() int {
-	return 4
+	return formatColorSize[f]
 }
 
 func (f OctreeFormat) NodeSize() int {
-	return f.IndexSize()*8 + f.ColorSize()
+	return formatColorSize[f] + formatIndexSize[f] * 8
 }
 
 const (

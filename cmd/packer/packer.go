@@ -40,12 +40,12 @@ func NewWriteSeekerBuffer(data []byte) io.WriteSeeker {
 }
 
 func (writer *writeSeekerBuffer) Write(p []byte) (n int, err error) {
-	s := int64(len(p))
+	s := len(p)
 	for i := 0; i < n; i++ {
-		writer.data[writer.offset + s] = p[i]
+		writer.data[writer.offset + int64(i)] = p[i]
 	}
-	writer.offset += s
-	return int(s), nil
+	writer.offset += int64(s)
+	return s, nil
 }
 
 func (writer *writeSeekerBuffer) Seek(offset int64, whence int) (int64, error) {
@@ -128,6 +128,8 @@ func startSort(input, output string) {
 	}
 }
 
+const inMemoryWrite = true
+
 func startBuild(numWorkers int, input, output string) {
 	workers := make([]pack.Worker, numWorkers)
 
@@ -146,25 +148,37 @@ func startBuild(numWorkers int, input, output string) {
 		}
 	}
 
-	// Assume input is less or equal in size to output.
-	outputBuffer := make([]byte, len(data))
-
-	//bounds := pack.Box{pack.Point{733, 682, 40.4}, 8.1}
-	bounds := pack.Box{pack.Point{797, 698, 41.881}, 8.5}
-	err = pack.BuildTree(workers, &pack.BuildConfig{NewWriteSeekerBuffer(outputBuffer), bounds, 256, pack.MIP_R8G8B8A8_UI32, 0, true})
-	if err != nil {
-		panic(err)
-	}
-
 	file, err := os.Create(output)
 	if err != nil {
 		panic(err)
 	}
 	defer file.Close()
 
-	err = binary.Write(file, binary.BigEndian, outputBuffer)
+	var (
+		writer io.WriteSeeker
+		outputBuffer []byte
+	)
+
+	if inMemoryWrite == true {
+		// Assume input is less or equal in size to output.
+		outputBuffer = make([]byte, len(data))
+		writer = NewWriteSeekerBuffer(outputBuffer)
+	} else {
+		writer = file
+	}
+
+	//bounds := pack.Box{pack.Point{733, 682, 40.4}, 8.1}
+	bounds := pack.Box{pack.Point{797, 698, 41.881}, 8.5}
+	err = pack.BuildTree(workers, &pack.BuildConfig{writer, bounds, 256, pack.MIP_R8G8B8A8_UI32, 0, true})
 	if err != nil {
 		panic(err)
+	}
+
+	if inMemoryWrite == true {
+		err = binary.Write(file, binary.BigEndian, outputBuffer)
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
