@@ -23,6 +23,7 @@ import (
 	"io"
 	"runtime"
 	"sync"
+	"math"
 )
 
 type Color struct {
@@ -70,6 +71,21 @@ func (color *Color) writeColor(writer io.Writer, format OctreeFormat) error {
 		err = binary.Write(writer, binary.BigEndian, byte(c.G))
 		err = binary.Write(writer, binary.BigEndian, byte(c.B))
 		err = binary.Write(writer, binary.BigEndian, byte(c.A))
+		return err
+	case MIP_R8G8B8A8_UI16:
+		c.Scale(256)
+		err := binary.Write(writer, binary.BigEndian, byte(c.R))
+		err = binary.Write(writer, binary.BigEndian, byte(c.G))
+		err = binary.Write(writer, binary.BigEndian, byte(c.B))
+		err = binary.Write(writer, binary.BigEndian, byte(c.A))
+		return err
+	case MIP_R5G5B5A1_UI16:
+		a := uint16(c.A) & 0x1
+		c.Scale(32)
+		r := uint16(c.R) & 0x1f
+		g := uint16(c.G) & 0x1f
+		b := uint16(c.B) & 0x1f
+		err := binary.Write(writer, binary.BigEndian, r << 11 | g << 6 | b << 1 | a)
 		return err
 	default:
 		return errUnsupportedFormat
@@ -204,6 +220,28 @@ func (node *treeNode) spawnChildren(zOffset float64, nodeInChan chan<- *treeNode
 	nodeInChan <- child
 }
 
+func writeIndex(writer io.Writer, idx int64, format OctreeFormat) error {
+	var err error
+	switch format {
+	case MIP_R8G8B8A8_UI32:
+		if idx > math.MaxUint32 {
+			return errOctreeOverflow
+		}
+		err = binary.Write(writer, binary.BigEndian, uint32(idx))
+	case MIP_R8G8B8A8_UI16:
+		if idx > math.MaxUint16 {
+			return errOctreeOverflow
+		}
+		err = binary.Write(writer, binary.BigEndian, uint16(idx))
+	case MIP_R5G5B5A1_UI16:
+		if idx > math.MaxUint16 {
+			return errOctreeOverflow
+		}
+		err = binary.Write(writer, binary.BigEndian, uint16(idx))
+	}
+	return err
+}
+
 func (node *treeNode) patchParent(writer io.WriteSeeker, mutex *sync.Mutex, format OctreeFormat) error {
 	mutex.Lock()
 	defer mutex.Unlock()
@@ -214,7 +252,7 @@ func (node *treeNode) patchParent(writer io.WriteSeeker, mutex *sync.Mutex, form
 		return err
 	}
 
-	err := binary.Write(writer, binary.BigEndian, uint32(node.fileOffset/int64(format.NodeSize())))
+	err := writeIndex(writer, node.fileOffset/int64(format.NodeSize()), format)
 	if err != nil {
 		return err
 	}

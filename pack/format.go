@@ -23,11 +23,7 @@ type OctreeFormat byte
 const (
 	MIP_R8G8B8A8_UI32 OctreeFormat = iota
 	MIP_R8G8B8A8_UI16
-	MIP_INDEX8_UI32
-	MIP_INDEX8_UI16
-	MIP_R8G8B8A8_PACK_UI28
-	MIP_INDEX8_PACK_UI31
-	MIP_INDEX8_PACK_UI15
+	MIP_R5G5B5A1_UI16
 )
 
 func (f OctreeFormat) IndexSize() int {

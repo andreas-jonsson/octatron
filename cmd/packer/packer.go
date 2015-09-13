@@ -26,8 +26,42 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"encoding/binary"
 	"os"
 )
+
+type writeSeekerBuffer struct {
+	data []byte
+	offset int64
+}
+
+func NewWriteSeekerBuffer(data []byte) io.WriteSeeker {
+	return &writeSeekerBuffer{data, 0}
+}
+
+func (writer *writeSeekerBuffer) Write(p []byte) (n int, err error) {
+	s := int64(len(p))
+	for i := 0; i < n; i++ {
+		writer.data[writer.offset + s] = p[i]
+	}
+	writer.offset += s
+	return int(s), nil
+}
+
+func (writer *writeSeekerBuffer) Seek(offset int64, whence int) (int64, error) {
+	switch whence {
+	case 0:
+		writer.offset = 0
+		return 0, nil
+	case 1:
+		writer.offset += offset
+		return writer.offset, nil
+	case 2:
+		writer.offset = int64(len(writer.data)) - offset
+		return writer.offset, nil
+	}
+	return 0, nil
+}
 
 type cloudSample struct {
 	pos        pack.Point
@@ -112,14 +146,23 @@ func startBuild(numWorkers int, input, output string) {
 		}
 	}
 
+	// Assume input is less or equal in size to output.
+	outputBuffer := make([]byte, len(data))
+
+	//bounds := pack.Box{pack.Point{733, 682, 40.4}, 8.1}
+	bounds := pack.Box{pack.Point{797, 698, 41.881}, 8.5}
+	err = pack.BuildTree(workers, &pack.BuildConfig{NewWriteSeekerBuffer(outputBuffer), bounds, 256, pack.MIP_R8G8B8A8_UI32, 0, true})
+	if err != nil {
+		panic(err)
+	}
+
 	file, err := os.Create(output)
 	if err != nil {
 		panic(err)
 	}
 	defer file.Close()
 
-	bounds := pack.Box{pack.Point{797, 698, 41.881}, 8.5}
-	err = pack.BuildTree(workers, &pack.BuildConfig{file, bounds, 256, pack.MIP_R8G8B8A8_UI32, 0, true})
+	err = binary.Write(file, binary.BigEndian, outputBuffer)
 	if err != nil {
 		panic(err)
 	}
