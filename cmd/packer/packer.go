@@ -72,7 +72,7 @@ func startFilter(input, output string) {
 	}
 	defer out.Close()
 
-	bounds, err := pack.FilterInput(&pack.FilterConfig{in, out, filter})
+	bounds, err := pack.FilterInput(in, out, filter)
 	if err != nil {
 		panic(err)
 	}

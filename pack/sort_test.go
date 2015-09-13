@@ -52,12 +52,7 @@ func startFilter() {
 	out, _ := os.Create("test.bin")
 	defer out.Close()
 
-	var cfg FilterConfig
-	cfg.Writer = out
-	cfg.Reader = in
-	cfg.Function = filter
-
-	bounds, err := FilterInput(&cfg)
+	bounds, err := FilterInput(in, out, filter)
 	if err != nil {
 		panic(err)
 	}

@@ -27,12 +27,6 @@ import (
 	"sort"
 )
 
-type FilterConfig struct {
-	Reader   io.Reader
-	Writer   io.Writer
-	Function func(io.Reader, chan<- Sample) error
-}
-
 type filterSample struct {
 	Pos        Point
 	R, G, B, A byte
@@ -71,7 +65,7 @@ func (s sampleSlice) Swap(i, j int) {
 
 // Preformes a filter (according to the filter function) pass of the input data and writes
 // it out in a binary format that can be consumed by other functions.
-func FilterInput(cfg *FilterConfig) (Box, error) {
+func FilterInput(reader io.Reader, writer io.Writer, f func(io.Reader, chan<- Sample) error) (Box, error) {
 	var (
 		err   error
 		fsamp filterSample
@@ -87,7 +81,7 @@ func FilterInput(cfg *FilterConfig) (Box, error) {
 	channel := make(chan Sample, 10)
 
 	go func() {
-		*errPtr = cfg.Function(cfg.Reader, channel)
+		*errPtr = f(reader, channel)
 		close(channel)
 	}()
 
@@ -101,7 +95,7 @@ func FilterInput(cfg *FilterConfig) (Box, error) {
 		fsamp.setColor(samp.Color())
 		minMax(&minPos, &maxPos, &fsamp.Pos)
 
-		err := binary.Write(cfg.Writer, binary.BigEndian, fsamp)
+		err := binary.Write(writer, binary.BigEndian, fsamp)
 		if err != nil {
 			return ret, err
 		}
