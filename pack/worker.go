@@ -84,6 +84,7 @@ func (w *sortedWorker) Start(bounds Box, samples chan<- Sample) error {
 func (w *sortedWorker) Stop() {
 }
 
+// Reads X axis sorted data in the format created by the filter function.
 func NewSortedWorker(reader io.ReadSeeker) (Worker, error) {
 	var err error
 	w := new(sortedWorker)
@@ -121,6 +122,7 @@ func (w *unsortedWorker) Start(bounds Box, samples chan<- Sample) error {
 func (w *unsortedWorker) Stop() {
 }
 
+// Reads unsorted data in the format created by the filter function.
 func NewUnsortedWorker(reader io.ReadSeeker) (Worker, error) {
 	return &unsortedWorker{reader}, nil
 }

@@ -69,6 +69,8 @@ func (s sampleSlice) Swap(i, j int) {
 	s[j] = tmp
 }
 
+// Preformes a filter (according to the filter function) pass of the input data and writes
+// it out in a binary format that can be consumed by other functions.
 func FilterInput(cfg *FilterConfig) (Box, error) {
 	var (
 		err   error
@@ -122,6 +124,8 @@ func minMax(min *Point, max *Point, pos *Point) {
 	max.Z = math.Max(max.Z, pos.Z)
 }
 
+// Preformes a quick sort of the data in the reader and writes it out to the writer.
+// The function expects the data to be in the format created by the filter function.
 func SortInput(reader io.ReadSeeker, writer io.Writer) error {
 	size, err := reader.Seek(0, 2)
 	if err != nil {
@@ -150,6 +154,10 @@ func SortInput(reader io.ReadSeeker, writer io.Writer) error {
 	return nil
 }
 
+// Preformes a external merge sort of the data in the reader and writes it out to the writer.
+// This function slices the input data in numSlices and caches them to disk.
+// That way only fileSize/numSlices of memory is used to perform the sort.
+// This function expects the data to be in the format created by the filter function.
 func ExternalSortInput(reader io.ReadSeeker, writer io.Writer, numSlices int) error {
 	files, err := sortData(reader, writer, numSlices)
 	if err != nil {
