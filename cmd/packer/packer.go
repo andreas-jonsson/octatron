@@ -32,11 +32,12 @@ import (
 
 type writeSeekerBuffer struct {
 	data []byte
+	len int64
 	offset int64
 }
 
-func NewWriteSeekerBuffer(data []byte) io.WriteSeeker {
-	return &writeSeekerBuffer{data, 0}
+func NewWriteSeekerBuffer(data []byte) *writeSeekerBuffer {
+	return &writeSeekerBuffer{data, 0, 0}
 }
 
 func (writer *writeSeekerBuffer) Write(p []byte) (n int, err error) {
@@ -45,6 +46,9 @@ func (writer *writeSeekerBuffer) Write(p []byte) (n int, err error) {
 		writer.data[writer.offset + int64(i)] = p[i]
 	}
 	writer.offset += int64(s)
+	if writer.offset > writer.len {
+		writer.len = writer.offset
+	}
 	return s, nil
 }
 
@@ -52,15 +56,12 @@ func (writer *writeSeekerBuffer) Seek(offset int64, whence int) (int64, error) {
 	switch whence {
 	case 0:
 		writer.offset = offset
-		return 0, nil
 	case 1:
 		writer.offset += offset
-		return writer.offset, nil
 	case 2:
-		writer.offset = int64(len(writer.data)) - offset
-		return writer.offset, nil
+		writer.offset = writer.len - offset
 	}
-	return 0, nil
+	return writer.offset, nil
 }
 
 type cloudSample struct {
@@ -128,21 +129,49 @@ func startSort(input, output string) {
 	}
 }
 
-const inMemoryWrite = false
+const (
+	inMemoryRead = true
+	inMemoryWrite = true
+)
 
 func startBuild(numWorkers int, input, output string) {
 	workers := make([]pack.Worker, numWorkers)
 
-	// This reads the entire file in to memory.
-	// Pass it directly to the worker if it is too big.
-	data, err := ioutil.ReadFile(input)
-	if err != nil {
-		panic(err)
+	var (
+		err error
+		data []byte
+		inputSize int
+		reader io.ReadSeeker
+	)
+
+	if inMemoryRead == true {
+		// This reads the entire file in to memory.
+		data, err = ioutil.ReadFile(input)
+		if err != nil {
+			panic(err)
+		}
+		inputSize = len(data)
 	}
 
 	for i := range workers {
-		var err error
-		workers[i], err = pack.NewSortedWorker(bytes.NewReader(data))
+		if inMemoryRead == true {
+			reader = bytes.NewReader(data)
+		} else {
+			fp, err := os.Open(input)
+			if err != nil {
+				panic(err)
+			}
+			defer fp.Close()
+
+			if inputSize <= 0 {
+				offset, _ := fp.Seek(0, 2)
+				fp.Seek(0, 0)
+				inputSize = int(offset)
+			}
+			reader = fp
+		}
+
+		workers[i], err = pack.NewSortedWorker(reader)
 		if err != nil {
 			panic(err)
 		}
@@ -155,14 +184,14 @@ func startBuild(numWorkers int, input, output string) {
 	defer file.Close()
 
 	var (
+		wsb *writeSeekerBuffer
 		writer io.WriteSeeker
-		outputBuffer []byte
 	)
 
 	if inMemoryWrite == true {
 		// Assume input is less or equal in size to output.
-		outputBuffer = make([]byte, 0, len(data))
-		writer = NewWriteSeekerBuffer(outputBuffer)
+		wsb = NewWriteSeekerBuffer(make([]byte, inputSize))
+		writer = wsb
 	} else {
 		writer = file
 	}
@@ -175,7 +204,7 @@ func startBuild(numWorkers int, input, output string) {
 	}
 
 	if inMemoryWrite == true {
-		err = binary.Write(file, binary.BigEndian, outputBuffer)
+		err = binary.Write(file, binary.BigEndian, wsb.data[:wsb.len])
 		if err != nil {
 			panic(err)
 		}
