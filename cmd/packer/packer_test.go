@@ -20,11 +20,18 @@ package main_test
 
 import (
 	"github.com/andreas-t-jonsson/octatron/cmd/packer"
+	_ "net/http/pprof"
+	"net/http"
 	"os"
+	"log"
 	"testing"
 )
 
 func TestPacker(t *testing.T) {
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
+
 	fp, err := os.Open("test.priv.xyz")
 	if os.IsNotExist(err) == true {
 		t.SkipNow()

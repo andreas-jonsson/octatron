@@ -21,9 +21,9 @@ package pack
 import (
 	"encoding/binary"
 	"io"
+	"math"
 	"runtime"
 	"sync"
-	"math"
 )
 
 type Color struct {
@@ -38,28 +38,8 @@ func (color *Color) scale(n float32) *Color {
 	return color
 }
 
-func (color *Color) add(c *Color) *Color {
-	color.R += c.R
-	color.G += c.G
-	color.B += c.B
-	color.A += c.A
-	return color
-}
-
-func (color *Color) sub(c *Color) *Color {
-	color.R -= c.R
-	color.G -= c.G
-	color.B -= c.B
-	color.A -= c.A
-	return color
-}
-
-func (color *Color) div(n float32) *Color {
-	color.R /= n
-	color.G /= n
-	color.B /= n
-	color.A /= n
-	return color
+func (color *Color) dist(c *Color) float32 {
+	return float32(math.Sqrt(math.Pow(float64(c.R-color.R), 2) + math.Pow(float64(c.G-color.G), 2) + math.Pow(float64(c.B-color.B), 2) + math.Pow(float64(c.A-color.A), 2)))
 }
 
 func (color *Color) writeColor(writer io.Writer, format OctreeFormat) error {
@@ -86,7 +66,7 @@ func (color *Color) writeColor(writer io.Writer, format OctreeFormat) error {
 		r := uint16(c.R) & 0x1f
 		g := uint16(c.G) & 0x1f
 		b := uint16(c.B) & 0x1f
-		err := binary.Write(writer, binary.BigEndian, r << 11 | g << 6 | b << 1 | a)
+		err := binary.Write(writer, binary.BigEndian, r<<11|g<<6|b<<1|a)
 		return err
 	default:
 		return errUnsupportedFormat
@@ -113,7 +93,7 @@ func (b Box) Intersect(p Point) bool {
 }
 
 type treeNode struct {
-	color, acc Color
+	color      Color
 	bounds     Box
 	parent     *treeNode
 	fileOffset int64
@@ -265,7 +245,7 @@ func (node *treeNode) patchParent(writer io.WriteSeeker, mutex *sync.Mutex, form
 func (node *treeNode) serialize(writer io.WriteSeeker, mutex *sync.Mutex, format OctreeFormat, nodeInChan chan<- *treeNode) (bool, error) {
 	var (
 		err         error
-		hasChildren bool = true
+		hasChildren = true
 	)
 
 	mutex.Lock()

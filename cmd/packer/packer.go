@@ -23,16 +23,16 @@ import (
 
 	"bufio"
 	"bytes"
+	"encoding/binary"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"encoding/binary"
 	"os"
 )
 
 type writeSeekerBuffer struct {
-	data []byte
-	len int64
+	data   []byte
+	len    int64
 	offset int64
 }
 
@@ -43,7 +43,7 @@ func NewWriteSeekerBuffer(data []byte) *writeSeekerBuffer {
 func (writer *writeSeekerBuffer) Write(p []byte) (n int, err error) {
 	s := len(p)
 	for i := 0; i < s; i++ {
-		writer.data[writer.offset + int64(i)] = p[i]
+		writer.data[writer.offset+int64(i)] = p[i]
 	}
 	writer.offset += int64(s)
 	if writer.offset > writer.len {
@@ -130,7 +130,7 @@ func startSort(input, output string) {
 }
 
 const (
-	inMemoryRead = true
+	inMemoryRead  = true
 	inMemoryWrite = true
 )
 
@@ -138,10 +138,10 @@ func startBuild(numWorkers int, input, output string) {
 	workers := make([]pack.Worker, numWorkers)
 
 	var (
-		err error
-		data []byte
+		err       error
+		data      []byte
 		inputSize int
-		reader io.ReadSeeker
+		reader    io.ReadSeeker
 	)
 
 	if inMemoryRead == true {
@@ -184,7 +184,7 @@ func startBuild(numWorkers int, input, output string) {
 	defer file.Close()
 
 	var (
-		wsb *writeSeekerBuffer
+		wsb    *writeSeekerBuffer
 		writer io.WriteSeeker
 	)
 
@@ -198,7 +198,7 @@ func startBuild(numWorkers int, input, output string) {
 
 	//bounds := pack.Box{pack.Point{733, 682, 40.4}, 8.1}
 	bounds := pack.Box{pack.Point{797, 698, 41.881}, 8.5}
-	err = pack.BuildTree(workers, &pack.BuildConfig{writer, bounds, 256, pack.MIP_R8G8B8A8_UI32, 0, false, true})
+	err = pack.BuildTree(workers, &pack.BuildConfig{writer, bounds, 128, pack.MIP_R8G8B8A8_UI32, 0, false, true})
 	if err != nil {
 		panic(err)
 	}

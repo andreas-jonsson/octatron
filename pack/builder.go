@@ -38,14 +38,25 @@ type BuildConfig struct {
 }
 
 type workerPrivateData struct {
-	err         error
-	numSamples  uint64
-	numRequests uint64
-	worker      Worker
+	err                     error
+	numSamples, numRequests uint64
+	worker                  Worker
 }
 
 func processData(data *workerPrivateData, node *treeNode, applyFilter, applyFill bool, sampleChan <-chan Sample) error {
-	var numColorSamples int
+	var (
+		numSumSamples uint64
+		color         [4]uint64
+	)
+
+	getAverageColor := func(vec *[4]uint64, num uint64) (ret Color) {
+		ret.R = float32(vec[0]/num) / 256
+		ret.G = float32(vec[1]/num) / 256
+		ret.B = float32(vec[2]/num) / 256
+		ret.A = float32(vec[3]/num) / 256
+		return ret
+	}
+
 	for {
 		sample, more := <-sampleChan
 		if more == false {
@@ -53,7 +64,11 @@ func processData(data *workerPrivateData, node *treeNode, applyFilter, applyFill
 			if err != nil {
 				return err
 			}
-			node.color.div(float32(numColorSamples))
+
+			if numSumSamples > 0 {
+				node.color = getAverageColor(&color, numSumSamples)
+			}
+
 			return nil
 		}
 
@@ -63,16 +78,15 @@ func processData(data *workerPrivateData, node *treeNode, applyFilter, applyFill
 			atomic.AddUint64(&data.numSamples, 1)
 		}
 
-		numColorSamples++
+		numSumSamples++
+		sampleColor := sample.Color()
+		sampleColor8 := sampleColor
+		sampleColor8.scale(256)
 
-		// Kahan summation algorithm
-		col := sample.Color()
-		y := *col.sub(&node.acc)
-		tmp := node.color
-		t := *tmp.add(&y)
-		t2 := t
-		node.acc = *t.sub(&node.color).sub(&y)
-		node.color = t2
+		color[0] += uint64(sampleColor8.R)
+		color[1] += uint64(sampleColor8.G)
+		color[2] += uint64(sampleColor8.B)
+		color[3] += uint64(sampleColor8.A)
 	}
 }
 
