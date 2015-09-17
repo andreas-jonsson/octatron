@@ -211,10 +211,36 @@ func startBuild(numWorkers int, input, output string) {
 	}
 }
 
+func startOptimize(input, output string) {
+	fin, err := os.Open(input)
+	if err != nil {
+		panic(err)
+	}
+	defer fin.Close()
+
+	fout, err := os.Create(output)
+	if err != nil {
+		panic(err)
+	}
+	defer fout.Close()
+
+	if err := pack.OptimizeTree(fin, fout); err != nil {
+		panic(err)
+	}
+}
+
 func Start() {
+	fmt.Println("Filtering...")
 	startFilter("test.priv.xyz", "test.priv.bin")
+
+	fmt.Println("Sorting...")
 	startSort("test.priv.bin", "test.priv.ord")
-	startBuild(4, "test.priv.ord", "test.priv.oct")
+
+	fmt.Println("Building...")
+	startBuild(4, "test.priv.ord", "test.priv.tmp")
+
+	fmt.Println("Optimizing...")
+	startOptimize("test.priv.tmp", "test.priv.oct")
 }
 
 func main() {

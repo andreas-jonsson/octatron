@@ -16,27 +16,33 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-package main_test
+package pack
 
 import (
-	"log"
-	"net/http"
-	_ "net/http/pprof"
 	"os"
 	"testing"
-
-	"github.com/andreas-t-jonsson/octatron/cmd/packer"
 )
 
-func TestPacker(t *testing.T) {
-	go func() {
-		log.Println(http.ListenAndServe("localhost:6060", nil))
-	}()
-
-	fp, err := os.Open("test.priv.xyz")
-	if os.IsNotExist(err) == true {
-		t.SkipNow()
+func optimize(input, output string) {
+	fin, err := os.Open(input)
+	if err != nil {
+		panic(err)
 	}
-	fp.Close()
-	main.Start()
+	defer fin.Close()
+
+	fout, err := os.Create(output)
+	if err != nil {
+		panic(err)
+	}
+	defer fout.Close()
+
+	if err := OptimizeTree(fin, fout); err != nil {
+		panic(err)
+	}
+}
+
+func TestOptimize(t *testing.T) {
+	startFilter()
+	start(1, "test.bin", NewUnsortedWorker)
+	optimize("test.oct", "test.tmp")
 }

@@ -16,27 +16,47 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-package main_test
+package pack
 
 import (
-	"log"
-	"net/http"
-	_ "net/http/pprof"
-	"os"
+	"bytes"
+	"fmt"
 	"testing"
-
-	"github.com/andreas-t-jonsson/octatron/cmd/packer"
 )
 
-func TestPacker(t *testing.T) {
-	go func() {
-		log.Println(http.ListenAndServe("localhost:6060", nil))
-	}()
+func testDecode(format OctreeFormat, colorDiff float32) {
+	var (
+		colorIn           Color
+		childIn, childOut [8]uint32
+		buffer            bytes.Buffer
+	)
 
-	fp, err := os.Open("test.priv.xyz")
-	if os.IsNotExist(err) == true {
-		t.SkipNow()
+	colorOut := Color{0.5, 0.3, 0.1, 0.5}
+	for i := range childOut {
+		childOut[i] = uint32(100*i - 10*i)
 	}
-	fp.Close()
-	main.Start()
+
+	if err := EncodeNode(&buffer, format, colorOut, childOut[:]); err != nil {
+		panic(err)
+	}
+
+	if err := DecodeNode(bytes.NewReader(buffer.Bytes()), format, &colorIn, childIn[:]); err != nil {
+		panic(err)
+	}
+
+	if colorIn.dist(&colorOut) > colorDiff {
+		panic(fmt.Errorf("%v ~= %v, %v", colorIn, colorOut, colorDiff))
+	}
+
+	for i, child := range childIn {
+		if child != childOut[i] {
+			panic("child != childOut[i]")
+		}
+	}
+}
+
+func TestDecodeNode(t *testing.T) {
+	testDecode(MIP_R8G8B8A8_UI32, 0.01)
+	testDecode(MIP_R8G8B8A8_UI16, 0.01)
+	//testDecode(MIP_R5G5B5A1_UI16, 0.1)
 }
