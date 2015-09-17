@@ -189,8 +189,8 @@ func startBuild(numWorkers int, input, output string) {
 	)
 
 	if inMemoryWrite == true {
-		// Assume input is less or equal in size to output.
-		wsb = NewWriteSeekerBuffer(make([]byte, inputSize))
+		// Assume input is less or equal in size to output*2.
+		wsb = NewWriteSeekerBuffer(make([]byte, inputSize*2))
 		writer = wsb
 	} else {
 		writer = file
@@ -211,7 +211,7 @@ func startBuild(numWorkers int, input, output string) {
 	}
 }
 
-func startOptimize(input, output string) {
+func startOptimize(input, output string, col float32) {
 	fin, err := os.Open(input)
 	if err != nil {
 		panic(err)
@@ -224,9 +224,11 @@ func startOptimize(input, output string) {
 	}
 	defer fout.Close()
 
-	if err := pack.OptimizeTree(fin, fout); err != nil {
+	status, err := pack.OptimizeTree(fin, fout, col)
+	if err != nil {
 		panic(err)
 	}
+	fmt.Printf("Merged %v, Memmap %v\n", status.NumMerged, status.MemMap)
 }
 
 func Start() {
@@ -240,7 +242,7 @@ func Start() {
 	startBuild(4, "test.priv.ord", "test.priv.tmp")
 
 	fmt.Println("Optimizing...")
-	startOptimize("test.priv.tmp", "test.priv.oct")
+	startOptimize("test.priv.tmp", "test.priv.oct", 0.25)
 }
 
 func main() {

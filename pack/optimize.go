@@ -20,38 +20,44 @@ package pack
 
 import (
 	"encoding/binary"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 )
 
-func OptimizeTree(reader io.ReadSeeker, writer io.Writer) error {
-	var header OctreeHeader
+const leafThreshold = 0 // Should perhaps move this to be controlled by the user.
+
+type OptStatus struct {
+	NumMerged uint32
+	MemMap    []int64
+}
+
+func OptimizeTree(reader io.ReadSeeker, writer io.Writer, colorThreshold float32) (OptStatus, error) {
+	var (
+		header OctreeHeader
+		status OptStatus
+	)
+
 	if err := binary.Read(reader, binary.BigEndian, &header); err != nil {
-		return err
+		return status, err
 	}
 
 	if header.Compressed() == true {
-		return errUnsupportedFormat
+		return status, errUnsupportedFormat
 	}
-
-	if header.Optimized() == true {
-		return errInvalidFile
-	}
-
-	fmt.Println("aaaa", header.NumNodes)
 
 	maxLevels := 0
 	for i := 1; i <= int(header.VoxelsPerAxis); i *= 2 {
 		maxLevels++
 	}
 
+	status.MemMap = make([]int64, maxLevels)
 	tempFiles := make([]*os.File, maxLevels)
+
 	for i := range tempFiles {
 		fp, err := ioutil.TempFile("", "")
 		if err != nil {
-			return nil
+			return status, err
 		}
 		tempFiles[i] = fp
 	}
@@ -67,26 +73,26 @@ func OptimizeTree(reader io.ReadSeeker, writer io.Writer) error {
 	header.NumNodes = 0
 	header.Flags &= optimizedMask
 
-	_, err := optNode(reader, tempFiles, &header, 0, 0)
+	_, err := optNode(reader, tempFiles, &header, 0, 0, colorThreshold, &status)
 	if err != nil {
-		return err
+		return status, err
 	}
 
 	if err := binary.Write(writer, binary.BigEndian, header); err != nil {
-		return err
+		return status, err
 	}
 
-	err = mergeAndPatch(writer, tempFiles, &header)
+	err = mergeAndPatch(writer, tempFiles, &header, &status)
 	if err != nil {
-		return err
+		return status, err
 	}
 
-	return err
+	return status, err
 }
 
-func mergeAndPatch(writer io.Writer, files []*os.File, header *OctreeHeader) error {
+func mergeAndPatch(writer io.Writer, files []*os.File, header *OctreeHeader, status *OptStatus) error {
 	var numNodes int64
-	for _, fp := range files {
+	for lv, fp := range files {
 		var (
 			color    Color
 			children [8]uint32
@@ -102,7 +108,8 @@ func mergeAndPatch(writer io.Writer, files []*os.File, header *OctreeHeader) err
 			return nil
 		}
 
-		numNodesInFile := end / int64(header.Format.NodeSize())
+		nodeSize := int64(header.Format.NodeSize())
+		numNodesInFile := end / nodeSize
 		nextLevelStart := numNodes + numNodesInFile
 
 		for i := int64(0); i < numNodesInFile; i++ {
@@ -111,7 +118,9 @@ func mergeAndPatch(writer io.Writer, files []*os.File, header *OctreeHeader) err
 			}
 
 			for j, child := range children {
-				if child > 0 {
+				if child == 0xffff {
+					children[j] = 0
+				} else {
 					children[j] = uint32(nextLevelStart) + child
 				}
 			}
@@ -121,12 +130,13 @@ func mergeAndPatch(writer io.Writer, files []*os.File, header *OctreeHeader) err
 			}
 		}
 
+		status.MemMap[lv] = numNodes*nodeSize + int64(header.Size())
 		numNodes += numNodesInFile
 	}
 	return nil
 }
 
-func optNode(reader io.ReadSeeker, files []*os.File, header *OctreeHeader, nodeIndex, level uint32) (int64, error) {
+func optNode(reader io.ReadSeeker, files []*os.File, header *OctreeHeader, nodeIndex, level uint32, colorThreshold float32, status *OptStatus) (int64, error) {
 	var (
 		color    Color
 		children [8]uint32
@@ -143,11 +153,7 @@ func optNode(reader io.ReadSeeker, files []*os.File, header *OctreeHeader, nodeI
 		return 0, err
 	}
 
-	var (
-		leafs int
-		merge = true
-	)
-
+	merge := true
 	for _, child := range children {
 		if child > 0 {
 			if _, err := reader.Seek(int64(child*uint32(nodeSize)+headerSize), 0); err != nil {
@@ -163,21 +169,25 @@ func optNode(reader io.ReadSeeker, files []*os.File, header *OctreeHeader, nodeI
 				return 0, err
 			}
 
-			if color.dist(&childColor) > 0.5 {
+			if color.dist(&childColor) > colorThreshold {
+				merge = false
+				break
+			}
+
+			leafs := 0
+			for _, gc := range grandChildren {
+				if gc > 0 {
+					leafs++
+				}
+			}
+
+			if leafs > leafThreshold {
 				merge = false
 				break
 			}
 		} else {
-			if leafs++; leafs > 0 {
-				merge = false
-				break
-			}
-		}
-	}
-	merge = false
-	if merge == true {
-		for i := range children {
-			children[i] = 0
+			merge = false
+			break
 		}
 	}
 
@@ -185,13 +195,20 @@ func optNode(reader io.ReadSeeker, files []*os.File, header *OctreeHeader, nodeI
 	if merge == false {
 		for i, child := range children {
 			if child > 0 {
-				p, err := optNode(reader, files, header, child, level+1)
+				p, err := optNode(reader, files, header, child, level+1, colorThreshold, status)
 				if err != nil {
 					return 0, err
 				}
 				children[i] = uint32(p)
 				numChildren++
+			} else {
+				children[i] = 0xffff
 			}
+		}
+	} else {
+		status.NumMerged++
+		for i := range children {
+			children[i] = 0xffff
 		}
 	}
 

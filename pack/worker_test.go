@@ -46,7 +46,7 @@ func start(numWorkers int, input string, constructor func(io.ReadSeeker) (Worker
 	defer file.Close()
 
 	bounds := Box{Point{0, 0, 0}, 80}
-	err = BuildTree(workers, &BuildConfig{file, bounds, 8, MIP_R8G8B8A8_UI32, 0, false, true})
+	err = BuildTree(workers, &BuildConfig{file, bounds, 8, MIP_R8G8B8A8_UI32, 1, true, true})
 	if err != nil {
 		panic(err)
 	}

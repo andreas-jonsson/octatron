@@ -19,6 +19,7 @@
 package pack
 
 import (
+	"fmt"
 	"os"
 	"testing"
 )
@@ -36,9 +37,11 @@ func optimize(input, output string) {
 	}
 	defer fout.Close()
 
-	if err := OptimizeTree(fin, fout); err != nil {
+	status, err := OptimizeTree(fin, fout, 0.25)
+	if err != nil {
 		panic(err)
 	}
+	fmt.Println(status)
 }
 
 func TestOptimize(t *testing.T) {
