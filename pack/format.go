@@ -29,11 +29,12 @@ const (
 	MIP_R8G8B8A8_UI32 OctreeFormat = iota
 	MIP_R8G8B8A8_UI16
 	MIP_R5G5B5A1_UI16
+	MIP_R64G64B64A64S64_UI32
 )
 
 var (
-	formatIndexSize = [3]int{4, 2, 2}
-	formatColorSize = [3]int{4, 4, 2}
+	formatIndexSize = [4]int{4, 2, 2, 4}
+	formatColorSize = [4]int{4, 4, 2, 40}
 )
 
 func (f OctreeFormat) IndexSize() int {
@@ -80,6 +81,37 @@ func (h *OctreeHeader) Compressed() bool {
 
 func (h *OctreeHeader) Optimized() bool {
 	return h.Flags&optimizedMask == optimizedMask
+}
+
+func TranscodeTree(reader io.Reader, writer io.Writer, format OctreeFormat) error {
+	var (
+		header   OctreeHeader
+		color    Color
+		children [8]uint32
+	)
+
+	if err := binary.Read(reader, binary.BigEndian, &header); err != nil {
+		return err
+	}
+
+	inputFormat := header.Format
+	header.Format = format
+
+	if err := binary.Write(writer, binary.BigEndian, header); err != nil {
+		return err
+	}
+
+	for i := uint64(0); i < header.NumNodes; i++ {
+		if err := DecodeNode(reader, inputFormat, &color, children[:]); err != nil {
+			return err
+		}
+
+		if err := EncodeNode(writer, format, color, children[:]); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func DecodeNode(reader io.Reader, fmt OctreeFormat, color *Color, children []uint32) error {
@@ -136,6 +168,20 @@ func DecodeNode(reader io.Reader, fmt OctreeFormat, color *Color, children []uin
 		color.A = float32(col & 0x1)
 
 		if err := readChild16(); err != nil {
+			return err
+		}
+	} else if fmt == MIP_R64G64B64A64S64_UI32 {
+		var col [5]uint64
+		if err := binary.Read(reader, binary.BigEndian, &col); err != nil {
+			return err
+		}
+
+		color.R = float32((col[0] / col[4])) / 256
+		color.G = float32((col[1] / col[4])) / 256
+		color.B = float32((col[2] / col[4])) / 256
+		color.A = float32((col[3] / col[4])) / 256
+
+		if err := binary.Read(reader, binary.BigEndian, children); err != nil {
 			return err
 		}
 	} else {

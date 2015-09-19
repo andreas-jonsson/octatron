@@ -77,6 +77,14 @@ type Point struct {
 	X, Y, Z float64
 }
 
+func (point *Point) scale(n float64) Point {
+	return Point{point.X * n, point.Y * n, point.Z * n}
+}
+
+func (point *Point) add(p *Point) Point {
+	return Point{point.X + p.X, point.Y + p.Y, point.Z + p.Z}
+}
+
 type Box struct {
 	Pos  Point
 	Size float64

@@ -19,33 +19,47 @@
 package pack
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"testing"
 )
 
-func optimize(input, output string) {
-	fin, err := os.Open(input)
+func TestBuildTree2(t *testing.T) {
+	infile, err := os.Open("test.xyz")
 	if err != nil {
 		panic(err)
 	}
-	defer fin.Close()
+	defer infile.Close()
 
-	fout, err := os.Create(output)
+	outfile, err := os.Create("test.oct")
 	if err != nil {
 		panic(err)
 	}
-	defer fout.Close()
+	defer outfile.Close()
 
-	status, err := OptimizeTree(fin, fout, MIP_R8G8B8A8_UI32, 0.25)
+	parser := func(samples chan<- Sample) error {
+		scanner := bufio.NewScanner(infile)
+		for scanner.Scan() {
+			s := new(filterSample)
+
+			//var ref float64
+			_, err := fmt.Sscan(scanner.Text(), &s.Pos.X, &s.Pos.Y, &s.Pos.Z, &s.R, &s.G, &s.B)
+			if err != nil {
+				return err
+			}
+
+			samples <- s
+		}
+		return scanner.Err()
+	}
+
+	bounds := Box{Point{0, 0, 0}, 80}
+	//bounds := Box{Point{733, 682, 40.4}, 8.1}
+	//bounds := Box{Point{797, 698, 41.881}, 8.5}
+
+	err = BuildTree2(&BuildConfig{outfile, bounds, 8, MIP_R8G8B8A8_UI32, 0, false, false}, parser)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(status)
-}
-
-func TestOptimize(t *testing.T) {
-	startFilter()
-	start(1, "test.bin", NewUnsortedWorker)
-	optimize("test.oct", "test.tmp")
 }

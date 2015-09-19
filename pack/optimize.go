@@ -32,7 +32,7 @@ type OptStatus struct {
 	MemMap    []int64
 }
 
-func OptimizeTree(reader io.ReadSeeker, writer io.Writer, colorThreshold float32) (OptStatus, error) {
+func OptimizeTree(reader io.ReadSeeker, writer io.Writer, outputFormat OctreeFormat, colorThreshold float32) (OptStatus, error) {
 	var (
 		header OctreeHeader
 		status OptStatus
@@ -73,11 +73,12 @@ func OptimizeTree(reader io.ReadSeeker, writer io.Writer, colorThreshold float32
 	header.NumNodes = 0
 	header.Flags &= optimizedMask
 
-	_, err := optNode(reader, tempFiles, &header, 0, 0, colorThreshold, &status)
+	_, err := optNode(reader, tempFiles, &header, outputFormat, 0, 0, colorThreshold, &status)
 	if err != nil {
 		return status, err
 	}
 
+	header.Format = outputFormat
 	if err := binary.Write(writer, binary.BigEndian, header); err != nil {
 		return status, err
 	}
@@ -136,7 +137,7 @@ func mergeAndPatch(writer io.Writer, files []*os.File, header *OctreeHeader, sta
 	return nil
 }
 
-func optNode(reader io.ReadSeeker, files []*os.File, header *OctreeHeader, nodeIndex, level uint32, colorThreshold float32, status *OptStatus) (int64, error) {
+func optNode(reader io.ReadSeeker, files []*os.File, header *OctreeHeader, outputFormat OctreeFormat, nodeIndex, level uint32, colorThreshold float32, status *OptStatus) (int64, error) {
 	var (
 		color    Color
 		children [8]uint32
@@ -195,7 +196,7 @@ func optNode(reader io.ReadSeeker, files []*os.File, header *OctreeHeader, nodeI
 	if merge == false {
 		for i, child := range children {
 			if child > 0 {
-				p, err := optNode(reader, files, header, child, level+1, colorThreshold, status)
+				p, err := optNode(reader, files, header, outputFormat, child, level+1, colorThreshold, status)
 				if err != nil {
 					return 0, err
 				}
@@ -223,7 +224,7 @@ func optNode(reader io.ReadSeeker, files []*os.File, header *OctreeHeader, nodeI
 		header.NumLeafs++
 	}
 
-	if err := EncodeNode(fp, header.Format, color, children[:]); err != nil {
+	if err := EncodeNode(fp, outputFormat, color, children[:]); err != nil {
 		return 0, err
 	}
 
