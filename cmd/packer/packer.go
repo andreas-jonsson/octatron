@@ -58,7 +58,9 @@ func Start() {
 
 	parser := func(samples chan<- pack.Sample) error {
 		defer fmt.Println("\rProgress: 100%")
+
 		scanner := bufio.NewScanner(infile)
+		progress := -1
 
 		for scanner.Scan() {
 			text := scanner.Text()
@@ -71,7 +73,11 @@ func Start() {
 			}
 
 			reads += int64(len(text) + 1)
-			fmt.Printf("\rProgress: %v%%", int(float64(reads)/float64(size)*100))
+			p := int((float64(reads) / float64(size)) * 100)
+			if p > progress {
+				progress = p
+				fmt.Printf("\rProgress: %v%%", p)
+			}
 
 			samples <- s
 		}
@@ -87,6 +93,19 @@ func Start() {
 		panic(err)
 	}
 	fmt.Println(status)
+
+	fmt.Println("Compressing...")
+
+	zipfile, err := os.Create("test.priv.ocz")
+	if err != nil {
+		panic(err)
+	}
+	defer zipfile.Close()
+
+	outfile.Seek(0, 0)
+	if pack.CompressTree(outfile, zipfile); err != nil {
+		panic(err)
+	}
 }
 
 func main() {

@@ -103,12 +103,16 @@ func TranscodeTree(reader io.Reader, writer io.Writer, format OctreeFormat) erro
 	}
 
 	if header.Compressed() == true {
-		var err error
-		reader, err = zlib.NewReader(reader)
+		readCloser, err := zlib.NewReader(reader)
 		if err != nil {
 			return err
 		}
-		writer = zlib.NewWriter(writer)
+		defer readCloser.Close()
+		reader = readCloser
+
+		writeCloser := zlib.NewWriter(writer)
+		defer writeCloser.Close()
+		writer = writeCloser
 	}
 
 	for i := uint64(0); i < header.NumNodes; i++ {

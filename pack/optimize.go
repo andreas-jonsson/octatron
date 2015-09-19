@@ -60,22 +60,25 @@ func CompressTree(reader io.Reader, writer io.Writer) error {
 		return err
 	}
 
-	buffer := make([]byte, header.Format.NodeSize())
 	zip := zlib.NewWriter(writer)
 	defer zip.Close()
 
-	for {
-		count, errRead := reader.Read(buffer[:])
-		if errRead != nil && errRead != io.EOF {
-			return errRead
-		} else if count == 0 {
-			return nil
+	var (
+		color    Color
+		children [8]uint32
+	)
+
+	for i := uint64(0); i < header.NumNodes; i++ {
+		if err := DecodeNode(reader, header.Format, &color, children[:]); err != nil {
+			return err
 		}
 
-		if num, err := zip.Write(buffer[:count]); err != nil || num != count {
+		if err := EncodeNode(zip, header.Format, color, children[:]); err != nil {
 			return err
 		}
 	}
+
+	return nil
 }
 
 func OptimizeTree(reader io.ReadSeeker, writer io.Writer, outputFormat OctreeFormat, colorThreshold float32, colorFilter bool) (OptStatus, error) {

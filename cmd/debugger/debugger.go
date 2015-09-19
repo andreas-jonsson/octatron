@@ -226,7 +226,7 @@ func windowLoop(window *sdl.Window) {
 
 	data.renderSections = true
 	data.zoom = -250
-	data.nodes = loadTree("cmd/packer/test.priv.oct")
+	data.nodes = loadTree("cmd/packer/test.priv.ocz")
 	//data.cloud = loadCloud("pack/test.xyz")
 	data.box = genBox()
 	defer gl.DeleteLists(data.box, 1)
@@ -331,8 +331,7 @@ func loadTree(file string) []octreeNode {
 	defer fp.Close()
 
 	var header pack.OctreeHeader
-	err = binary.Read(fp, binary.BigEndian, &header)
-	if err != nil {
+	if err := binary.Read(fp, binary.BigEndian, &header); err != nil {
 		panic(err)
 	}
 
@@ -340,13 +339,14 @@ func loadTree(file string) []octreeNode {
 		panic("Format must be: MIP_R8G8B8A8_UI32")
 	}
 
-	var reader io.ReadCloser
+	var reader io.Reader
 	if header.Compressed() == true {
-		reader, err = zlib.NewReader(fp)
+		zipReader, err := zlib.NewReader(fp)
 		if err != nil {
 			panic(err)
 		}
-		defer reader.Close()
+		zipReader.Close()
+		reader = zipReader
 	} else {
 		reader = fp
 	}
@@ -354,21 +354,10 @@ func loadTree(file string) []octreeNode {
 	numNodes := header.NumNodes
 	nodes := make([]octreeNode, numNodes)
 
-	prog := -1
-	for i := uint64(0); i < numNodes; i++ {
-		err := binary.Read(reader, binary.BigEndian, &nodes[i])
-		if err != nil {
-			panic(err)
-		}
-
-		p := int((float32(i+1) / float32(numNodes)) * 100)
-		if p > prog {
-			fmt.Printf("\rLoading: %v%%", p)
-			prog = p
-		}
+	if err := binary.Read(reader, binary.BigEndian, nodes); err != nil {
+		panic(err)
 	}
 
-	fmt.Println("")
 	return nodes
 }
 
