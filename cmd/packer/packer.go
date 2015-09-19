@@ -40,7 +40,7 @@ func (s *xyzSample) Position() pack.Point {
 }
 
 func Start() {
-	infile, err := os.Open("test2.priv.xyz")
+	infile, err := os.Open("test.priv.xyz")
 	if err != nil {
 		panic(err)
 	}
