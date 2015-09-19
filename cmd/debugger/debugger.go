@@ -226,7 +226,7 @@ func windowLoop(window *sdl.Window) {
 
 	data.renderSections = true
 	data.zoom = -250
-	data.nodes = loadTree("cmd/packer/test.priv.ocz")
+	data.nodes = loadTree("cmd/packer/test.priv.oct")
 	//data.cloud = loadCloud("pack/test.xyz")
 	data.box = genBox()
 	defer gl.DeleteLists(data.box, 1)
