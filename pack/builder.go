@@ -27,7 +27,10 @@ import (
 
 const sampleChannelSize = 256
 
+type BuildWorker func(chan<- Sample) error
+
 type BuildConfig struct {
+	Worker         BuildWorker
 	Writer         io.Writer
 	Bounds         Box
 	VoxelsPerAxis  int
@@ -56,7 +59,7 @@ var childPositions = [...]Point{
 	Point{0, 0, 1}, Point{1, 0, 1}, Point{0, 1, 1}, Point{1, 1, 1},
 }
 
-func BuildTree(cfg *BuildConfig, worker func(chan<- Sample) error) (BuildStatus, error) {
+func BuildTree(cfg *BuildConfig) (BuildStatus, error) {
 	var status BuildStatus
 
 	vpa := uint64(cfg.VoxelsPerAxis)
@@ -80,7 +83,7 @@ func BuildTree(cfg *BuildConfig, worker func(chan<- Sample) error) (BuildStatus,
 	channel := make(chan Sample, sampleChannelSize)
 
 	go func() {
-		*errPtr = worker(channel)
+		*errPtr = cfg.Worker(channel)
 		close(channel)
 	}()
 
