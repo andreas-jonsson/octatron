@@ -68,7 +68,7 @@ func TestBuildTree(t *testing.T) {
 	}
 
 	bounds := Box{Point{0, 0, 0}, 80}
-	status, err := BuildTree(&BuildConfig{outfile, bounds, 8, MIP_R8G8B8A8_UI32, true, 0.25}, parser)
+	status, err := BuildTree(&BuildConfig{outfile, bounds, 8, MIP_R8G8B8A8_UI32, true, true, 0.25}, parser)
 	if err != nil {
 		panic(err)
 	}

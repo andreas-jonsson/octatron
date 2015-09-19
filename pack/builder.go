@@ -25,12 +25,15 @@ import (
 	"os"
 )
 
+const sampleChannelSize = 256
+
 type BuildConfig struct {
 	Writer         io.Writer
 	Bounds         Box
 	VoxelsPerAxis  int
 	Format         OctreeFormat
 	Optimize       bool
+	ColorFilter    bool
 	ColorThreshold float32
 }
 
@@ -48,7 +51,7 @@ type accNode struct {
 	Children [8]uint32
 }
 
-var childPositions = []Point{
+var childPositions = [...]Point{
 	Point{0, 0, 0}, Point{1, 0, 0}, Point{0, 1, 0}, Point{1, 1, 0},
 	Point{0, 0, 1}, Point{1, 0, 1}, Point{0, 1, 1}, Point{1, 1, 1},
 }
@@ -74,7 +77,7 @@ func BuildTree(cfg *BuildConfig, worker func(chan<- Sample) error) (BuildStatus,
 
 	var cbErr error
 	errPtr := &cbErr
-	channel := make(chan Sample, 10)
+	channel := make(chan Sample, sampleChannelSize)
 
 	go func() {
 		*errPtr = worker(channel)
@@ -124,7 +127,7 @@ func BuildTree(cfg *BuildConfig, worker func(chan<- Sample) error) (BuildStatus,
 	}
 
 	if cfg.Optimize == true {
-		status.Status, err = OptimizeTree(fp, cfg.Writer, cfg.Format, cfg.ColorThreshold)
+		status.Status, err = OptimizeTree(fp, cfg.Writer, cfg.Format, cfg.ColorThreshold, cfg.ColorFilter)
 		if err != nil {
 			return status, err
 		}

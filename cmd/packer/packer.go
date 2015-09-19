@@ -79,11 +79,10 @@ func Start() {
 		return scanner.Err()
 	}
 
-	//bounds := Box{Point{0, 0, 0}, 80}
-	bounds := pack.Box{pack.Point{733, 682, 40.4}, 8.1}
-	//bounds := Box{Point{797, 698, 41.881}, 8.5}
+	bounds := pack.Box{pack.Point{797, 698, 41.881}, 8.5}
+	//bounds := pack.Box{pack.Point{733, 682, 40.4}, 8.1}
 
-	status, err := pack.BuildTree(&pack.BuildConfig{outfile, bounds, 512, pack.MIP_R8G8B8A8_UI32, true, 0.25}, parser)
+	status, err := pack.BuildTree(&pack.BuildConfig{outfile, bounds, 256, pack.MIP_R8G8B8A8_UI32, true, true, 0.25}, parser)
 	if err != nil {
 		panic(err)
 	}
