@@ -24,7 +24,8 @@ var (
 	errUnsupportedFormat,
 	errInvalidFile,
 	errOctreeOverflow,
-	errVoxelsPowerOfTwo error
+	errVoxelsPowerOfTwo,
+	errInputIsCompressed error
 )
 
 func init() {
@@ -32,4 +33,5 @@ func init() {
 	errInvalidFile = errors.New("invalid file")
 	errOctreeOverflow = errors.New("octree-format overflow")
 	errVoxelsPowerOfTwo = errors.New("voxels must be a power of two")
+	errInputIsCompressed = errors.New("input is compressed")
 }

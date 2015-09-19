@@ -19,6 +19,7 @@
 package pack
 
 import (
+	"compress/zlib"
 	"encoding/binary"
 	"io"
 	"io/ioutil"
@@ -30,6 +31,41 @@ const leafThreshold = 0 // Should perhaps move this to be controlled by the user
 type OptStatus struct {
 	NumMerged uint32
 	MemMap    []int64
+}
+
+func CompressTree(oct io.Reader, ocz io.Writer) error {
+	var header OctreeHeader
+	err := binary.Read(oct, binary.BigEndian, &header)
+	if err != nil {
+		return err
+	}
+
+	if header.Compressed() == true {
+		return errInputIsCompressed
+	}
+	header.Flags = header.Flags & compressedMask
+
+	err = binary.Write(ocz, binary.BigEndian, header)
+	if err != nil {
+		return err
+	}
+
+	buffer := make([]byte, header.Format.NodeSize())
+	zip := zlib.NewWriter(ocz)
+	defer zip.Close()
+
+	for {
+		count, errRead := oct.Read(buffer[:])
+		if errRead != nil && errRead != io.EOF {
+			return errRead
+		} else if count == 0 {
+			return nil
+		}
+
+		if num, err := zip.Write(buffer[:count]); err != nil || num != count {
+			return err
+		}
+	}
 }
 
 func OptimizeTree(reader io.ReadSeeker, writer io.Writer, outputFormat OctreeFormat, colorThreshold float32) (OptStatus, error) {
@@ -228,5 +264,5 @@ func optNode(reader io.ReadSeeker, files []*os.File, header *OctreeHeader, outpu
 		return 0, err
 	}
 
-	return pos / int64(nodeSize), nil
+	return pos / int64(outputFormat.NodeSize()), nil
 }

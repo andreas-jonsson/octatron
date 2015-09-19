@@ -19,62 +19,58 @@
 package pack
 
 import (
-	"io"
+	"bufio"
+	"fmt"
 	"os"
 	"testing"
 )
 
-func start(numWorkers int, input string, constructor func(io.ReadSeeker) (Worker, error)) {
-	workers := make([]Worker, numWorkers)
-	for i := range workers {
-		fp, err := os.Open(input)
-		if err != nil {
-			panic(err)
-		}
-		defer fp.Close()
+type xyzSample struct {
+	pos     Point
+	r, g, b byte
+}
 
-		workers[i], err = constructor(fp)
-		if err != nil {
-			panic(err)
-		}
-	}
+func (s *xyzSample) Color() Color {
+	return Color{float32(s.r) / 256, float32(s.g) / 256, float32(s.b) / 256, 1}
+}
 
-	file, err := os.Create("test.oct")
+func (s *xyzSample) Position() Point {
+	return s.pos
+}
+
+func TestBuildTree(t *testing.T) {
+	infile, err := os.Open("test.xyz")
 	if err != nil {
 		panic(err)
 	}
-	defer file.Close()
+	defer infile.Close()
+
+	outfile, err := os.Create("test.oct")
+	if err != nil {
+		panic(err)
+	}
+	defer outfile.Close()
+
+	parser := func(samples chan<- Sample) error {
+		scanner := bufio.NewScanner(infile)
+		for scanner.Scan() {
+			text := scanner.Text()
+			s := new(xyzSample)
+
+			_, err := fmt.Sscan(text, &s.pos.X, &s.pos.Y, &s.pos.Z, &s.r, &s.g, &s.b)
+			if err != nil {
+				return err
+			}
+
+			samples <- s
+		}
+		return scanner.Err()
+	}
 
 	bounds := Box{Point{0, 0, 0}, 80}
-	err = BuildTree(workers, &BuildConfig{file, bounds, 8, MIP_R8G8B8A8_UI32, 1, true, true})
+	status, err := BuildTree(&BuildConfig{outfile, bounds, 8, MIP_R8G8B8A8_UI32, true, 0.25}, parser)
 	if err != nil {
 		panic(err)
 	}
-
-	_, err = file.Seek(0, 0)
-	if err != nil {
-		panic(err)
-	}
-
-	zip, err := os.Create("test.ocz")
-	if err != nil {
-		panic(err)
-	}
-	defer zip.Close()
-
-	err = CompressTree(file, zip)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func TestXSortedWorker(t *testing.T) {
-	startFilter()
-	startSort()
-	start(4, "test.ord", NewSortedWorker)
-}
-
-func TestUnsortedWorker(t *testing.T) {
-	startFilter()
-	start(4, "test.bin", NewUnsortedWorker)
+	fmt.Println(status)
 }

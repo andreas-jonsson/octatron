@@ -19,230 +19,75 @@
 package main
 
 import (
-	"github.com/andreas-t-jonsson/octatron/pack"
-
 	"bufio"
-	"bytes"
-	"encoding/binary"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"os"
+
+	"github.com/andreas-t-jonsson/octatron/pack"
 )
 
-type writeSeekerBuffer struct {
-	data   []byte
-	len    int64
-	offset int64
+type xyzSample struct {
+	pos     pack.Point
+	r, g, b byte
 }
 
-func NewWriteSeekerBuffer(data []byte) *writeSeekerBuffer {
-	return &writeSeekerBuffer{data, 0, 0}
+func (s *xyzSample) Color() pack.Color {
+	return pack.Color{float32(s.r) / 256, float32(s.g) / 256, float32(s.b) / 256, 1}
 }
 
-func (writer *writeSeekerBuffer) Write(p []byte) (n int, err error) {
-	s := len(p)
-	for i := 0; i < s; i++ {
-		writer.data[writer.offset+int64(i)] = p[i]
-	}
-	writer.offset += int64(s)
-	if writer.offset > writer.len {
-		writer.len = writer.offset
-	}
-	return s, nil
-}
-
-func (writer *writeSeekerBuffer) Seek(offset int64, whence int) (int64, error) {
-	switch whence {
-	case 0:
-		writer.offset = offset
-	case 1:
-		writer.offset += offset
-	case 2:
-		writer.offset = writer.len - offset
-	}
-	return writer.offset, nil
-}
-
-type cloudSample struct {
-	pos        pack.Point
-	r, g, b, a byte
-}
-
-func (s *cloudSample) Color() pack.Color {
-	return pack.Color{float32(s.r) / 256, float32(s.g) / 256, float32(s.b) / 256, float32(s.a) / 256}
-}
-
-func (s *cloudSample) Position() pack.Point {
+func (s *xyzSample) Position() pack.Point {
 	return s.pos
 }
 
-func filter(input io.Reader, samples chan<- pack.Sample) error {
-	scanner := bufio.NewScanner(input)
-	for scanner.Scan() {
-		s := new(cloudSample)
-
-		var ref float64
-		_, err := fmt.Sscan(scanner.Text(), &s.pos.X, &s.pos.Y, &s.pos.Z, &ref, &s.r, &s.g, &s.b)
-		if err != nil {
-			return err
-		}
-
-		samples <- s
-	}
-
-	return scanner.Err()
-}
-
-func startFilter(input, output string) {
-	in, err := os.Open(input)
-	if err != nil {
-		panic(err)
-	}
-	defer in.Close()
-
-	out, err := os.Create(output)
-	if err != nil {
-		panic(err)
-	}
-	defer out.Close()
-
-	bounds, err := pack.FilterInput(in, out, filter)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println("Bounding box:", bounds)
-}
-
-func startSort(input, output string) {
-	in, _ := os.Open(input)
-	defer in.Close()
-
-	out, _ := os.Create(output)
-	defer out.Close()
-
-	// This reads the entire file in to memory!
-	// Use ExternalSortInput if the file is to big.
-	if err := pack.SortInput(in, out); err != nil {
-		panic(err)
-	}
-}
-
-const (
-	inMemoryRead  = true
-	inMemoryWrite = true
-)
-
-func startBuild(numWorkers int, input, output string) {
-	workers := make([]pack.Worker, numWorkers)
-
-	var (
-		err       error
-		data      []byte
-		inputSize int
-		reader    io.ReadSeeker
-	)
-
-	if inMemoryRead == true {
-		// This reads the entire file in to memory.
-		data, err = ioutil.ReadFile(input)
-		if err != nil {
-			panic(err)
-		}
-		inputSize = len(data)
-	}
-
-	for i := range workers {
-		if inMemoryRead == true {
-			reader = bytes.NewReader(data)
-		} else {
-			fp, err := os.Open(input)
-			if err != nil {
-				panic(err)
-			}
-			defer fp.Close()
-
-			if inputSize <= 0 {
-				offset, _ := fp.Seek(0, 2)
-				fp.Seek(0, 0)
-				inputSize = int(offset)
-			}
-			reader = fp
-		}
-
-		workers[i], err = pack.NewSortedWorker(reader)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	file, err := os.Create(output)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-
-	var (
-		wsb    *writeSeekerBuffer
-		writer io.WriteSeeker
-	)
-
-	if inMemoryWrite == true {
-		// Assume input is less or equal in size to output*2.
-		wsb = NewWriteSeekerBuffer(make([]byte, inputSize*2))
-		writer = wsb
-	} else {
-		writer = file
-	}
-
-	//bounds := pack.Box{pack.Point{733, 682, 40.4}, 8.1}
-	bounds := pack.Box{pack.Point{797, 698, 41.881}, 8.5}
-	err = pack.BuildTree(workers, &pack.BuildConfig{writer, bounds, 128, pack.MIP_R8G8B8A8_UI32, 0, false, true})
-	if err != nil {
-		panic(err)
-	}
-
-	if inMemoryWrite == true {
-		err = binary.Write(file, binary.BigEndian, wsb.data[:wsb.len])
-		if err != nil {
-			panic(err)
-		}
-	}
-}
-
-func startOptimize(input, output string, col float32) {
-	fin, err := os.Open(input)
-	if err != nil {
-		panic(err)
-	}
-	defer fin.Close()
-
-	fout, err := os.Create(output)
-	if err != nil {
-		panic(err)
-	}
-	defer fout.Close()
-
-	status, err := pack.OptimizeTree(fin, fout, col)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("Merged %v, Memmap %v\n", status.NumMerged, status.MemMap)
-}
-
 func Start() {
-	fmt.Println("Filtering...")
-	startFilter("test.priv.xyz", "test.priv.bin")
+	infile, err := os.Open("test2.priv.xyz")
+	if err != nil {
+		panic(err)
+	}
+	defer infile.Close()
 
-	fmt.Println("Sorting...")
-	startSort("test.priv.bin", "test.priv.ord")
+	var reads int64
+	size, _ := infile.Seek(0, 2)
+	infile.Seek(0, 0)
 
-	fmt.Println("Building...")
-	startBuild(4, "test.priv.ord", "test.priv.tmp")
+	outfile, err := os.Create("test.priv.oct")
+	if err != nil {
+		panic(err)
+	}
+	defer outfile.Close()
 
-	fmt.Println("Optimizing...")
-	startOptimize("test.priv.tmp", "test.priv.oct", 0.25)
+	parser := func(samples chan<- pack.Sample) error {
+		defer fmt.Println("\rProgress: 100%")
+		scanner := bufio.NewScanner(infile)
+
+		for scanner.Scan() {
+			text := scanner.Text()
+			s := new(xyzSample)
+
+			var ref float64
+			_, err := fmt.Sscan(text, &s.pos.X, &s.pos.Y, &s.pos.Z, &ref, &s.r, &s.g, &s.b)
+			if err != nil {
+				return err
+			}
+
+			reads += int64(len(text) + 1)
+			fmt.Printf("\rProgress: %v%%", int(float64(reads)/float64(size)*100))
+
+			samples <- s
+		}
+
+		return scanner.Err()
+	}
+
+	//bounds := Box{Point{0, 0, 0}, 80}
+	bounds := pack.Box{pack.Point{733, 682, 40.4}, 8.1}
+	//bounds := Box{Point{797, 698, 41.881}, 8.5}
+
+	status, err := pack.BuildTree(&pack.BuildConfig{outfile, bounds, 512, pack.MIP_R8G8B8A8_UI32, true, 0.25}, parser)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(status)
 }
 
 func main() {

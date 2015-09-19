@@ -19,265 +19,226 @@
 package pack
 
 import (
-	"compress/zlib"
 	"encoding/binary"
-	"errors"
 	"io"
-	"sync"
-	"sync/atomic"
+	"io/ioutil"
+	"os"
 )
 
 type BuildConfig struct {
-	Writer        io.WriteSeeker
-	Bounds        Box
-	VoxelsPerAxis int
-	Format        OctreeFormat
-	Filter        int
-	Fill          bool
-	Interactive   bool
+	Writer         io.Writer
+	Bounds         Box
+	VoxelsPerAxis  int
+	Format         OctreeFormat
+	Optimize       bool
+	ColorThreshold float32
 }
 
-type workerPrivateData struct {
-	err                     error
-	numSamples, numRequests uint64
-	worker                  Worker
+type BuildStatus struct {
+	Status OptStatus
 }
 
-func processData(data *workerPrivateData, node *treeNode, applyFilter, applyFill bool, sampleChan <-chan Sample) error {
-	var (
-		numSumSamples uint64
-		color         [4]uint64
-	)
-
-	getAverageColor := func(vec *[4]uint64, num uint64) (ret Color) {
-		ret.R = float32(vec[0]/num) / 256
-		ret.G = float32(vec[1]/num) / 256
-		ret.B = float32(vec[2]/num) / 256
-		ret.A = float32(vec[3]/num) / 256
-		return ret
-	}
-
-	for {
-		sample, more := <-sampleChan
-		if more == false {
-			err := data.err
-			if err != nil {
-				return err
-			}
-
-			if numSumSamples > 0 {
-				node.color = getAverageColor(&color, numSumSamples)
-			}
-
-			return nil
-		}
-
-		passFilter := !applyFilter || node.bounds.Intersect(sample.Position())
-		if applyFill == true || passFilter == true {
-			node.numSamplesInNode++
-			atomic.AddUint64(&data.numSamples, 1)
-		}
-
-		numSumSamples++
-		sampleColor := sample.Color()
-		sampleColor8 := sampleColor
-		sampleColor8.scale(256)
-
-		color[0] += uint64(sampleColor8.R)
-		color[1] += uint64(sampleColor8.G)
-		color[2] += uint64(sampleColor8.B)
-		color[3] += uint64(sampleColor8.A)
-	}
+type Sample interface {
+	Color() Color
+	Position() Point
 }
 
-func collectData(workerData *workerPrivateData, filter float64, node *treeNode, sampleChan chan<- Sample) {
-	bounds := node.bounds
-	if filter > 0.0 {
-		bounds.Pos.X -= filter
-		bounds.Pos.Y -= filter
-		bounds.Pos.Z -= filter
-		bounds.Size += filter * 2
-	}
-
-	err := workerData.worker.Start(bounds, sampleChan)
-	if err != nil {
-		workerData.err = err
-	}
-
-	atomic.AddUint64(&workerData.numRequests, 1)
-	close(sampleChan)
+type accNode struct {
+	Color    [5]uint64
+	Children [8]uint32
 }
 
-func incVolume(volumeTraversed *uint64, voxelsPerAxis int) uint64 {
-	vpa := uint64(voxelsPerAxis)
-	volume := vpa * vpa * vpa
-	return atomic.AddUint64(volumeTraversed, volume)
+var childPositions = []Point{
+	Point{0, 0, 0}, Point{1, 0, 0}, Point{0, 1, 0}, Point{1, 1, 0},
+	Point{0, 0, 1}, Point{1, 0, 1}, Point{0, 1, 1}, Point{1, 1, 1},
 }
 
-func writeHeader(writer io.Writer, header *OctreeHeader) error {
-	err := binary.Write(writer, binary.BigEndian, header)
-	if err != nil {
-		return nil
-	}
-	return err
-}
-
-func CompressTree(oct io.Reader, ocz io.Writer) error {
-	var header OctreeHeader
-	err := binary.Read(oct, binary.BigEndian, &header)
-	if err != nil {
-		return err
-	}
-
-	if header.Compressed() == true {
-		return errors.New("input is compressed")
-	}
-	header.Flags = header.Flags & compressedMask
-
-	err = binary.Write(ocz, binary.BigEndian, header)
-	if err != nil {
-		return err
-	}
-
-	// We expect format to be 4 byte aligned
-	var buffer [4096]byte
-	zip := zlib.NewWriter(ocz)
-	defer zip.Close()
-
-	for {
-		count, errRead := oct.Read(buffer[:])
-		if errRead != nil && errRead != io.EOF {
-			return errRead
-		} else if count == 0 {
-			return nil
-		}
-
-		if num, err := zip.Write(buffer[:count]); err != nil || num != count {
-			return err
-		}
-	}
-}
-
-func BuildTree(workers []Worker, cfg *BuildConfig) error {
-	var (
-		volumeTraversed, numLeafs, numNodes uint64
-		wgWorkers                           sync.WaitGroup
-		wgUI                                *sync.WaitGroup
-	)
+func BuildTree(cfg *BuildConfig, worker func(chan<- Sample) error) (BuildStatus, error) {
+	var status BuildStatus
 
 	vpa := uint64(cfg.VoxelsPerAxis)
 	if vpa == 0 || (vpa&(vpa-1)) != 0 {
-		return errVoxelsPowerOfTwo
+		return status, errVoxelsPowerOfTwo
 	}
 
-	totalVolume := vpa * vpa * vpa
-
-	numWorkers := len(workers)
-	workerData := make([]workerPrivateData, numWorkers)
-	wgWorkers.Add(numWorkers)
-
-	writeMutex := &sync.Mutex{}
-
-	nodeMapShutdownChan, nodeMapInChan, nodeMapOutChan := startNodeCache(numWorkers)
-	nodeMapInChan <- newRootNode(cfg.Bounds, cfg.VoxelsPerAxis)
+	fp, err := ioutil.TempFile("", "")
+	if err != nil {
+		return status, err
+	}
 
 	defer func() {
-		nodeMapShutdownChan <- struct{}{}
+		name := fp.Name()
+		fp.Close()
+		os.Remove(name)
 	}()
 
-	for idx, worker := range workers {
-		data := &workerData[idx]
-		data.worker = worker
+	var cbErr error
+	errPtr := &cbErr
+	channel := make(chan Sample, 10)
+
+	go func() {
+		*errPtr = worker(channel)
+		close(channel)
+	}()
+
+	header, err := writeOctreeHeader(cfg, fp)
+	if err != nil {
+		return status, err
 	}
 
-	if cfg.Interactive == true {
-		wgUI = startUI(workerData, totalVolume, &volumeTraversed, &numLeafs)
-		defer wgUI.Wait()
+	header.NumNodes++
+	var rootNode accNode
+	if err := binary.Write(fp, binary.BigEndian, rootNode); err != nil {
+		return status, err
 	}
 
+	for {
+		samp, more := <-channel
+		if more == false {
+			break
+		}
+
+		if _, err := fp.Seek(int64(header.Size()), 0); err != nil {
+			return status, err
+		}
+
+		if err := insertSample(cfg, header, fp, samp, cfg.Bounds, cfg.VoxelsPerAxis); err != nil {
+			return status, err
+		}
+	}
+
+	if cbErr != nil {
+		return status, cbErr
+	}
+
+	if _, err := fp.Seek(0, 0); err != nil {
+		return status, err
+	}
+
+	if err := binary.Write(fp, binary.BigEndian, header); err != nil {
+		return status, err
+	}
+
+	if _, err := fp.Seek(0, 0); err != nil {
+		return status, err
+	}
+
+	if cfg.Optimize == true {
+		status.Status, err = OptimizeTree(fp, cfg.Writer, cfg.Format, 0.25)
+		if err != nil {
+			return status, err
+		}
+	} else {
+		if err := TranscodeTree(fp, cfg.Writer, cfg.Format); err != nil {
+			return status, err
+		}
+	}
+
+	return status, nil
+}
+
+func writeOctreeHeader(cfg *BuildConfig, writer io.Writer) (*OctreeHeader, error) {
 	var header OctreeHeader
 	header.Sign[0] = 0x1b
 	header.Sign[1] = 0x6f
 	header.Sign[2] = 0x63
 	header.Sign[3] = 0x74
 	header.Version = binaryVersion
-	header.Format = cfg.Format
+	header.Format = MIP_R64G64B64A64S64_UI32
 	header.Unused = 0x0
 	header.NumNodes = 0
 	header.NumLeafs = 0
 	header.VoxelsPerAxis = uint32(cfg.VoxelsPerAxis)
+	return &header, binary.Write(writer, binary.BigEndian, header)
+}
 
-	kernelSize := (cfg.Bounds.Size / float64(cfg.VoxelsPerAxis)) * float64(cfg.Filter)
+func insertSample(cfg *BuildConfig, header *OctreeHeader, readWriter io.ReadWriteSeeker, sample Sample, bounds Box, voxelRes int) error {
+	var node accNode
+	for {
+		if err := binary.Read(readWriter, binary.BigEndian, &node); err != nil {
+			return err
+		}
 
-	if err := writeHeader(cfg.Writer, &header); err != nil {
-		return err
-	}
+		if _, err := readWriter.Seek(int64(-MIP_R64G64B64A64S64_UI32.NodeSize()), 1); err != nil {
+			return err
+		}
 
-	for idx, worker := range workers {
-		data := &workerData[idx]
+		color := sample.Color()
+		node.Color[0] += uint64(color.R * 256)
+		node.Color[1] += uint64(color.G * 256)
+		node.Color[2] += uint64(color.B * 256)
+		node.Color[3] += uint64(color.A * 256)
+		node.Color[4]++
 
-		// Spawn worker
-		go func() {
-			defer wgWorkers.Done()
-			defer worker.Stop()
+		if err := binary.Write(readWriter, binary.BigEndian, node.Color); err != nil {
+			return err
+		}
 
-			// Process jobs
-			for {
-				node, more := <-nodeMapOutChan
-				if more == false {
-					return
-				}
+		if voxelRes == 1 {
+			header.NumLeafs++
+			return nil
+		}
 
-				sampleChan := make(chan Sample, 10)
-				go collectData(data, kernelSize, node, sampleChan)
-				if processData(data, node, kernelSize > 0, cfg.Fill, sampleChan) != nil {
-					incVolume(&volumeTraversed, node.voxelsPerAxis)
-					return
-				}
+		var (
+			childBounds Box
+			newVoxelRes = voxelRes
+		)
 
-				// This is a leaf
-				if node.numSamplesInNode == 0 {
-					// Are we done with the octree
-					if incVolume(&volumeTraversed, node.voxelsPerAxis) == totalVolume {
-						nodeMapShutdownChan <- struct{}{}
+		for i, child := range node.Children {
+			childBounds.Size = bounds.Size * 0.5
+			childOffset := childPositions[i].scale(childBounds.Size)
+			childBounds.Pos = bounds.Pos.add(&childOffset)
+
+			if childBounds.Intersect(sample.Position()) == true {
+				if child == 0 {
+					currentPos, err := readWriter.Seek(0, 1)
+					if err != nil {
+						return err
+					}
+
+					newPos, err := readWriter.Seek(0, 2)
+					if err != nil {
+						return err
+					}
+
+					if _, err = readWriter.Seek(currentPos, 0); err != nil {
+						return err
+					}
+
+					node.Children[i] = uint32((newPos - int64(header.Size())) / int64(MIP_R64G64B64A64S64_UI32.NodeSize()))
+					if err := binary.Write(readWriter, binary.BigEndian, node.Children); err != nil {
+						return err
+					}
+
+					if _, err = readWriter.Seek(newPos, 0); err != nil {
+						return err
+					}
+
+					header.NumNodes++
+					var newNode accNode
+					if err := binary.Write(readWriter, binary.BigEndian, newNode); err != nil {
+						return err
+					}
+
+					if _, err := readWriter.Seek(int64(-MIP_R64G64B64A64S64_UI32.NodeSize()), 1); err != nil {
+						return err
 					}
 				} else {
-					atomic.AddUint64(&numNodes, 1)
-					hasChildren, err := node.serialize(cfg.Writer, writeMutex, cfg.Format, nodeMapInChan)
-					if err != nil {
-						incVolume(&volumeTraversed, node.voxelsPerAxis)
-						data.err = err
-						return
-					} else if hasChildren == false {
-						atomic.AddUint64(&numLeafs, 1)
-						if incVolume(&volumeTraversed, node.voxelsPerAxis) == totalVolume {
-							nodeMapShutdownChan <- struct{}{}
-						}
+					if _, err := readWriter.Seek(int64(int(child)*MIP_R64G64B64A64S64_UI32.NodeSize()+header.Size()), 0); err != nil {
+						return err
 					}
 				}
-			}
-		}()
-	}
 
-	wgWorkers.Wait()
-	for _, data := range workerData {
-		if data.err != nil {
-			return data.err
+				newVoxelRes = voxelRes / 2
+				break
+			}
+		}
+
+		if newVoxelRes == voxelRes {
+			return nil
+		} else {
+			bounds = childBounds
+			voxelRes = newVoxelRes
 		}
 	}
-
-	if _, err := cfg.Writer.Seek(0, 0); err != nil {
-		return err
-	}
-
-	header.NumNodes = numNodes
-	header.NumLeafs = numLeafs
-	if err := writeHeader(cfg.Writer, &header); err != nil {
-		return err
-	}
-
-	if _, err := cfg.Writer.Seek(0, 2); err != nil {
-		return err
-	}
-	return nil
 }
