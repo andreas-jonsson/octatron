@@ -19,6 +19,7 @@
 package pack
 
 import (
+	"compress/zlib"
 	"encoding/binary"
 	"io"
 )
@@ -99,6 +100,15 @@ func TranscodeTree(reader io.Reader, writer io.Writer, format OctreeFormat) erro
 
 	if err := binary.Write(writer, binary.BigEndian, header); err != nil {
 		return err
+	}
+
+	if header.Compressed() == true {
+		var err error
+		reader, err = zlib.NewReader(reader)
+		if err != nil {
+			return err
+		}
+		writer = zlib.NewWriter(writer)
 	}
 
 	for i := uint64(0); i < header.NumNodes; i++ {
