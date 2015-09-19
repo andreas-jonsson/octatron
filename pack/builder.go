@@ -124,7 +124,7 @@ func BuildTree(cfg *BuildConfig, worker func(chan<- Sample) error) (BuildStatus,
 	}
 
 	if cfg.Optimize == true {
-		status.Status, err = OptimizeTree(fp, cfg.Writer, cfg.Format, 0.25)
+		status.Status, err = OptimizeTree(fp, cfg.Writer, cfg.Format, cfg.ColorThreshold)
 		if err != nil {
 			return status, err
 		}
