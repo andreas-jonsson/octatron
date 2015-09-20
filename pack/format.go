@@ -139,6 +139,14 @@ func TranscodeTree(reader io.Reader, writer io.Writer, format OctreeFormat) erro
 	return nil
 }
 
+func DecodeHeader(reader io.Reader, header *OctreeHeader) error {
+	return binary.Read(reader, binary.BigEndian, header)
+}
+
+func EncodeHeader(writer io.Writer, header OctreeHeader) error {
+	return binary.Write(writer, binary.BigEndian, header)
+}
+
 func DecodeNode(reader io.Reader, format OctreeFormat, color *Color, children []uint32) error {
 	readR8G8B8A8 := func() error {
 		var col [4]byte
