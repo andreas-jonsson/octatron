@@ -199,9 +199,9 @@ func DecodeNode(reader io.Reader, format OctreeFormat, color *Color, children []
 			return err
 		}
 
-		color.R = float32(col&0xf000) / 15
-		color.G = float32(col&0xf00) / 15
-		color.B = float32(col&0xf0) / 15
+		color.R = float32((col&0xf000)>>12) / 15
+		color.G = float32((col&0xf00)>>8) / 15
+		color.B = float32((col&0xf0)>>4) / 15
 		color.A = float32(col&0xf) / 15
 
 		if err := readChild16(); err != nil {
@@ -213,8 +213,8 @@ func DecodeNode(reader io.Reader, format OctreeFormat, color *Color, children []
 			return err
 		}
 
-		color.R = float32(col&0xf800) / 31
-		color.G = float32(col&0x7e0) / 63
+		color.R = float32((col&0xf800)>>11) / 31
+		color.G = float32((col&0x7e0)>>5) / 63
 		color.B = float32(col&0x1f) / 31
 		color.A = 1
 

@@ -31,7 +31,7 @@ func testDecode(format OctreeFormat, colorDiff float32) {
 		buffer            bytes.Buffer
 	)
 
-	colorOut := Color{0.5, 0.3, 0.1, 0.5}
+	colorOut := Color{0.5, 0.3, 0.7, 1.0}
 	for i := range childOut {
 		childOut[i] = uint32(100*i - 10*i)
 	}
@@ -58,5 +58,11 @@ func testDecode(format OctreeFormat, colorDiff float32) {
 func TestDecodeNode(t *testing.T) {
 	testDecode(MipR8G8B8A8UnpackUI32, 0.01)
 	testDecode(MipR8G8B8A8UnpackUI16, 0.01)
-	//testDecode(MipR5G5B5A1UnpackUI16, 0.1)
+	testDecode(MipR4G4B4A4UnpackUI16, 0.1)
+	testDecode(MipR5G6B5UnpackUI16, 0.1)
+
+	testDecode(MipR8G8B8A8PackUI28, 0.01)
+	testDecode(MipR4G4B4A4PackUI30, 0.1)
+	testDecode(MipR5G6B5PackUI30, 0.1)
+	testDecode(MipR3G3B2PackUI31, 0.1)
 }
