@@ -56,7 +56,7 @@ func testDecode(format OctreeFormat, colorDiff float32) {
 }
 
 func TestDecodeNode(t *testing.T) {
-	testDecode(MIP_R8G8B8A8_UI32, 0.01)
-	testDecode(MIP_R8G8B8A8_UI16, 0.01)
-	//testDecode(MIP_R5G5B5A1_UI16, 0.1)
+	testDecode(MipR8G8B8A8UnpackUI32, 0.01)
+	testDecode(MipR8G8B8A8UnpackUI16, 0.01)
+	//testDecode(MipR5G5B5A1UnpackUI16, 0.1)
 }

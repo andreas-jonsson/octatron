@@ -36,6 +36,25 @@ func (color *Color) scale(n float32) *Color {
 	return color
 }
 
+func (color *Color) setComponent(comp int, val float32) {
+	switch comp {
+	case 0:
+		color.R = val
+	case 1:
+		color.G = val
+	case 2:
+		color.B = val
+	case 3:
+		color.A = val
+	default:
+		panic("invalid color component")
+	}
+}
+
+func (color *Color) bytes() [4]byte {
+	return [4]byte{byte(color.R * 256), byte(color.G * 256), byte(color.B * 256), byte(color.A * 256)}
+}
+
 func (color *Color) dist(c *Color) float32 {
 	return float32(math.Sqrt(math.Pow(float64(c.R-color.R), 2) + math.Pow(float64(c.G-color.G), 2) + math.Pow(float64(c.B-color.B), 2) + math.Pow(float64(c.A-color.A), 2)))
 }
@@ -44,21 +63,21 @@ func (color *Color) writeColor(writer io.Writer, format OctreeFormat) error {
 	c := *color
 
 	switch format {
-	case MIP_R8G8B8A8_UI32:
+	case MipR8G8B8A8UnpackUI32:
 		c.scale(256)
 		err := binary.Write(writer, binary.BigEndian, byte(c.R))
 		err = binary.Write(writer, binary.BigEndian, byte(c.G))
 		err = binary.Write(writer, binary.BigEndian, byte(c.B))
 		err = binary.Write(writer, binary.BigEndian, byte(c.A))
 		return err
-	case MIP_R8G8B8A8_UI16:
+	case MipR8G8B8A8UnpackUI16:
 		c.scale(256)
 		err := binary.Write(writer, binary.BigEndian, byte(c.R))
 		err = binary.Write(writer, binary.BigEndian, byte(c.G))
 		err = binary.Write(writer, binary.BigEndian, byte(c.B))
 		err = binary.Write(writer, binary.BigEndian, byte(c.A))
 		return err
-	case MIP_R5G5B5A1_UI16:
+	case MipR5G5B5A1UnpackUI16:
 		a := uint16(c.A) & 0x1
 		c.scale(32)
 		r := uint16(c.R) & 0x1f

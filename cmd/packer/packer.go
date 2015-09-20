@@ -88,7 +88,7 @@ func Start() {
 	bounds := pack.Box{pack.Point{797, 698, 41.881}, 8.5}
 	//bounds := pack.Box{pack.Point{733, 682, 40.4}, 8.1}
 
-	cfg := pack.BuildConfig{parser, outfile, bounds, 256, pack.MIP_R8G8B8A8_UI32, true, true, 0.25}
+	cfg := pack.BuildConfig{parser, outfile, bounds, 256, pack.MipR8G8B8A8PackUI28, true, true, 0.25}
 
 	status, err := pack.BuildTree(&cfg)
 	if err != nil {

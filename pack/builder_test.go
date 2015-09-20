@@ -68,7 +68,7 @@ func TestBuildTree(t *testing.T) {
 	}
 
 	bounds := Box{Point{0, 0, 0}, 80}
-	cfg := BuildConfig{parser, outfile, bounds, 8, MIP_R8G8B8A8_UI32, true, true, 0.25}
+	cfg := BuildConfig{parser, outfile, bounds, 8, MipR8G8B8A8UnpackUI32, true, true, 0.25}
 
 	status, err := BuildTree(&cfg)
 	if err != nil {

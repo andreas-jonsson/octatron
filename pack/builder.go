@@ -150,7 +150,7 @@ func writeOctreeHeader(cfg *BuildConfig, writer io.Writer) (*OctreeHeader, error
 	header.Sign[2] = 0x63
 	header.Sign[3] = 0x74
 	header.Version = binaryVersion
-	header.Format = MIP_R64G64B64A64S64_UI32
+	header.Format = mipR64G64B64A64S64UnpackUI32
 	header.Unused = 0x0
 	header.NumNodes = 0
 	header.NumLeafs = 0
@@ -165,7 +165,7 @@ func insertSample(cfg *BuildConfig, header *OctreeHeader, readWriter io.ReadWrit
 			return err
 		}
 
-		if _, err := readWriter.Seek(int64(-MIP_R64G64B64A64S64_UI32.NodeSize()), 1); err != nil {
+		if _, err := readWriter.Seek(int64(-mipR64G64B64A64S64UnpackUI32.NodeSize()), 1); err != nil {
 			return err
 		}
 
@@ -211,7 +211,7 @@ func insertSample(cfg *BuildConfig, header *OctreeHeader, readWriter io.ReadWrit
 						return err
 					}
 
-					node.Children[i] = uint32((newPos - int64(header.Size())) / int64(MIP_R64G64B64A64S64_UI32.NodeSize()))
+					node.Children[i] = uint32((newPos - int64(header.Size())) / int64(mipR64G64B64A64S64UnpackUI32.NodeSize()))
 					if err := binary.Write(readWriter, binary.BigEndian, node.Children); err != nil {
 						return err
 					}
@@ -226,11 +226,11 @@ func insertSample(cfg *BuildConfig, header *OctreeHeader, readWriter io.ReadWrit
 						return err
 					}
 
-					if _, err := readWriter.Seek(int64(-MIP_R64G64B64A64S64_UI32.NodeSize()), 1); err != nil {
+					if _, err := readWriter.Seek(int64(-mipR64G64B64A64S64UnpackUI32.NodeSize()), 1); err != nil {
 						return err
 					}
 				} else {
-					if _, err := readWriter.Seek(int64(int(child)*MIP_R64G64B64A64S64_UI32.NodeSize()+header.Size()), 0); err != nil {
+					if _, err := readWriter.Seek(int64(int(child)*mipR64G64B64A64S64UnpackUI32.NodeSize()+header.Size()), 0); err != nil {
 						return err
 					}
 				}

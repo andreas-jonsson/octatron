@@ -23,7 +23,6 @@ import (
 	"github.com/go-gl/gl/v3.2-compatibility/gl"
 	"github.com/veandco/go-sdl2/sdl"
 
-	"bufio"
 	"compress/zlib"
 	"encoding/binary"
 	"fmt"
@@ -47,13 +46,8 @@ const (
 	cloudOffsetZ   = -48
 )
 
-type cloudSample struct {
-	Pos   point3d
-	Color [3]byte
-}
-
 type octreeNode struct {
-	Color    [4]byte
+	Color    pack.Color
 	Children [8]uint32
 }
 
@@ -194,13 +188,12 @@ func gluPerspective(fovy float64, aspect float64, zNear float64, zFar float64) {
 }
 
 type renderData struct {
-	yrot, xrot                  float64
-	zoom                        float64
-	minNodeSize                 float32
-	nodes                       []octreeNode
-	cloud                       []cloudSample
-	box                         uint32
-	renderSections, renderCloud bool
+	yrot, xrot     float64
+	zoom           float64
+	minNodeSize    float32
+	nodes          []octreeNode
+	box            uint32
+	renderSections bool
 }
 
 func drawAxis(data *renderData) {
@@ -227,7 +220,6 @@ func windowLoop(window *sdl.Window) {
 	data.renderSections = true
 	data.zoom = -250
 	data.nodes = loadTree("cmd/packer/test.priv.oct")
-	//data.cloud = loadCloud("pack/test.xyz")
 	data.box = genBox()
 	defer gl.DeleteLists(data.box, 1)
 
@@ -248,8 +240,6 @@ func windowLoop(window *sdl.Window) {
 					return
 				case sdl.K_SPACE:
 					data.renderSections = !data.renderSections
-				case sdl.K_RETURN:
-					//data.renderCloud = !data.renderCloud
 				case sdl.K_PLUS:
 					data.minNodeSize += 1.0
 				case sdl.K_MINUS:
@@ -273,11 +263,7 @@ func windowLoop(window *sdl.Window) {
 
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-		if data.renderCloud == true {
-			renderCloud(data, data.cloud)
-		} else {
-			renderTree(data, &data.nodes[0], point3d{0, 0, 0}, 100)
-		}
+		renderTree(data, &data.nodes[0], point3d{0, 0, 0}, 100)
 
 		gl.Disable(gl.DEPTH_TEST)
 		drawAxis(data)
@@ -291,38 +277,6 @@ func windowLoop(window *sdl.Window) {
 	}
 }
 
-func loadCloud(file string) []cloudSample {
-	samples := make([]cloudSample, 0)
-
-	fp, err := os.Open(file)
-	if err != nil {
-		panic(err)
-	}
-	defer fp.Close()
-
-	scanner := bufio.NewScanner(fp)
-	for scanner.Scan() {
-		var s cloudSample
-		var ref float64
-
-		_, err := fmt.Sscan(scanner.Text(), &s.Pos.X, &s.Pos.Y, &s.Pos.Z, &ref, &s.Color[0], &s.Color[1], &s.Color[2])
-		if err != nil {
-			panic(err)
-		}
-
-		s.Pos = s.Pos.add(&point3d{cloudOffsetX, cloudOffsetY, cloudOffsetZ})
-		s.Pos = s.Pos.scale(cloudScale)
-		samples = append(samples, s)
-	}
-
-	err = scanner.Err()
-	if err != nil {
-		panic(err)
-	}
-
-	return samples
-}
-
 func loadTree(file string) []octreeNode {
 	fp, err := os.Open(file)
 	if err != nil {
@@ -333,10 +287,6 @@ func loadTree(file string) []octreeNode {
 	var header pack.OctreeHeader
 	if err := binary.Read(fp, binary.BigEndian, &header); err != nil {
 		panic(err)
-	}
-
-	if header.Format != pack.MIP_R8G8B8A8_UI32 {
-		panic("Format must be: MIP_R8G8B8A8_UI32")
 	}
 
 	var reader io.Reader
@@ -354,8 +304,11 @@ func loadTree(file string) []octreeNode {
 	numNodes := header.NumNodes
 	nodes := make([]octreeNode, numNodes)
 
-	if err := binary.Read(reader, binary.BigEndian, nodes); err != nil {
-		panic(err)
+	for i := uint64(0); i < numNodes; i++ {
+		node := &nodes[i]
+		if err := pack.DecodeNode(reader, header.Format, &node.Color, node.Children[:]); err != nil {
+			panic(err)
+		}
 	}
 
 	return nodes
@@ -389,7 +342,7 @@ func renderTree(data *renderData, node *octreeNode, pos point3d, size float32) {
 			return
 		} else if data.renderSections == true {
 			gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
-			renderNode(data, [4]byte{0, 255, 0, 255}, pos, size)
+			renderNode(data, pack.Color{0, 1, 0, 1}, pos, size)
 			gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
 		}
 
@@ -404,7 +357,7 @@ func renderTree(data *renderData, node *octreeNode, pos point3d, size float32) {
 	}
 }
 
-func renderNode(data *renderData, color [4]byte, pos point3d, size float32) {
+func renderNode(data *renderData, color pack.Color, pos point3d, size float32) {
 	gl.LoadIdentity()
 
 	gl.Translated(0, 0, data.zoom)
@@ -414,22 +367,6 @@ func renderNode(data *renderData, color [4]byte, pos point3d, size float32) {
 	gl.Translatef(pos.X, pos.Y, pos.Z)
 	gl.Scalef(size, size, size)
 
-	gl.Color3f(float32(color[0])/256, float32(color[1])/256, float32(color[2])/256)
+	gl.Color3f(color.R, color.G, color.B)
 	gl.CallList(data.box)
-}
-
-func renderCloud(data *renderData, samples []cloudSample) {
-	for _, s := range samples {
-		gl.LoadIdentity()
-
-		gl.Translated(0, 0, data.zoom)
-		gl.Rotated(data.xrot, 1, 0, 0)
-		gl.Rotated(data.yrot, 0, 1, 0)
-
-		gl.Translatef(s.Pos.X, s.Pos.Y, s.Pos.Z)
-		gl.Scaled(cloudPointSize, cloudPointSize, cloudPointSize)
-
-		gl.Color3f(float32(s.Color[0])/256, float32(s.Color[1])/256, float32(s.Color[2])/256)
-		gl.CallList(data.box)
-	}
 }

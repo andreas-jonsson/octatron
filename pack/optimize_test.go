@@ -32,7 +32,7 @@ func TestTranscode(t *testing.T) {
 	out, _ := os.Create("test.opt")
 	defer out.Close()
 
-	if err := TranscodeTree(in, out, MIP_R8G8B8A8_UI32); err != nil {
+	if err := TranscodeTree(in, out, MipR8G8B8A8UnpackUI32); err != nil {
 		panic(err)
 	}
 }

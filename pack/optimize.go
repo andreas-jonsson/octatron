@@ -23,6 +23,7 @@ import (
 	"encoding/binary"
 	"io"
 	"io/ioutil"
+	"math"
 	"os"
 )
 
@@ -37,7 +38,6 @@ type optInput struct {
 	reader         io.ReadSeeker
 	files          []*os.File
 	header         *OctreeHeader
-	outputFormat   OctreeFormat
 	colorThreshold float32
 	colorFilter    bool
 	status         *OptStatus
@@ -122,7 +122,7 @@ func OptimizeTree(reader io.ReadSeeker, writer io.Writer, outputFormat OctreeFor
 	header.NumNodes = 0
 	header.Flags &= optimizedMask
 
-	args := optInput{reader, tempFiles, &header, outputFormat, colorThreshold, colorFilter, &status}
+	args := optInput{reader, tempFiles, &header, colorThreshold, colorFilter, &status}
 	_, err := optNode(&args, 0, 0, Color{})
 	if err != nil {
 		return status, err
@@ -133,7 +133,8 @@ func OptimizeTree(reader io.ReadSeeker, writer io.Writer, outputFormat OctreeFor
 		return status, err
 	}
 
-	err = mergeAndPatch(writer, tempFiles, &header, &status)
+	header.Format = MipR8G8B8A8UnpackUI32
+	err = mergeAndPatch(writer, tempFiles, &header, outputFormat, &status)
 	if err != nil {
 		return status, err
 	}
@@ -141,7 +142,7 @@ func OptimizeTree(reader io.ReadSeeker, writer io.Writer, outputFormat OctreeFor
 	return status, err
 }
 
-func mergeAndPatch(writer io.Writer, files []*os.File, header *OctreeHeader, status *OptStatus) error {
+func mergeAndPatch(writer io.Writer, files []*os.File, header *OctreeHeader, outputFormat OctreeFormat, status *OptStatus) error {
 	var numNodes int64
 	for lv, fp := range files {
 		var (
@@ -169,14 +170,14 @@ func mergeAndPatch(writer io.Writer, files []*os.File, header *OctreeHeader, sta
 			}
 
 			for j, child := range children {
-				if child == 0xffff {
+				if child == math.MaxUint32 {
 					children[j] = 0
 				} else {
 					children[j] = uint32(nextLevelStart) + child
 				}
 			}
 
-			if err := EncodeNode(writer, header.Format, color, children[:]); err != nil {
+			if err := EncodeNode(writer, outputFormat, color, children[:]); err != nil {
 				return err
 			}
 		}
@@ -253,13 +254,13 @@ func optNode(in *optInput, nodeIndex, level uint32, parentColor Color) (int64, e
 				children[i] = uint32(p)
 				numChildren++
 			} else {
-				children[i] = 0xffff
+				children[i] = math.MaxUint32
 			}
 		}
 	} else {
 		in.status.NumMerged++
 		for i := range children {
-			children[i] = 0xffff
+			children[i] = math.MaxUint32
 		}
 	}
 
@@ -278,9 +279,9 @@ func optNode(in *optInput, nodeIndex, level uint32, parentColor Color) (int64, e
 		}
 	}
 
-	if err := EncodeNode(fp, in.outputFormat, newColor, children[:]); err != nil {
+	if err := EncodeNode(fp, MipR8G8B8A8UnpackUI32, newColor, children[:]); err != nil {
 		return 0, err
 	}
 
-	return pos / int64(in.outputFormat.NodeSize()), nil
+	return pos / int64(MipR8G8B8A8UnpackUI32.NodeSize()), nil
 }

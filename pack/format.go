@@ -22,20 +22,27 @@ import (
 	"compress/zlib"
 	"encoding/binary"
 	"io"
+	"math"
 )
 
 type OctreeFormat byte
 
 const (
-	MIP_R8G8B8A8_UI32 OctreeFormat = iota
-	MIP_R8G8B8A8_UI16
-	MIP_R5G5B5A1_UI16
-	MIP_R64G64B64A64S64_UI32
+	MipR8G8B8A8UnpackUI32 OctreeFormat = iota
+	MipR8G8B8A8UnpackUI16
+	MipR5G5B5A1UnpackUI16
+
+	MipR8G8B8A8PackUI28
+
+	// Internal formats
+	mipR64G64B64A64S64UnpackUI32
 )
 
+const maxUint28 = 1<<28 - 1
+
 var (
-	formatIndexSize = [4]int{4, 2, 2, 4}
-	formatColorSize = [4]int{4, 4, 2, 40}
+	formatColorSize = [...]int{4, 4, 2, 0, 40}
+	formatIndexSize = [...]int{4, 2, 2, 4, 4}
 )
 
 func (f OctreeFormat) IndexSize() int {
@@ -128,7 +135,7 @@ func TranscodeTree(reader io.Reader, writer io.Writer, format OctreeFormat) erro
 	return nil
 }
 
-func DecodeNode(reader io.Reader, fmt OctreeFormat, color *Color, children []uint32) error {
+func DecodeNode(reader io.Reader, format OctreeFormat, color *Color, children []uint32) error {
 	readR8G8B8A8 := func() error {
 		var col [4]byte
 		if err := binary.Read(reader, binary.BigEndian, &col); err != nil {
@@ -154,7 +161,7 @@ func DecodeNode(reader io.Reader, fmt OctreeFormat, color *Color, children []uin
 		return nil
 	}
 
-	if fmt == MIP_R8G8B8A8_UI32 {
+	if format == MipR8G8B8A8UnpackUI32 {
 		if err := readR8G8B8A8(); err != nil {
 			return err
 		}
@@ -162,7 +169,7 @@ func DecodeNode(reader io.Reader, fmt OctreeFormat, color *Color, children []uin
 		if err := binary.Read(reader, binary.BigEndian, children); err != nil {
 			return err
 		}
-	} else if fmt == MIP_R8G8B8A8_UI16 {
+	} else if format == MipR8G8B8A8UnpackUI16 {
 		if err := readR8G8B8A8(); err != nil {
 			return err
 		}
@@ -170,21 +177,21 @@ func DecodeNode(reader io.Reader, fmt OctreeFormat, color *Color, children []uin
 		if err := readChild16(); err != nil {
 			return err
 		}
-	} else if fmt == MIP_R5G5B5A1_UI16 {
+	} else if format == MipR5G5B5A1UnpackUI16 {
 		var col uint16
 		if err := binary.Read(reader, binary.BigEndian, &col); err != nil {
 			return err
 		}
 
-		color.R = float32(col & 0xf800)
-		color.G = float32(col & 0x7c0)
-		color.B = float32(col & 0x3e)
+		color.R = float32(col&0xf800) / 32
+		color.G = float32(col&0x7c0) / 32
+		color.B = float32(col&0x3e) / 32
 		color.A = float32(col & 0x1)
 
 		if err := readChild16(); err != nil {
 			return err
 		}
-	} else if fmt == MIP_R64G64B64A64S64_UI32 {
+	} else if format == mipR64G64B64A64S64UnpackUI32 {
 		var col [5]uint64
 		if err := binary.Read(reader, binary.BigEndian, &col); err != nil {
 			return err
@@ -198,25 +205,74 @@ func DecodeNode(reader io.Reader, fmt OctreeFormat, color *Color, children []uin
 		if err := binary.Read(reader, binary.BigEndian, children); err != nil {
 			return err
 		}
+	} else if format == MipR8G8B8A8PackUI28 {
+		if err := binary.Read(reader, binary.BigEndian, children); err != nil {
+			return err
+		}
+
+		var cbits byte
+		for i, component := range children {
+			if i%2 == 0 {
+				cbits = byte(component >> 24)
+			} else {
+				cbits |= byte(component >> 28)
+				color.setComponent(i/2, float32(cbits)/256)
+			}
+			children[i] = component & 0xfffffff
+		}
 	} else {
 		return errUnsupportedFormat
 	}
 	return nil
 }
 
-func EncodeNode(writer io.Writer, fmt OctreeFormat, color Color, children []uint32) error {
-	if err := color.writeColor(writer, fmt); err != nil {
-		return err
-	}
+func EncodeNode(writer io.Writer, format OctreeFormat, color Color, children []uint32) error {
+	if format == MipR8G8B8A8UnpackUI32 {
+		if err := color.writeColor(writer, format); err != nil {
+			return err
+		}
 
-	if fmt == MIP_R8G8B8A8_UI32 {
+		for _, child := range children {
+			if child > math.MaxUint32 {
+				return errOctreeOverflow
+			}
+		}
+
 		if err := binary.Write(writer, binary.BigEndian, children); err != nil {
 			return err
 		}
+	} else if format == MipR8G8B8A8PackUI28 {
+		var component uint32
+		colors := color.bytes()
+
+		for i, child := range children {
+			if child > maxUint28 {
+				return errOctreeOverflow
+			}
+
+			var colorNib uint32
+			if i%2 == 0 {
+				colorNib = uint32(colors[i/2]&0xf0) << 24
+			} else {
+				colorNib = uint32(colors[i/2]&0xf) << 28
+			}
+
+			component = colorNib | child
+			if err := binary.Write(writer, binary.BigEndian, component); err != nil {
+				return err
+			}
+		}
 	} else {
+		if err := color.writeColor(writer, format); err != nil {
+			return err
+		}
+
 		var ch [8]uint16
-		for i := 0; i < 8; i++ {
-			ch[i] = uint16(children[i])
+		for i, child := range children {
+			if child > math.MaxUint16 {
+				return errOctreeOverflow
+			}
+			ch[i] = uint16(child)
 		}
 
 		if err := binary.Write(writer, binary.BigEndian, ch); err != nil {
