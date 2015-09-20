@@ -52,7 +52,7 @@ func (color *Color) setComponent(comp int, val float32) {
 }
 
 func (color *Color) bytes() [4]byte {
-	return [4]byte{byte(color.R * 256), byte(color.G * 256), byte(color.B * 256), byte(color.A * 256)}
+	return [4]byte{byte(color.R * 255), byte(color.G * 255), byte(color.B * 255), byte(color.A * 255)}
 }
 
 func (color *Color) dist(c *Color) float32 {
@@ -64,26 +64,32 @@ func (color *Color) writeColor(writer io.Writer, format OctreeFormat) error {
 
 	switch format {
 	case MipR8G8B8A8UnpackUI32:
-		c.scale(256)
+		c.scale(255)
 		err := binary.Write(writer, binary.BigEndian, byte(c.R))
 		err = binary.Write(writer, binary.BigEndian, byte(c.G))
 		err = binary.Write(writer, binary.BigEndian, byte(c.B))
 		err = binary.Write(writer, binary.BigEndian, byte(c.A))
 		return err
 	case MipR8G8B8A8UnpackUI16:
-		c.scale(256)
+		c.scale(255)
 		err := binary.Write(writer, binary.BigEndian, byte(c.R))
 		err = binary.Write(writer, binary.BigEndian, byte(c.G))
 		err = binary.Write(writer, binary.BigEndian, byte(c.B))
 		err = binary.Write(writer, binary.BigEndian, byte(c.A))
 		return err
-	case MipR5G5B5A1UnpackUI16:
-		a := uint16(c.A) & 0x1
-		c.scale(32)
-		r := uint16(c.R) & 0x1f
-		g := uint16(c.G) & 0x1f
-		b := uint16(c.B) & 0x1f
-		err := binary.Write(writer, binary.BigEndian, r<<11|g<<6|b<<1|a)
+	case MipR4G4B4A4UnpackUI16:
+		c.scale(15)
+		r := uint16(c.R) & 0xf
+		g := uint16(c.G) & 0xf
+		b := uint16(c.B) & 0xf
+		a := uint16(c.A) & 0xf
+		err := binary.Write(writer, binary.BigEndian, r<<12|g<<8|b<<4|a)
+		return err
+	case MipR5G6B5UnpackUI16:
+		r := uint16(c.R*31) & 0x1f
+		g := uint16(c.G*63) & 0x3f
+		b := uint16(c.B*31) & 0x1f
+		err := binary.Write(writer, binary.BigEndian, r<<11|g<<5|b)
 		return err
 	default:
 		return errUnsupportedFormat

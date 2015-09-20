@@ -32,7 +32,7 @@ type xyzSample struct {
 }
 
 func (s *xyzSample) Color() pack.Color {
-	return pack.Color{float32(s.r) / 256, float32(s.g) / 256, float32(s.b) / 256, 1}
+	return pack.Color{float32(s.r) / 255, float32(s.g) / 255, float32(s.b) / 255, 1}
 }
 
 func (s *xyzSample) Position() pack.Point {

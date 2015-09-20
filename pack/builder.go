@@ -170,10 +170,10 @@ func insertSample(cfg *BuildConfig, header *OctreeHeader, readWriter io.ReadWrit
 		}
 
 		color := sample.Color()
-		node.Color[0] += uint64(color.R * 256)
-		node.Color[1] += uint64(color.G * 256)
-		node.Color[2] += uint64(color.B * 256)
-		node.Color[3] += uint64(color.A * 256)
+		node.Color[0] += uint64(color.R * 255)
+		node.Color[1] += uint64(color.G * 255)
+		node.Color[2] += uint64(color.B * 255)
+		node.Color[3] += uint64(color.A * 255)
 		node.Color[4]++
 
 		if err := binary.Write(readWriter, binary.BigEndian, node.Color); err != nil {

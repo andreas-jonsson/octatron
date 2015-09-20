@@ -30,9 +30,12 @@ type OctreeFormat byte
 const (
 	MipR8G8B8A8UnpackUI32 OctreeFormat = iota
 	MipR8G8B8A8UnpackUI16
-	MipR5G5B5A1UnpackUI16
+	MipR4G4B4A4UnpackUI16
+	MipR5G6B5UnpackUI16
 
 	MipR8G8B8A8PackUI28
+	MipR4G4B4A4PackUI30
+	MipR5G6B5PackUI30
 	MipR3G3B2PackUI31
 
 	// Internal formats
@@ -40,13 +43,14 @@ const (
 )
 
 const (
-	maxUint28 = 1<<28 - 1
 	maxUint31 = 1<<31 - 1
+	maxUint30 = 1<<30 - 1
+	maxUint28 = 1<<28 - 1
 )
 
 var (
-	formatColorSize = [...]int{4, 4, 2, 0, 0, 40}
-	formatIndexSize = [...]int{4, 2, 2, 4, 4, 4}
+	formatColorSize = [...]int{4, 4, 2, 2, 0, 0, 0, 0, 40}
+	formatIndexSize = [...]int{4, 2, 2, 2, 4, 4, 4, 4, 4}
 )
 
 func (f OctreeFormat) IndexSize() int {
@@ -154,10 +158,10 @@ func DecodeNode(reader io.Reader, format OctreeFormat, color *Color, children []
 			return err
 		}
 
-		color.R = float32(col[0]) / 256
-		color.G = float32(col[1]) / 256
-		color.B = float32(col[2]) / 256
-		color.A = float32(col[3]) / 256
+		color.R = float32(col[0]) / 255
+		color.G = float32(col[1]) / 255
+		color.B = float32(col[2]) / 255
+		color.A = float32(col[3]) / 255
 		return nil
 	}
 
@@ -189,16 +193,30 @@ func DecodeNode(reader io.Reader, format OctreeFormat, color *Color, children []
 		if err := readChild16(); err != nil {
 			return err
 		}
-	} else if format == MipR5G5B5A1UnpackUI16 {
+	} else if format == MipR4G4B4A4UnpackUI16 {
 		var col uint16
 		if err := binary.Read(reader, binary.BigEndian, &col); err != nil {
 			return err
 		}
 
-		color.R = float32(col&0xf800) / 32
-		color.G = float32(col&0x7c0) / 32
-		color.B = float32(col&0x3e) / 32
-		color.A = float32(col & 0x1)
+		color.R = float32(col&0xf000) / 15
+		color.G = float32(col&0xf00) / 15
+		color.B = float32(col&0xf0) / 15
+		color.A = float32(col&0xf) / 15
+
+		if err := readChild16(); err != nil {
+			return err
+		}
+	} else if format == MipR5G6B5UnpackUI16 {
+		var col uint16
+		if err := binary.Read(reader, binary.BigEndian, &col); err != nil {
+			return err
+		}
+
+		color.R = float32(col&0xf800) / 31
+		color.G = float32(col&0x7e0) / 63
+		color.B = float32(col&0x1f) / 31
+		color.A = 1
 
 		if err := readChild16(); err != nil {
 			return err
@@ -209,10 +227,10 @@ func DecodeNode(reader io.Reader, format OctreeFormat, color *Color, children []
 			return err
 		}
 
-		color.R = float32((col[0] / col[4])) / 256
-		color.G = float32((col[1] / col[4])) / 256
-		color.B = float32((col[2] / col[4])) / 256
-		color.A = float32((col[3] / col[4])) / 256
+		color.R = float32((col[0] / col[4])) / 255
+		color.G = float32((col[1] / col[4])) / 255
+		color.B = float32((col[2] / col[4])) / 255
+		color.A = float32((col[3] / col[4])) / 255
 
 		if err := binary.Read(reader, binary.BigEndian, children); err != nil {
 			return err
@@ -228,10 +246,40 @@ func DecodeNode(reader io.Reader, format OctreeFormat, color *Color, children []
 				cbits = byte(component >> 24)
 			} else {
 				cbits |= byte(component >> 28)
-				color.setComponent(i/2, float32(cbits)/256)
+				color.setComponent(i/2, float32(cbits)/255)
 			}
 			children[i] = component & 0xfffffff
 		}
+	} else if format == MipR4G4B4A4PackUI30 {
+		if err := binary.Read(reader, binary.BigEndian, children); err != nil {
+			return err
+		}
+
+		var cbits uint16
+		for i, component := range children {
+			cbits |= uint16((component & 0xc0000000) >> (16 + byte(i*2)))
+			children[i] = component & 0x3fffffff
+		}
+
+		color.R = float32((cbits&0xf000)>>12) / 15
+		color.G = float32((cbits&0xf00)>>8) / 15
+		color.B = float32((cbits&0xf0)>>4) / 15
+		color.A = float32(cbits&0xf) / 15
+	} else if format == MipR5G6B5PackUI30 {
+		if err := binary.Read(reader, binary.BigEndian, children); err != nil {
+			return err
+		}
+
+		var cbits uint16
+		for i, component := range children {
+			cbits |= uint16((component & 0xc0000000) >> (16 + byte(i*2)))
+			children[i] = component & 0x3fffffff
+		}
+
+		color.R = float32((cbits&0xf800)>>11) / 31
+		color.G = float32((cbits&0x7e0)>>5) / 63
+		color.B = float32(cbits&0x1f) / 31
+		color.A = 1
 	} else if format == MipR3G3B2PackUI31 {
 		if err := binary.Read(reader, binary.BigEndian, children); err != nil {
 			return err
@@ -243,9 +291,9 @@ func DecodeNode(reader io.Reader, format OctreeFormat, color *Color, children []
 			children[i] = component & 0x7fffffff
 		}
 
-		color.R = float32((cbits&0xe0)>>5) / 8
-		color.G = float32((cbits&0x1c)>>2) / 8
-		color.B = float32(cbits&0x3) / 4
+		color.R = float32((cbits&0xe0)>>5) / 7
+		color.G = float32((cbits&0x1c)>>2) / 7
+		color.B = float32(cbits&0x3) / 3
 		color.A = 1
 	} else {
 		return errUnsupportedFormat
@@ -295,9 +343,9 @@ func EncodeNode(writer io.Writer, format OctreeFormat, color Color, children []u
 			packedColor byte
 		)
 
-		packedColor = byte(color.R*8) << 5
-		packedColor |= byte(color.G*8) << 2
-		packedColor |= byte(color.B * 4)
+		packedColor = byte(color.R*7) << 5
+		packedColor |= byte(color.G*7) << 2
+		packedColor |= byte(color.B * 3)
 
 		for i, child := range children {
 			if child > maxUint31 {
@@ -305,6 +353,47 @@ func EncodeNode(writer io.Writer, format OctreeFormat, color Color, children []u
 			}
 
 			component = ((uint32(packedColor) << byte(24+i)) & 0x80000000) | child
+			if err := binary.Write(writer, binary.BigEndian, component); err != nil {
+				return err
+			}
+		}
+	} else if format == MipR5G6B5PackUI30 {
+		var (
+			component   uint32
+			packedColor uint16
+		)
+
+		packedColor = uint16(color.R*31) << 11
+		packedColor |= uint16(color.G*63) << 5
+		packedColor |= uint16(color.B * 31)
+
+		for i, child := range children {
+			if child > maxUint30 {
+				return errOctreeOverflow
+			}
+
+			component = ((uint32(packedColor) << byte(16+i*2)) & 0xc0000000) | child
+			if err := binary.Write(writer, binary.BigEndian, component); err != nil {
+				return err
+			}
+		}
+	} else if format == MipR4G4B4A4PackUI30 {
+		var (
+			component   uint32
+			packedColor uint16
+		)
+
+		packedColor = uint16(color.R*15) << 12
+		packedColor |= uint16(color.G*15) << 8
+		packedColor |= uint16(color.B*15) << 4
+		packedColor |= uint16(color.A*15) & 0xf
+
+		for i, child := range children {
+			if child > maxUint30 {
+				return errOctreeOverflow
+			}
+
+			component = ((uint32(packedColor) << byte(16+i*2)) & 0xc0000000) | child
 			if err := binary.Write(writer, binary.BigEndian, component); err != nil {
 				return err
 			}
