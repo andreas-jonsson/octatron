@@ -16,64 +16,22 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-package pack
+#version 150
 
-import (
-	"bufio"
-	"fmt"
-	"os"
-	"testing"
-)
+uniform mat4 cameraMatrix;
 
-type xyzSample struct {
-	pos     Point
-	r, g, b byte
-}
+in vec3 inputPosition;
+//in vec3 cameraPosition;
 
-func (s *xyzSample) Color() Color {
-	return Color{float32(s.r) / 255, float32(s.g) / 255, float32(s.b) / 255, 1}
-}
+out vec3 rayDirection;
+out vec3 rayOrigin;
 
-func (s *xyzSample) Position() Point {
-	return s.pos
-}
+void main() {
+	const vec3 orig = vec3(0.0, 0.0, -2.0);
+	vec3 dir = normalize(inputPosition - orig);
 
-func TestBuildTree(t *testing.T) {
-	infile, err := os.Open("test.xyz")
-	if err != nil {
-		panic(err)
-	}
-	defer infile.Close()
+	rayDirection = (cameraMatrix * vec4(dir, 1)).xyz;
+	rayOrigin = (cameraMatrix * vec4(orig, 1)).xyz;
 
-	outfile, err := os.Create("test.oct")
-	if err != nil {
-		panic(err)
-	}
-	defer outfile.Close()
-
-	parser := func(samples chan<- Sample) error {
-		scanner := bufio.NewScanner(infile)
-		for scanner.Scan() {
-			text := scanner.Text()
-			s := new(xyzSample)
-
-			var ref float32
-			_, err := fmt.Sscan(text, &s.pos.X, &s.pos.Y, &s.pos.Z, &ref, &s.r, &s.g, &s.b)
-			if err != nil {
-				return err
-			}
-
-			samples <- s
-		}
-		return scanner.Err()
-	}
-
-	bounds := Box{Point{0, 0, 0}, 80}
-	cfg := BuildConfig{parser, outfile, bounds, 8, MipR8G8B8A8UnpackUI32, true, true, 0.25}
-
-	status, err := BuildTree(&cfg)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(status)
+    gl_Position = vec4(inputPosition, 1);
 }
