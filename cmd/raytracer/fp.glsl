@@ -16,10 +16,9 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#version 410
+#version 150
 
 uniform usampler1D oct;
-//uniform float octSize;
 
 in vec3 rayDirection;
 in vec3 rayOrigin;
@@ -51,7 +50,7 @@ void decodeColor(in uint nodeAddress, out vec4 outputColor) {
     outputColor.a = float(color & 0xffu) / 255.0;
 }
 
-void intersectTree(in vec3 origin, in vec3 direction, in uint nodeIndex, in vec3 nodePos, in float nodeScale, out vec4 outputColor, out float dist) {
+bool intersectTree(in vec3 origin, in vec3 direction, in uint nodeIndex, in vec3 nodePos, in float nodeScale, out vec4 outputColor, out float dist) {
     const uint nodeSize = 36u;
     const vec3[8] childPositions = vec3[](
         vec3(0, 0, 0), vec3(1, 0, 0), vec3(0, 1, 0), vec3(1, 1, 0),
@@ -67,66 +66,32 @@ void intersectTree(in vec3 origin, in vec3 direction, in uint nodeIndex, in vec3
         vec3 candidatePos;
 
         int numChild = 0;
-        for (int i = 1; i < 9; i++) {
-            uint child = texelFetch(oct, int(nodeAddress) + i, 0).r;
-
-
-
-            //uint child = texture(oct, float((int(nodeAddress) + i) / textureSize(oct, 0))).r;
-
-
-            //decodeColor(0, outputColor);
-            //return;
-
-
-
-
-
-
-
-
+        for (int i = 0; i < 8; i++) {
+            uint child = texelFetch(oct, int(nodeAddress) + i + 1, 0).r;
             if (child > 0u) {
                 numChild++;
 
-
-
-
-                vec3 bmin = nodePos + (childPositions[0] * childScale);
+                vec3 bmin = nodePos + (childPositions[i] * childScale);
                 vec3 bmax = bmin + vec3(childScale);
 
                 float intersectionDist;
-                //intersect(origin, direction, bmin, bmax, intersectionDist);
                 if (intersect(origin, direction, bmin, bmax, intersectionDist) == true) {
-
-                    //outputColor = vec4(0,0,intersectionDist-1.5,1);
-                    //return;
-
-
                     if (intersectionDist < shortestDist) {
                         shortestDist = intersectionDist;
                         candidate = child;
                         candidatePos = bmin;
-
-
-                        //outputColor = vec4(1,0,0,1);
-                        //return;
                     }
                 }
             }
         }
 
         if (numChild == 0) {
-
-            //decodeColor(nodeAddress, outputColor);
-
-            outputColor = vec4(0,1,0,1);
-            return;
+            decodeColor(nodeAddress, outputColor);
+            return true;
         }
 
-        // This should be avoided.
         if (candidate == 0xffffffffu) {
-            outputColor = vec4(1,0,0,1);
-            return;
+            return false;
         }
 
         nodeScale = childScale;
@@ -137,42 +102,15 @@ void intersectTree(in vec3 origin, in vec3 direction, in uint nodeIndex, in vec3
 
 void main() {
     float halfSize = octSize * 0.5;
-	vec3 min = vec3(-halfSize);
+    vec3 min = vec3(-halfSize);
 
     float dist;
     vec4 color;
 
-    intersectTree(rayOrigin, rayDirection, 0u, min, octSize, color, dist);
+    if (intersectTree(rayOrigin, rayDirection, 0u, min, octSize, color, dist) == false) {
+        discard;
+        return;
+    }
 
     outputColor = vec4(color.rgb,1);
-/*
-    uint r = texelFetch(oct, 0,0).r;
-    uint g = texelFetch(oct, 1,0).r;
-    uint b = texelFetch(oct, 2,0).r;
-    uint a = texelFetch(oct, 3,0).r;
-    outputColor = vec4(float(r)/255,float(g)/255,float(b)/255,float(a)/255);*/
-
-    //decodeColor(0u, outputColor);
-
-    //outputColor = vec4(float((u & 0xff000000u) >> 24) / 255,0,0,1);
-    //outputColor = vec4(float(u) / 255,0,0,1);
-
-
-	//outputColor = vec4(1,0,0,1);
-	//return;
-
-/*
-	int nodeOffset = 0;
-
-
-
-
-
-
-	float dist;
-	if (intersect(rayOrigin, rayDirection, min, max, dist))
-		outputColor = vec4(1,dist - 1.5,0,1);
-	else
-		outputColor = vec4(0,0,0,1);
-*/
 }

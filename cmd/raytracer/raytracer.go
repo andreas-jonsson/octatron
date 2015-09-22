@@ -21,7 +21,7 @@ package main
 import (
 	"io/ioutil"
 
-	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/veandco/go-sdl2/sdl"
 
@@ -51,8 +51,8 @@ func main() {
 	}
 	defer sdl.Quit()
 
-	sdl.GL_SetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 4)
-	sdl.GL_SetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 1)
+	sdl.GL_SetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 3)
+	sdl.GL_SetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 2)
 	sdl.GL_SetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_CORE)
 
 	window, err = sdl.CreateWindow(winTitle, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, winWidth, winHeight, sdl.WINDOW_OPENGL)
@@ -113,6 +113,8 @@ func loadResources() (uint32, uint32) {
 }
 
 func setupGL() int32 {
+	gl.Disable(gl.DEPTH_TEST)
+
 	program, _ := loadResources()
 
 	gl.BindFragDataLocation(program, 0, gl.Str("outputColor\x00"))
