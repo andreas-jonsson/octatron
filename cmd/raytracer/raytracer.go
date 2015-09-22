@@ -21,7 +21,7 @@ package main
 import (
 	"io/ioutil"
 
-	"github.com/go-gl/gl/v3.2-core/gl"
+	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/veandco/go-sdl2/sdl"
 
@@ -51,8 +51,8 @@ func main() {
 	}
 	defer sdl.Quit()
 
-	sdl.GL_SetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 3)
-	sdl.GL_SetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 2)
+	sdl.GL_SetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 4)
+	sdl.GL_SetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 1)
 	sdl.GL_SetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_CORE)
 
 	window, err = sdl.CreateWindow(winTitle, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, winWidth, winHeight, sdl.WINDOW_OPENGL)
@@ -86,8 +86,9 @@ func printGLInfo() {
 	fmt.Println("OpenGL renderer:", gl.GoStr(gl.GetString(gl.RENDERER)))
 }
 
-func loadResources() uint32 {
-	_, _, err := newOctree("pack/test.oct")
+func loadResources() (uint32, uint32) {
+	//texture, _, err := newOctree("cmd/raytracer/test.priv.oct")
+	texture, _, err := newOctree("pack/test.oct")
 	if err != nil {
 		panic(err)
 	}
@@ -108,13 +109,16 @@ func loadResources() uint32 {
 	}
 
 	gl.UseProgram(program)
-	return program
+	return program, texture
 }
 
 func setupGL() int32 {
-	program := loadResources()
+	program, _ := loadResources()
+
 	gl.BindFragDataLocation(program, 0, gl.Str("outputColor\x00"))
 	cameraMatrixUniform := gl.GetUniformLocation(program, gl.Str("cameraMatrix\x00"))
+	octUniform := gl.GetUniformLocation(program, gl.Str("oct\x00"))
+	gl.Uniform1i(octUniform, 0)
 
 	gl.Viewport(0, 0, winWidth, winHeight)
 
@@ -183,7 +187,7 @@ func windowLoop(window *sdl.Window, cameraMatrixUniform int32) {
 
 		sdl.GL_SwapWindow(window)
 		if glErr := gl.GetError(); glErr != gl.NO_ERROR {
-			panic(fmt.Errorf("GL error, swap: %v", glErr))
+			panic(fmt.Errorf("GL error, swap: %x", glErr))
 		}
 	}
 }

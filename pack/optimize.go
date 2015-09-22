@@ -92,7 +92,7 @@ func OptimizeTree(reader io.ReadSeeker, writer io.Writer, outputFormat OctreeFor
 	}
 
 	if header.Compressed() == true {
-		return status, errUnsupportedFormat
+		return status, errInputIsCompressed
 	}
 
 	maxLevels := 0

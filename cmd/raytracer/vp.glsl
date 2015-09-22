@@ -16,7 +16,7 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-#version 150
+#version 410
 
 uniform mat4 cameraMatrix;
 

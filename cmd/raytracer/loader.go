@@ -19,12 +19,14 @@
 package main
 
 import (
-	"github.com/andreas-t-jonsson/octatron/pack"
-	"github.com/go-gl/gl/v3.2-core/gl"
-
 	"errors"
+	"os"
+
+	"github.com/andreas-t-jonsson/octatron/pack"
+	"github.com/go-gl/gl/v4.1-core/gl"
+
+	"encoding/binary"
 	"fmt"
-	"io/ioutil"
 	"strings"
 )
 
@@ -54,7 +56,7 @@ func newProgram(vertexShaderSource, fragmentShaderSource string) (uint32, error)
 		log := strings.Repeat("\x00", int(logLength+1))
 		gl.GetProgramInfoLog(program, logLength, nil, gl.Str(log))
 
-		return 0, errors.New(fmt.Sprintf("failed to link program: %v", log))
+		return 0, fmt.Errorf("failed to link program: %v", log)
 	}
 
 	gl.DeleteShader(vertexShader)
@@ -85,33 +87,55 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 	return shader, nil
 }
 
-func newOctree(file string) (uint32, *[]byte, error) {
-	oct, err := ioutil.ReadFile(file)
-	if err != nil {
-		return 0, nil, err
-	}
-
+func newOctree(file string) (uint32, []uint32, error) {
 	var (
 		header  pack.OctreeHeader
 		texture uint32
+		data    []uint32
 	)
+
+	fp, err := os.Open(file)
+	if err != nil {
+		return 0, nil, err
+	}
+	defer fp.Close()
+
+	if err := pack.DecodeHeader(fp, &header); err != nil {
+		return 0, nil, err
+	}
+
+	if header.Format != pack.MipR8G8B8A8UnpackUI32 {
+		return 0, nil, errors.New("invalid octree format")
+	}
+
+	numInts := header.NumNodes*8 + 1
+	data = make([]uint32, numInts)
+	for i := uint64(0); i < numInts; i++ {
+		if err := binary.Read(fp, binary.BigEndian, &data[i]); err != nil {
+			return 0, nil, err
+		}
+	}
 
 	gl.GenTextures(1, &texture)
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_1D, texture)
+
+	gl.TexParameteri(gl.TEXTURE_1D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+	gl.TexParameteri(gl.TEXTURE_1D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+
 	gl.TexImage1D(
 		gl.TEXTURE_1D,
 		0,
-		gl.RGBA,
-		int32(len(oct)/4),
+		gl.R32UI,
+		int32(len(data)),
 		0,
-		gl.RGBA,
+		gl.RED_INTEGER,
 		gl.UNSIGNED_INT,
-		gl.Ptr(oct[header.Size():]))
+		gl.Ptr(data))
 
 	if glErr := gl.GetError(); glErr != gl.NO_ERROR {
-		err = fmt.Errorf("GL error, loading octree: %v", glErr)
+		err = fmt.Errorf("GL error, loading octree: %x", glErr)
 	}
 
-	return texture, &oct, err
+	return texture, data, err
 }
