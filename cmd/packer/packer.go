@@ -21,6 +21,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
 
 	"github.com/andreas-t-jonsson/octatron/pack"
@@ -57,10 +58,9 @@ func Start() {
 	defer outfile.Close()
 
 	parser := func(samples chan<- pack.Sample) error {
-		defer fmt.Println("\rProgress: 100%")
-
 		scanner := bufio.NewScanner(infile)
 		progress := -1
+		box := pack.Box{pack.Point{math.MaxFloat64, math.MaxFloat64, math.MaxFloat64}, -math.MaxFloat64}
 
 		for scanner.Scan() {
 			text := scanner.Text()
@@ -72,6 +72,11 @@ func Start() {
 				return err
 			}
 
+			box.Pos.X = math.Min(box.Pos.X, s.pos.X)
+			box.Pos.Y = math.Min(box.Pos.Y, s.pos.Y)
+			box.Pos.Z = math.Min(box.Pos.Z, s.pos.Z)
+			box.Size = math.Max(math.Max(math.Max(s.pos.X, s.pos.Y), s.pos.Z), box.Size) - math.Max(math.Max(box.Pos.X, box.Pos.Y), box.Pos.Z)
+
 			reads += int64(len(text) + 1)
 			p := int((float64(reads) / float64(size)) * 100)
 			if p > progress {
@@ -82,11 +87,14 @@ func Start() {
 			samples <- s
 		}
 
+		fmt.Println("\rProgress: 100%")
+		fmt.Println("Bounds:", box)
 		return scanner.Err()
 	}
 
 	bounds := pack.Box{pack.Point{797, 698, 41.881}, 8.5}
 	//bounds := pack.Box{pack.Point{733, 682, 40.4}, 8.1}
+	//bounds := pack.Box{pack.Point{717, 658, 56}, 6.8}
 
 	cfg := pack.BuildConfig{parser, outfile, bounds, 256, pack.MipR8G8B8A8PackUI28, true, true, 0.25}
 
