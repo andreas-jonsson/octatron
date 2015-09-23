@@ -108,8 +108,19 @@ func newOctree(file string) (uint32, []uint32, error) {
 		return 0, nil, errors.New("invalid octree format")
 	}
 
+	var maxSize int32
+	gl.GetIntegerv(gl.MAX_TEXTURE_SIZE, &maxSize)
+
 	numInts := header.NumNodes*8 + 1
-	data = make([]uint32, numInts)
+	if maxSize*maxSize < int32(numInts) {
+		panic("octree does not fit on GPU")
+	}
+
+	height := int32(numInts / uint64(maxSize))
+	textureSize := maxSize * height
+	padding := numInts - uint64(textureSize)
+
+	data = make([]uint32, numInts+padding)
 	for i := uint64(0); i < numInts; i++ {
 		if err := binary.Read(fp, binary.BigEndian, &data[i]); err != nil {
 			return 0, nil, err
@@ -118,16 +129,17 @@ func newOctree(file string) (uint32, []uint32, error) {
 
 	gl.GenTextures(1, &texture)
 	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_1D, texture)
+	gl.BindTexture(gl.TEXTURE_2D, texture)
 
-	gl.TexParameteri(gl.TEXTURE_1D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-	gl.TexParameteri(gl.TEXTURE_1D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
-	gl.TexImage1D(
-		gl.TEXTURE_1D,
+	gl.TexImage2D(
+		gl.TEXTURE_2D,
 		0,
 		gl.R32UI,
-		int32(len(data)),
+		maxSize,
+		height,
 		0,
 		gl.RED_INTEGER,
 		gl.UNSIGNED_INT,

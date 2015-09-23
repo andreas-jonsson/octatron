@@ -18,7 +18,7 @@
 
 #version 150
 
-uniform usampler1D oct;
+uniform usampler2D oct;
 
 in vec3 rayDirection;
 in vec3 rayOrigin;
@@ -42,61 +42,77 @@ bool intersect(in vec3 origin, in vec3 direction, in vec3 bmin, in vec3 bmax, ou
     return final > start;
 }
 
+ivec2 convertAddress(uint addr) {
+    ivec2 size = textureSize(oct, 0);
+    return ivec2(addr % uint(size.x), addr / uint(size.x));
+}
+
 void decodeColor(in uint nodeAddress, out vec4 outputColor) {
-    uint color = texelFetch(oct, int(nodeAddress), 0).r;
+    uint color = texelFetch(oct, convertAddress(nodeAddress), 0).r;
     outputColor.r = float((color & 0xff000000u) >> 24) / 255.0;
     outputColor.g = float((color & 0xff0000u) >> 16) / 255.0;
     outputColor.b = float((color & 0xff00u) >> 8) / 255.0;
     outputColor.a = float(color & 0xffu) / 255.0;
 }
 
+struct workNode {
+    vec3 pos;
+    float size;
+    uint index;
+};
+
+const uint nodeSize = 36u;
+const vec3[8] childPositions = vec3[](
+    vec3(0, 0, 0), vec3(1, 0, 0), vec3(0, 1, 0), vec3(1, 1, 0),
+    vec3(0, 0, 1), vec3(1, 0, 1), vec3(0, 1, 1), vec3(1, 1, 1)
+);
+
 bool intersectTree(in vec3 origin, in vec3 direction, in uint nodeIndex, in vec3 nodePos, in float nodeScale, out vec4 outputColor, out float dist) {
-    const uint nodeSize = 36u;
-    const vec3[8] childPositions = vec3[](
-        vec3(0, 0, 0), vec3(1, 0, 0), vec3(0, 1, 0), vec3(1, 1, 0),
-        vec3(0, 0, 1), vec3(1, 0, 1), vec3(0, 1, 1), vec3(1, 1, 1)
-    );
+    int top = -1;
+    workNode work[64];
+
+    float shortestDist = 100000000.0;
+    uint candidate = 0xffffffffu;
+    float intersectionDist;
 
     for (;;) {
-        uint nodeAddress = (nodeIndex * nodeSize) / 4u;
-        float childScale = nodeScale * 0.5;
+        if (intersect(origin, direction, nodePos, nodePos + vec3(nodeScale), intersectionDist) == true) {
+            int numChild = 0;
+            uint nodeAddress = (nodeIndex * nodeSize) / 4u;
+            float childScale = nodeScale * 0.5;
 
-        float shortestDist = 100000000.0;
-        uint candidate = 0xffffffffu;
-        vec3 candidatePos;
+            for (uint i = 0u; i < 8u; i++) {
+                uint child = texelFetch(oct, convertAddress(nodeAddress + i + 1u), 0).r;
+                if (child > 0u) {
+                    numChild++;
 
-        int numChild = 0;
-        for (int i = 0; i < 8; i++) {
-            uint child = texelFetch(oct, int(nodeAddress) + i + 1, 0).r;
-            if (child > 0u) {
-                numChild++;
+                    top++;
+                    work[top].pos = nodePos + (childPositions[i] * childScale);
+                    work[top].size = childScale;
+                    work[top].index = child;
+                }
+            }
 
-                vec3 bmin = nodePos + (childPositions[i] * childScale);
-                vec3 bmax = bmin + vec3(childScale);
-
-                float intersectionDist;
-                if (intersect(origin, direction, bmin, bmax, intersectionDist) == true) {
-                    if (intersectionDist < shortestDist) {
-                        shortestDist = intersectionDist;
-                        candidate = child;
-                        candidatePos = bmin;
-                    }
+            if (numChild == 0) {
+                if (intersectionDist < shortestDist) {
+                    shortestDist = intersectionDist;
+                    candidate = nodeAddress;
                 }
             }
         }
 
-        if (numChild == 0) {
-            decodeColor(nodeAddress, outputColor);
+        if (top == -1) {
+            if (candidate == 0xffffffffu) {
+                return false;
+            }
+            decodeColor(candidate, outputColor);
             return true;
         }
 
-        if (candidate == 0xffffffffu) {
-            return false;
-        }
-
-        nodeScale = childScale;
-        nodeIndex = candidate;
-        nodePos = candidatePos;
+        nodeScale = work[top].size;
+        nodeIndex = work[top].index;
+        nodePos = work[top].pos;
+        top--;
     }
 }
 

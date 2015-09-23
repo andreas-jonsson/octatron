@@ -87,8 +87,8 @@ func printGLInfo() {
 }
 
 func loadResources() (uint32, uint32) {
-	//texture, _, err := newOctree("cmd/raytracer/test.priv.oct")
-	texture, _, err := newOctree("pack/test.oct")
+	texture, _, err := newOctree("cmd/packer/test.priv.oct")
+	//texture, _, err := newOctree("pack/test.oct")
 	if err != nil {
 		panic(err)
 	}
@@ -114,6 +114,7 @@ func loadResources() (uint32, uint32) {
 
 func setupGL() int32 {
 	gl.Disable(gl.DEPTH_TEST)
+	gl.ClearColor(0.7, 0.7, 0.7, 1)
 
 	program, _ := loadResources()
 
