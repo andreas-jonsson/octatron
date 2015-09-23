@@ -111,16 +111,27 @@ func newOctree(file string) (uint32, []uint32, error) {
 	var maxSize int32
 	gl.GetIntegerv(gl.MAX_TEXTURE_SIZE, &maxSize)
 
-	numInts := header.NumNodes*8 + 1
+	numInts := header.NumNodes * (1 + 8)
 	if maxSize*maxSize < int32(numInts) {
 		panic("octree does not fit on GPU")
 	}
 
-	height := int32(numInts / uint64(maxSize))
-	textureSize := maxSize * height
-	padding := numInts - uint64(textureSize)
+	var (
+		height int32
+		width  = maxSize
+	)
 
-	data = make([]uint32, numInts+padding)
+	for height < width {
+		maxSize = width
+		height = int32(numInts/uint64(width)) + 1
+		width /= 2
+	}
+
+	fmt.Printf("Octree is loaded in an %vx%v, R32UI, 2D texture.\n", maxSize, height)
+
+	textureSize := maxSize * height
+	data = make([]uint32, textureSize)
+
 	for i := uint64(0); i < numInts; i++ {
 		if err := binary.Read(fp, binary.BigEndian, &data[i]); err != nil {
 			return 0, nil, err

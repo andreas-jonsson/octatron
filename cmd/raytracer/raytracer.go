@@ -162,6 +162,10 @@ func windowLoop(window *sdl.Window, cameraMatrixUniform int32) {
 			switch t := event.(type) {
 			case *sdl.QuitEvent:
 				return
+			case *sdl.KeyDownEvent:
+				if t.Keysym.Sym == sdl.K_ESCAPE {
+					return
+				}
 			case *sdl.MouseButtonEvent:
 				if t.State == 1 {
 					buttonDown = true

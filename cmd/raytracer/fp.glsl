@@ -75,7 +75,7 @@ bool intersectTree(in vec3 origin, in vec3 direction, in uint nodeIndex, in vec3
     uint candidate = 0xffffffffu;
     float intersectionDist;
 
-    for (;;) {
+    while (true) {
         if (intersect(origin, direction, nodePos, nodePos + vec3(nodeScale), intersectionDist) == true) {
             int numChild = 0;
             uint nodeAddress = (nodeIndex * nodeSize) / 4u;
