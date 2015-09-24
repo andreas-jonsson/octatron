@@ -107,11 +107,12 @@ func newOctree(file string) (uint32, []uint32, error) {
 	if header.Format != pack.MipR8G8B8A8UnpackUI32 {
 		return 0, nil, errors.New("invalid octree format")
 	}
+	nodeSize := uint64(1 + 8)
 
 	var maxSize int32
 	gl.GetIntegerv(gl.MAX_TEXTURE_SIZE, &maxSize)
 
-	numInts := header.NumNodes * (1 + 8)
+	numInts := header.NumNodes * nodeSize
 	if maxSize*maxSize < int32(numInts) {
 		panic("octree does not fit on GPU")
 	}
@@ -132,9 +133,19 @@ func newOctree(file string) (uint32, []uint32, error) {
 	textureSize := maxSize * height
 	data = make([]uint32, textureSize)
 
-	for i := uint64(0); i < numInts; i++ {
-		if err := binary.Read(fp, binary.BigEndian, &data[i]); err != nil {
+	for i := uint64(0); i < header.NumNodes; i++ {
+		start := i * nodeSize
+		if err := binary.Read(fp, binary.BigEndian, data[start:start+nodeSize]); err != nil {
 			return 0, nil, err
+		}
+
+		// Recalculate alpha value.
+		data[start] |= 0x000000ff
+		for j := 1; j < 9; j++ {
+			if data[start+uint64(j)] > 0 {
+				data[start] &= 0xffffff00
+				break
+			}
 		}
 	}
 

@@ -31,8 +31,8 @@ import (
 
 const (
 	winTitle  = "Octatron"
-	winWidth  = 800
-	winHeight = 600
+	winWidth  = 512
+	winHeight = 512
 )
 
 func init() {
@@ -180,7 +180,7 @@ func windowLoop(window *sdl.Window, cameraMatrixUniform int32) {
 			}
 		}
 
-		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+		gl.Clear(gl.COLOR_BUFFER_BIT)
 
 		xq := mgl32.QuatRotate(xrot, mgl32.Vec3{1, 0, 0})
 		yq := mgl32.QuatRotate(yrot, mgl32.Vec3{0, 1, 0})
