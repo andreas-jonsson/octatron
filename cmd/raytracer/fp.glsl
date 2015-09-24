@@ -78,12 +78,14 @@ bool intersectTree(in vec3 origin, in vec3 direction, in float len, in uint node
         if (intersect(origin, direction, len, nodePos, nodePos + vec3(nodeScale), intersectionDist) == true) {
             uint nodeAddress = (nodeIndex * nodeSize) / 4u;
             uint color = texelFetch(oct, convertAddress(nodeAddress), 0).r;
-
-            if ((color & 0x000000ffu) == 0u) {
+            uint mask = color & 0x000000ffu;
+            
+            if (mask != 0u) {
                 float childScale = nodeScale * 0.5;
                 for (uint i = 0u; i < 8u; i++) {
-                    uint child = texelFetch(oct, convertAddress(nodeAddress + i + 1u), 0).r;
-                    if (child > 0u) {
+                    if (((0x80u >> i) & mask) != 0u) {
+                        uint child = texelFetch(oct, convertAddress(nodeAddress + i + 1u), 0).r;
+
                         top++;
                         work[top].pos = nodePos + (childPositions[i] * childScale);
                         work[top].size = childScale;

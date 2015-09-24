@@ -31,8 +31,8 @@ import (
 
 const (
 	winTitle  = "Octatron"
-	winWidth  = 512
-	winHeight = 512
+	winWidth  = 800
+	winHeight = 600
 )
 
 func init() {

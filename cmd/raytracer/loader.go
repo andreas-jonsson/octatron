@@ -140,11 +140,10 @@ func newOctree(file string) (uint32, []uint32, error) {
 		}
 
 		// Recalculate alpha value.
-		data[start] |= 0x000000ff
-		for j := 1; j < 9; j++ {
-			if data[start+uint64(j)] > 0 {
-				data[start] &= 0xffffff00
-				break
+		data[start] &= 0xffffff00
+		for j := uint64(1); j < 9; j++ {
+			if data[start+j] > 0 {
+				data[start] |= uint32(0x100) >> j
 			}
 		}
 	}
