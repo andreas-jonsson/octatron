@@ -172,3 +172,139 @@ func newOctree(file string) (uint32, []uint32, error) {
 
 	return texture, data, err
 }
+
+var vertexShader = `
+#version 150
+
+uniform mat4 cameraMatrix;
+
+in vec3 inputPosition;
+
+out vec3 rayDirection;
+out vec3 rayOrigin;
+
+void main() {
+	const vec3 orig = vec3(0.0, 0.0, -2.0);
+	vec3 dir = normalize(inputPosition - orig);
+
+	rayDirection = (cameraMatrix * vec4(dir, 1)).xyz;
+	rayOrigin = (cameraMatrix * vec4(orig, 1)).xyz;
+
+    gl_Position = vec4(inputPosition, 1);
+}
+`
+
+var fragmentShader = `
+#version 150
+
+uniform usampler2D oct;
+
+in vec3 rayDirection;
+in vec3 rayOrigin;
+
+out vec4 outputColor;
+
+const float veryBig = 10000;
+const float octSize = 1;
+
+bool intersect(in vec3 origin, in vec3 direction, in float len, in vec3 bmin, in vec3 bmax, out float dist) {
+    vec3 omin = (bmin - origin) / direction;
+    vec3 omax = (bmax - origin) / direction;
+
+    vec3 mmax = max(omax, omin);
+    vec3 mmin = min(omax, omin);
+
+    float final = min(mmax.x, min(mmax.y, mmax.z));
+    float start = max(max(mmin.x, 0.0), max(mmin.y, mmin.z));
+
+	dist = min(final, start);
+    return final > start && dist < len;
+}
+
+ivec2 convertAddress(uint addr) {
+    ivec2 size = textureSize(oct, 0);
+    return ivec2(addr % uint(size.x), addr / uint(size.x));
+}
+
+void decodeColor(in uint color, out vec4 outputColor) {
+    outputColor.r = float((color & 0xff000000u) >> 24) / 255.0;
+    outputColor.g = float((color & 0xff0000u) >> 16) / 255.0;
+    outputColor.b = float((color & 0xff00u) >> 8) / 255.0;
+    outputColor.a = float(color & 0xffu) / 255.0;
+}
+
+struct workNode {
+    vec3 pos;
+    float size;
+    uint index;
+};
+
+const uint nodeSize = 36u;
+const vec3[8] childPositions = vec3[](
+    vec3(0, 0, 0), vec3(1, 0, 0), vec3(0, 1, 0), vec3(1, 1, 0),
+    vec3(0, 0, 1), vec3(1, 0, 1), vec3(0, 1, 1), vec3(1, 1, 1)
+);
+
+bool intersectTree(in vec3 origin, in vec3 direction, in float len, in uint nodeIndex, in vec3 nodePos, in float nodeScale, out vec4 outputColor, out float dist) {
+    int top = -1;
+    workNode work[64];
+
+    float shortestDist = veryBig;
+    uint candidateColor;
+    float intersectionDist;
+
+    while (true) {
+        if (intersect(origin, direction, len, nodePos, nodePos + vec3(nodeScale), intersectionDist) == true) {
+            uint nodeAddress = (nodeIndex * nodeSize) / 4u;
+            uint color = texelFetch(oct, convertAddress(nodeAddress), 0).r;
+            uint mask = color & 0x000000ffu;
+
+            if (mask != 0u) {
+                float childScale = nodeScale * 0.5;
+                for (uint i = 0u; i < 8u; i++) {
+                    if (((0x80u >> i) & mask) != 0u) {
+                        uint child = texelFetch(oct, convertAddress(nodeAddress + i + 1u), 0).r;
+
+                        top++;
+                        work[top].pos = nodePos + (childPositions[i] * childScale);
+                        work[top].size = childScale;
+                        work[top].index = child;
+                    }
+                }
+            } else if (intersectionDist < shortestDist) {
+                shortestDist = intersectionDist;
+                len = intersectionDist;
+                candidateColor = color;
+            }
+        }
+
+        if (top == -1) {
+            if (shortestDist >= veryBig) {
+                return false;
+            }
+            decodeColor(candidateColor, outputColor);
+            return true;
+        }
+
+        nodeScale = work[top].size;
+        nodeIndex = work[top].index;
+        nodePos = work[top].pos;
+        top--;
+    }
+}
+
+void main() {
+    float halfSize = octSize * 0.5;
+    vec3 min = vec3(-halfSize);
+
+    float dist;
+    vec4 color;
+
+    if (intersectTree(rayOrigin, rayDirection, veryBig, 0u, min, octSize, color, dist) == false) {
+        discard;
+        return;
+    }
+
+    outputColor = vec4(color.rgb,1);
+}
+`

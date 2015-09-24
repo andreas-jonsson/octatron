@@ -19,8 +19,6 @@
 package main
 
 import (
-	"io/ioutil"
-
 	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/veandco/go-sdl2/sdl"
@@ -93,15 +91,17 @@ func loadResources() (uint32, uint32) {
 		panic(err)
 	}
 
-	vertexShader, err := ioutil.ReadFile("cmd/raytracer/vp.glsl")
-	if err != nil {
-		panic(err)
-	}
+	/*
+		vertexShader, err := ioutil.ReadFile("cmd/raytracer/vp.glsl")
+		if err != nil {
+			panic(err)
+		}
 
-	fragmentShader, err := ioutil.ReadFile("cmd/raytracer/fp.glsl")
-	if err != nil {
-		panic(err)
-	}
+		fragmentShader, err := ioutil.ReadFile("cmd/raytracer/fp.glsl")
+		if err != nil {
+			panic(err)
+		}
+	*/
 
 	program, err := newProgram(string(vertexShader)+"\x00", string(fragmentShader)+"\x00")
 	if err != nil {
