@@ -253,29 +253,32 @@ bool intersectTree(in vec3 origin, in vec3 direction, in float len, in uint node
     uint candidateColor;
     float intersectionDist;
 
+	if (intersect(origin, direction, len, nodePos, nodePos + vec3(nodeScale), intersectionDist) == false)
+		return false;
+
     while (true) {
-        if (intersect(origin, direction, len, nodePos, nodePos + vec3(nodeScale), intersectionDist) == true) {
-            uint nodeAddress = (nodeIndex * nodeSize) / 4u;
-            uint color = texelFetch(oct, convertAddress(nodeAddress), 0).r;
-            uint mask = color & 0x000000ffu;
+        uint nodeAddress = (nodeIndex * nodeSize) / 4u;
+        uint color = texelFetch(oct, convertAddress(nodeAddress), 0).r;
+        uint mask = color & 0x000000ffu;
 
-            if (mask != 0u) {
-                float childScale = nodeScale * 0.5;
-                for (uint i = 0u; i < 8u; i++) {
-                    if (((0x80u >> i) & mask) != 0u) {
-                        uint child = texelFetch(oct, convertAddress(nodeAddress + i + 1u), 0).r;
+        if (mask != 0u) {
+            float childScale = nodeScale * 0.5;
 
+            for (uint i = 0u; i < 8u; i++) {
+                if (((0x80u >> i) & mask) != 0u) {
+					vec3 pos = nodePos + (childPositions[i] * childScale);
+					if (intersect(origin, direction, len, pos, pos + vec3(childScale), intersectionDist) == true) {
                         top++;
-                        work[top].pos = nodePos + (childPositions[i] * childScale);
+                        work[top].pos = pos;
                         work[top].size = childScale;
-                        work[top].index = child;
-                    }
+                        work[top].index = texelFetch(oct, convertAddress(nodeAddress + i + 1u), 0).r;
+					}
                 }
-            } else if (intersectionDist < shortestDist) {
-                shortestDist = intersectionDist;
-                len = intersectionDist;
-                candidateColor = color;
             }
+        } else if (intersectionDist < shortestDist) {
+            shortestDist = intersectionDist;
+            len = intersectionDist;
+            candidateColor = color;
         }
 
         if (top == -1) {

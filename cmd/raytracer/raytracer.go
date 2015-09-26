@@ -19,6 +19,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/veandco/go-sdl2/sdl"
@@ -157,7 +159,21 @@ func windowLoop(window *sdl.Window, cameraMatrixUniform int32) {
 		buttonDown bool
 	)
 
+	numFrame := 0
+	count := 0
+	t := time.Now()
+
 	for {
+		c := time.Now()
+		dt := c.Sub(t)
+		t = c
+
+		if numFrame > count {
+			fmt.Println("\rDeltaTime:", dt)
+			count += 5
+		}
+		numFrame++
+
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch t := event.(type) {
 			case *sdl.QuitEvent:
