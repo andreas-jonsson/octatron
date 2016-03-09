@@ -94,7 +94,7 @@ func BuildTree(cfg *BuildConfig) (BuildStatus, error) {
 
 	header.NumNodes++
 	var rootNode accNode
-	if err := binary.Write(fp, binary.BigEndian, rootNode); err != nil {
+	if err := binary.Write(fp, binary.LittleEndian, rootNode); err != nil {
 		return status, err
 	}
 
@@ -121,7 +121,7 @@ func BuildTree(cfg *BuildConfig) (BuildStatus, error) {
 		return status, err
 	}
 
-	if err := binary.Write(fp, binary.BigEndian, header); err != nil {
+	if err := binary.Write(fp, binary.LittleEndian, header); err != nil {
 		return status, err
 	}
 
@@ -155,13 +155,13 @@ func writeOctreeHeader(cfg *BuildConfig, writer io.Writer) (*OctreeHeader, error
 	header.NumNodes = 0
 	header.NumLeafs = 0
 	header.VoxelsPerAxis = uint32(cfg.VoxelsPerAxis)
-	return &header, binary.Write(writer, binary.BigEndian, header)
+	return &header, binary.Write(writer, binary.LittleEndian, header)
 }
 
 func insertSample(cfg *BuildConfig, header *OctreeHeader, readWriter io.ReadWriteSeeker, sample Sample, bounds Box, voxelRes int) error {
 	var node accNode
 	for {
-		if err := binary.Read(readWriter, binary.BigEndian, &node); err != nil {
+		if err := binary.Read(readWriter, binary.LittleEndian, &node); err != nil {
 			return err
 		}
 
@@ -176,7 +176,7 @@ func insertSample(cfg *BuildConfig, header *OctreeHeader, readWriter io.ReadWrit
 		node.Color[3] += uint64(color.A * 255)
 		node.Color[4]++
 
-		if err := binary.Write(readWriter, binary.BigEndian, node.Color); err != nil {
+		if err := binary.Write(readWriter, binary.LittleEndian, node.Color); err != nil {
 			return err
 		}
 
@@ -212,7 +212,7 @@ func insertSample(cfg *BuildConfig, header *OctreeHeader, readWriter io.ReadWrit
 					}
 
 					node.Children[i] = uint32((newPos - int64(header.Size())) / int64(mipR64G64B64A64S64UnpackUI32.NodeSize()))
-					if err := binary.Write(readWriter, binary.BigEndian, node.Children); err != nil {
+					if err := binary.Write(readWriter, binary.LittleEndian, node.Children); err != nil {
 						return err
 					}
 
@@ -222,7 +222,7 @@ func insertSample(cfg *BuildConfig, header *OctreeHeader, readWriter io.ReadWrit
 
 					header.NumNodes++
 					var newNode accNode
-					if err := binary.Write(readWriter, binary.BigEndian, newNode); err != nil {
+					if err := binary.Write(readWriter, binary.LittleEndian, newNode); err != nil {
 						return err
 					}
 

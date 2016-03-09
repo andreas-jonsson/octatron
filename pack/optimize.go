@@ -45,7 +45,7 @@ type optInput struct {
 
 func CompressTree(reader io.Reader, writer io.Writer) error {
 	var header OctreeHeader
-	err := binary.Read(reader, binary.BigEndian, &header)
+	err := binary.Read(reader, binary.LittleEndian, &header)
 	if err != nil {
 		return err
 	}
@@ -55,7 +55,7 @@ func CompressTree(reader io.Reader, writer io.Writer) error {
 	}
 	header.Flags = header.Flags & compressedMask
 
-	err = binary.Write(writer, binary.BigEndian, header)
+	err = binary.Write(writer, binary.LittleEndian, header)
 	if err != nil {
 		return err
 	}
@@ -87,7 +87,7 @@ func OptimizeTree(reader io.ReadSeeker, writer io.Writer, outputFormat OctreeFor
 		status OptStatus
 	)
 
-	if err := binary.Read(reader, binary.BigEndian, &header); err != nil {
+	if err := binary.Read(reader, binary.LittleEndian, &header); err != nil {
 		return status, err
 	}
 
@@ -129,7 +129,7 @@ func OptimizeTree(reader io.ReadSeeker, writer io.Writer, outputFormat OctreeFor
 	}
 
 	header.Format = outputFormat
-	if err := binary.Write(writer, binary.BigEndian, header); err != nil {
+	if err := binary.Write(writer, binary.LittleEndian, header); err != nil {
 		return status, err
 	}
 

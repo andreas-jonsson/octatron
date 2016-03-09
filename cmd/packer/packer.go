@@ -24,7 +24,7 @@ import (
 	"math"
 	"os"
 
-	"github.com/andreas-t-jonsson/octatron/pack"
+	"github.com/andreas-jonsson/octatron/pack"
 )
 
 type xyzSample struct {

@@ -65,17 +65,17 @@ func (color *Color) writeColor(writer io.Writer, format OctreeFormat) error {
 	switch format {
 	case MipR8G8B8A8UnpackUI32:
 		c.scale(255)
-		err := binary.Write(writer, binary.BigEndian, byte(c.R))
-		err = binary.Write(writer, binary.BigEndian, byte(c.G))
-		err = binary.Write(writer, binary.BigEndian, byte(c.B))
-		err = binary.Write(writer, binary.BigEndian, byte(c.A))
+		err := binary.Write(writer, binary.LittleEndian, byte(c.R))
+		err = binary.Write(writer, binary.LittleEndian, byte(c.G))
+		err = binary.Write(writer, binary.LittleEndian, byte(c.B))
+		err = binary.Write(writer, binary.LittleEndian, byte(c.A))
 		return err
 	case MipR8G8B8A8UnpackUI16:
 		c.scale(255)
-		err := binary.Write(writer, binary.BigEndian, byte(c.R))
-		err = binary.Write(writer, binary.BigEndian, byte(c.G))
-		err = binary.Write(writer, binary.BigEndian, byte(c.B))
-		err = binary.Write(writer, binary.BigEndian, byte(c.A))
+		err := binary.Write(writer, binary.LittleEndian, byte(c.R))
+		err = binary.Write(writer, binary.LittleEndian, byte(c.G))
+		err = binary.Write(writer, binary.LittleEndian, byte(c.B))
+		err = binary.Write(writer, binary.LittleEndian, byte(c.A))
 		return err
 	case MipR4G4B4A4UnpackUI16:
 		c.scale(15)
@@ -83,13 +83,13 @@ func (color *Color) writeColor(writer io.Writer, format OctreeFormat) error {
 		g := uint16(c.G) & 0xf
 		b := uint16(c.B) & 0xf
 		a := uint16(c.A) & 0xf
-		err := binary.Write(writer, binary.BigEndian, r<<12|g<<8|b<<4|a)
+		err := binary.Write(writer, binary.LittleEndian, r<<12|g<<8|b<<4|a)
 		return err
 	case MipR5G6B5UnpackUI16:
 		r := uint16(c.R*31) & 0x1f
 		g := uint16(c.G*63) & 0x3f
 		b := uint16(c.B*31) & 0x1f
-		err := binary.Write(writer, binary.BigEndian, r<<11|g<<5|b)
+		err := binary.Write(writer, binary.LittleEndian, r<<11|g<<5|b)
 		return err
 	default:
 		return errUnsupportedFormat

@@ -19,7 +19,7 @@
 package main
 
 import (
-	"github.com/andreas-t-jonsson/octatron/pack"
+	"github.com/andreas-jonsson/octatron/pack"
 	"github.com/go-gl/gl/v3.2-compatibility/gl"
 	"github.com/veandco/go-sdl2/sdl"
 
@@ -285,7 +285,7 @@ func loadTree(file string) []octreeNode {
 	defer fp.Close()
 
 	var header pack.OctreeHeader
-	if err := binary.Read(fp, binary.BigEndian, &header); err != nil {
+	if err := binary.Read(fp, binary.LittleEndian, &header); err != nil {
 		panic(err)
 	}
 

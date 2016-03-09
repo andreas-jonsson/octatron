@@ -16,7 +16,7 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /*************************************************************************/
 
-package main_test
+package main
 
 import (
 	"log"
@@ -24,8 +24,6 @@ import (
 	_ "net/http/pprof"
 	"os"
 	"testing"
-
-	"github.com/andreas-t-jonsson/octatron/cmd/packer"
 )
 
 func TestPacker(t *testing.T) {
@@ -38,5 +36,5 @@ func TestPacker(t *testing.T) {
 		t.SkipNow()
 	}
 	fp.Close()
-	main.Start()
+	Start()
 }

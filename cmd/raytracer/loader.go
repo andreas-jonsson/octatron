@@ -22,7 +22,7 @@ import (
 	"errors"
 	"os"
 
-	"github.com/andreas-t-jonsson/octatron/pack"
+	"github.com/andreas-jonsson/octatron/pack"
 	"github.com/go-gl/gl/v3.2-core/gl"
 
 	"encoding/binary"
@@ -135,7 +135,7 @@ func newOctree(file string) (uint32, []uint32, error) {
 
 	for i := uint64(0); i < header.NumNodes; i++ {
 		start := i * nodeSize
-		if err := binary.Read(fp, binary.BigEndian, data[start:start+nodeSize]); err != nil {
+		if err := binary.Read(fp, binary.LittleEndian, data[start:start+nodeSize]); err != nil {
 			return 0, nil, err
 		}
 
