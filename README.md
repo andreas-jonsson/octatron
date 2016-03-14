@@ -7,7 +7,7 @@
 
 ## About
 
-Tools and libraries for converting point-cloud data to octree files that can be used for efficient rendering and quarrying.
+Tools and libraries for converting point-cloud data to octree files that can be used for efficient rendering and querying.
 
 ![raytracer](https://raw.githubusercontent.com/andreas-jonsson/octatron/master/assets/screenshot1.png)
 ![raytracer](https://raw.githubusercontent.com/andreas-jonsson/octatron/master/assets/screenshot2.png)
