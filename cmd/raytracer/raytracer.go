@@ -18,11 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package main
 
 import (
+	"fmt"
 	"image"
 	"os"
 	"runtime"
+	"time"
 	"unsafe"
 
+	"github.com/andreas-jonsson/octatron/trace"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -45,7 +48,8 @@ func main() {
 	sdl.Init(sdl.INIT_EVERYTHING)
 	defer sdl.Quit()
 
-	window, err := sdl.CreateWindow("raytracer", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 640, 320, sdl.WINDOW_SHOWN)
+	title := "AJ's Raytracer"
+	window, err := sdl.CreateWindow(title, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 640, 320, sdl.WINDOW_SHOWN)
 	if err != nil {
 		panic(err)
 	}
@@ -75,12 +79,21 @@ func main() {
 	}
 	defer fp.Close()
 
-	tree, err := loadOctree(fp)
+	tree, err := trace.LoadOctree(fp)
 	if err != nil {
 		panic(err)
 	}
 
+	cfg := trace.Config{FieldOfView: 45, TreeScale: 1, TreePosition: [3]float32{-0.5, -0.5, -3}}
+	camera := trace.Camera{LookAt: [3]float32{0, 0, -1}, Up: [3]float32{0, 1, 0}}
+
+	nf := 0
+	dt := time.Duration(1000 / 60)
+	ft := time.Duration(nf)
+
 	for {
+		t := time.Now()
+
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch t := event.(type) {
 			case *sdl.QuitEvent:
@@ -97,10 +110,20 @@ func main() {
 
 		renderer.Clear()
 
-		startTrace(tree, surface)
+		trace.Raytrace(&cfg, tree, &camera, surface)
 
 		texture.Update(nil, unsafe.Pointer(&surface.Pix[0]), surface.Stride)
 		renderer.Copy(texture, nil, nil)
 		renderer.Present()
+
+		dt = time.Since(t)
+		ft += dt
+		nf++
+
+		if ft >= time.Second {
+			window.SetTitle(fmt.Sprintf("%v - fps: %v, dt: %vms", title, nf, int(ft/time.Millisecond)/nf))
+			nf = 0
+			ft = 0
+		}
 	}
 }

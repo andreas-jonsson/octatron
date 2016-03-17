@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package main
+package trace
 
 import (
 	"image"
@@ -25,6 +25,22 @@ import (
 
 	"github.com/andreas-jonsson/octatron/pack"
 	"github.com/ungerik/go3d/vec3"
+)
+
+type (
+	Octree []octreeNode
+
+	Camera struct {
+		Position,
+		LookAt,
+		Up [3]float32
+	}
+
+	Config struct {
+		FieldOfView  float32
+		TreeScale    float32
+		TreePosition [3]float32
+	}
 )
 
 type (
@@ -43,7 +59,7 @@ func (n *octreeNode) setColor(color *pack.Color) {
 	n.color.A = uint8(color.A * 255)
 }
 
-func loadOctree(reader io.Reader) ([]octreeNode, error) {
+func LoadOctree(reader io.Reader) (Octree, error) {
 	var (
 		color  pack.Color
 		header pack.OctreeHeader
@@ -94,7 +110,8 @@ func intersectBox(ray *infiniteRay, lenght float32, box *vec3.Box) float32 {
 }
 
 var (
-	clearColor     = color.RGBA{0, 0, 0, 255}
+	clearColor color.RGBA
+
 	childPositions = []vec3.T{
 		vec3.T{0, 0, 0}, vec3.T{1, 0, 0}, vec3.T{0, 1, 0}, vec3.T{1, 1, 0},
 		vec3.T{0, 0, 1}, vec3.T{1, 0, 1}, vec3.T{0, 1, 1}, vec3.T{1, 1, 1},
@@ -111,23 +128,30 @@ func intersectTree(tree []octreeNode, ray *infiniteRay, nodePos vec3.T, nodeScal
 	boxDist := intersectBox(ray, length, &box)
 
 	if boxDist == length {
-		return math.MaxFloat32, color
+		return length, color
 	}
 
+	numChild := 0
 	childScale := nodeScale * 0.5
+
 	for i, childIndex := range node.children {
 		if childIndex != 0 {
+			numChild++
 			scaled := childPositions[i].Scaled(childScale)
 			pos := vec3.Add(&nodePos, &scaled)
 
-			if dist, col := intersectTree(tree, ray, pos, childScale, length, childIndex); dist < math.MaxFloat32 {
+			if ln, col := intersectTree(tree, ray, pos, childScale, length, childIndex); ln < length {
+				length = ln
 				color = col
-				boxDist = dist
 			}
 		}
 	}
 
-	return boxDist, node.color
+	if numChild == 0 {
+		return boxDist, node.color
+	}
+
+	return length, color
 }
 
 func calcIncVectors(lookAtPoint, eyePoint, up vec3.T, width, height, fieldOfView float32) (vec3.T, vec3.T, vec3.T) {
@@ -161,16 +185,16 @@ func calcIncVectors(lookAtPoint, eyePoint, up vec3.T, width, height, fieldOfView
 	return xIncVector, yIncVector, viewPlaneBottomLeftPoint
 }
 
-func startTrace(tree []octreeNode, img *image.RGBA) {
-	var (
-		width  float32 = 640
-		height float32 = 360
-	)
+func Raytrace(cfg *Config, tree Octree, camera *Camera, img *image.RGBA) {
+	rect := img.Rect
+	width := float32(rect.Max.X)
+	height := float32(rect.Max.Y)
 
-	const fieldOfView = 45
+	nodeScale := cfg.TreeScale
+	nodePos := cfg.TreePosition
+	eyePoint := vec3.T(camera.Position)
 
-	eyePoint := vec3.Zero
-	xInc, yInc, bottomLeft := calcIncVectors(vec3.T{0, 0, -1}, eyePoint, vec3.T{0, 1, 0}, width, height, fieldOfView)
+	xInc, yInc, bottomLeft := calcIncVectors(camera.LookAt, eyePoint, camera.Up, width, height, cfg.FieldOfView)
 
 	for h := 0; h < int(height); h++ {
 		for w := 0; w < int(width); w++ {
@@ -183,16 +207,9 @@ func startTrace(tree []octreeNode, img *image.RGBA) {
 			dir := vec3.Sub(&viewPlanePoint, &eyePoint)
 			dir.Normalize()
 
-			ray := infiniteRay{vec3.Zero, dir}
-
-			nodePos := vec3.T{-0.5, -0.5, -3}
-
-			dist, _ := intersectTree(tree, &ray, nodePos, 1, math.MaxFloat32, 0)
-			if dist != math.MaxFloat32 {
-				img.SetRGBA(w, h, color.RGBA{byte(dist * 180), 0, 0, 255})
-				//img.SetRGBA(w, h, col)
-			}
-			//img.SetRGBA(w, h, color.RGBA{byte(dir[0] * 127), byte(dir[1] * 127), byte(dir[2] * 127), 255})
+			ray := infiniteRay{eyePoint, dir}
+			_, col := intersectTree(tree, &ray, nodePos, nodeScale, math.MaxFloat32, 0)
+			img.SetRGBA(w, h, col)
 		}
 	}
 }
