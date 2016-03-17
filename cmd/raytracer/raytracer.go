@@ -100,6 +100,9 @@ func main() {
 
 	for {
 		t := time.Now()
+		dtf := float32(dt / time.Millisecond)
+
+		const cameraSpeed = 0.001
 
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch t := event.(type) {
@@ -111,6 +114,36 @@ func main() {
 					return
 				case sdl.K_f:
 					toggleFullscreen(window)
+				/*
+					case sdl.K_UP:
+						camera.Position[2] += dtf * cameraSpeed
+					case sdl.K_DOWN:
+						camera.Position[2] -= dtf * cameraSpeed
+					case sdl.K_LEFT:
+						camera.Position[0] += dtf * cameraSpeed
+					case sdl.K_RIGHT:
+						camera.Position[0] -= dtf * cameraSpeed
+					case sdl.K_w:
+						camera.LookAt[2] += dtf * cameraSpeed
+					case sdl.K_s:
+						camera.LookAt[2] -= dtf * cameraSpeed
+					case sdl.K_a:
+						camera.LookAt[0] += dtf * cameraSpeed
+					case sdl.K_d:
+						camera.LookAt[0] -= dtf * cameraSpeed
+				*/
+				case sdl.K_UP:
+					camera.Position[2] -= dtf * cameraSpeed
+					camera.LookAt[2] -= dtf * cameraSpeed
+				case sdl.K_DOWN:
+					camera.Position[2] += dtf * cameraSpeed
+					camera.LookAt[2] += dtf * cameraSpeed
+				case sdl.K_LEFT:
+					camera.Position[0] += dtf * cameraSpeed
+					camera.LookAt[0] += dtf * cameraSpeed
+				case sdl.K_RIGHT:
+					camera.Position[0] -= dtf * cameraSpeed
+					camera.LookAt[0] -= dtf * cameraSpeed
 				}
 			}
 		}

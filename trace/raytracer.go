@@ -63,28 +63,6 @@ func (n *octreeNode) setColor(color *pack.Color) {
 	n.color.A = uint8(color.A * 255)
 }
 
-func LoadOctree(reader io.Reader) (Octree, error) {
-	var (
-		color  pack.Color
-		header pack.OctreeHeader
-	)
-
-	if err := pack.DecodeHeader(reader, &header); err != nil {
-		return nil, err
-	}
-
-	data := make([]octreeNode, header.NumNodes)
-	for i := range data {
-		n := &data[i]
-		if err := pack.DecodeNode(reader, header.Format, &color, n.children[:]); err != nil {
-			return nil, err
-		}
-		n.setColor(&color)
-	}
-
-	return data, nil
-}
-
 func intersectBox(ray *infiniteRay, lenght float32, box *vec3.Box) float32 {
 	origin := ray[0]
 	direction := ray[1]
@@ -227,4 +205,26 @@ func Raytrace(cfg *Config, camera *Camera) {
 	}
 
 	wg.Wait()
+}
+
+func LoadOctree(reader io.Reader) (Octree, error) {
+	var (
+		color  pack.Color
+		header pack.OctreeHeader
+	)
+
+	if err := pack.DecodeHeader(reader, &header); err != nil {
+		return nil, err
+	}
+
+	data := make([]octreeNode, header.NumNodes)
+	for i := range data {
+		n := &data[i]
+		if err := pack.DecodeNode(reader, header.Format, &color, n.children[:]); err != nil {
+			return nil, err
+		}
+		n.setColor(&color)
+	}
+
+	return data, nil
 }
