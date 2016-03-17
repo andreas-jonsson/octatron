@@ -72,7 +72,7 @@ func updateScreen(ctx, buf, img *js.Object, dest, src []byte) {
 	numFrames++
 }
 
-func setupConnection(ctx, buf, img *js.Object, dest []byte) *websocket.WebSocket {
+func setupConnection(ctx, buf, img *js.Object, dest []byte, renderChan chan<- struct{}) *websocket.WebSocket {
 	ws, err := websocket.New("ws://localhost:8080/render")
 	if err != nil {
 		handleError(err)
@@ -100,6 +100,7 @@ func setupConnection(ctx, buf, img *js.Object, dest []byte) *websocket.WebSocket
 		blob := jsblob.Blob{*ev.Get("data")}
 		go func() {
 			updateScreen(ctx, buf, img, dest, blob.Bytes())
+			renderChan <- struct{}{}
 		}()
 	}
 
@@ -109,14 +110,14 @@ func setupConnection(ctx, buf, img *js.Object, dest []byte) *websocket.WebSocket
 	return ws
 }
 
-func updateCamera(ws *websocket.WebSocket) {
+func updateCamera(ws *websocket.WebSocket, renderChan <-chan struct{}) {
 	const (
-		cameraSpeed = 0.01
+		cameraSpeed = 0.1
 		tick30hz    = (1000 / 30) * time.Millisecond
 	)
 
 	var (
-		pressed bool
+		pressed = true
 		msg     updateMessage
 	)
 
@@ -124,8 +125,6 @@ func updateCamera(ws *websocket.WebSocket) {
 	msg.Camera.Up = [3]float32{0, 1, 0}
 
 	for _ = range time.Tick(tick30hz) {
-		pressed = false
-
 		switch {
 		case keys[38]: // Up
 			msg.Camera.Position[2] -= cameraSpeed
@@ -154,6 +153,9 @@ func updateCamera(ws *websocket.WebSocket) {
 			if err := ws.Send(string(msg)); err != nil {
 				handleError(err)
 			}
+
+			pressed = false
+			<-renderChan
 		}
 	}
 }
@@ -195,8 +197,11 @@ func start() {
 	buf := js.Global.Get("Uint8ClampedArray").New(arrBuf)
 	dest := js.Global.Get("Uint8Array").New(arrBuf).Interface().([]byte)
 
-	ws := setupConnection(ctx, buf, img, dest)
-	go updateCamera(ws)
+	renderChan := make(chan struct{}, 1) // Ensure that we have at moast N frames in-flight.
+	ws := setupConnection(ctx, buf, img, dest, renderChan)
+	renderChan <- struct{}{}
+
+	go updateCamera(ws, renderChan)
 }
 
 func main() {

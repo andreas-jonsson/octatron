@@ -128,17 +128,15 @@ func unloadTree(file string) {
 }
 
 func renderServer(ws *websocket.Conn) {
-	var (
-		setup  setupMessage
-		update updateMessage
-	)
-
 	log.Println("new connection:", ws.RemoteAddr())
 
+	var setup setupMessage
 	if err := messageCodec.Receive(ws, &setup); err != nil {
 		log.Println(err)
 		return
 	}
+
+	// TODO Verify message.
 
 	tree, err := loadTree(setup.Tree)
 	if err != nil {
@@ -157,39 +155,34 @@ func renderServer(ws *websocket.Conn) {
 		Image:        image.NewRGBA(image.Rect(0, 0, setup.Width, setup.Height)),
 	}
 
-	var cameraLock sync.Mutex
-	camera := &trace.Camera{
-		Position: [3]float32{0, 0, 0},
-		LookAt:   [3]float32{0, 0, -1},
-		Up:       [3]float32{0, 1, 0},
-	}
-
+	updateChan := make(chan updateMessage, 1)
 	go func() {
+		var update updateMessage
 		for {
-			cameraLock.Lock()
-			cam := *camera
-			cameraLock.Unlock()
-
-			trace.Raytrace(&cfg, &cam)
-
-			if err := streamCodec.Send(ws, cfg.Image.Pix); err != nil {
+			if err := messageCodec.Receive(ws, &update); err != nil {
 				log.Println(err)
 				return
 			}
+
+			// TODO Verify message.
+			updateChan <- update
 		}
 	}()
 
 	for {
-		if err := messageCodec.Receive(ws, &update); err != nil {
+		update := <-updateChan
+		camera := trace.Camera{
+			Position: update.Camera.Position,
+			LookAt:   update.Camera.LookAt,
+			Up:       update.Camera.Up,
+		}
+
+		trace.Raytrace(&cfg, &camera)
+
+		if err := streamCodec.Send(ws, cfg.Image.Pix); err != nil {
 			log.Println(err)
 			return
 		}
-
-		cameraLock.Lock()
-		camera.Position = update.Camera.Position
-		camera.LookAt = update.Camera.LookAt
-		camera.Up = update.Camera.Up
-		cameraLock.Unlock()
 	}
 }
 

@@ -25342,7 +25342,7 @@ $packages["github.com/gopherjs/websocket"] = (function() {
 	return $pkg;
 })();
 $packages["main"] = (function() {
-	var $pkg = {}, $init, json, fmt, jsblob, js, websocket, strconv, time, setupMessage, updateMessage, arrayType, structType, sliceType, ptrType, funcType, sliceType$1, funcType$1, numFrames, keys, handleError, updateScreen, setupConnection, updateCamera, updateTitle, start, main;
+	var $pkg = {}, $init, json, fmt, jsblob, js, websocket, strconv, time, setupMessage, updateMessage, structType, arrayType, structType$1, sliceType, ptrType, funcType, sliceType$1, funcType$1, numFrames, keys, handleError, updateScreen, setupConnection, updateCamera, updateTitle, start, main;
 	json = $packages["encoding/json"];
 	fmt = $packages["fmt"];
 	jsblob = $packages["github.com/flimzy/jsblob"];
@@ -25367,13 +25367,14 @@ $packages["main"] = (function() {
 	updateMessage = $pkg.updateMessage = $newType(0, $kindStruct, "main.updateMessage", "updateMessage", "main", function(Camera_) {
 		this.$val = this;
 		if (arguments.length === 0) {
-			this.Camera = new structType.ptr(arrayType.zero(), arrayType.zero(), arrayType.zero());
+			this.Camera = new structType$1.ptr(arrayType.zero(), arrayType.zero(), arrayType.zero());
 			return;
 		}
 		this.Camera = Camera_;
 	});
+	structType = $structType([]);
 	arrayType = $arrayType($Float32, 3);
-	structType = $structType([{prop: "Position", name: "Position", pkg: "", typ: arrayType, tag: "position"}, {prop: "LookAt", name: "LookAt", pkg: "", typ: arrayType, tag: "look_at"}, {prop: "Up", name: "Up", pkg: "", typ: arrayType, tag: "up"}]);
+	structType$1 = $structType([{prop: "Position", name: "Position", pkg: "", typ: arrayType, tag: "position"}, {prop: "LookAt", name: "LookAt", pkg: "", typ: arrayType, tag: "look_at"}, {prop: "Up", name: "Up", pkg: "", typ: arrayType, tag: "up"}]);
 	sliceType = $sliceType($emptyInterface);
 	ptrType = $ptrType(js.Object);
 	funcType = $funcType([ptrType], [], false);
@@ -25401,13 +25402,14 @@ $packages["main"] = (function() {
 		ctx.putImageData(img, 0, 0);
 		numFrames = numFrames + (1) >> 0;
 	};
-	setupConnection = function(ctx, buf, img, dest) {
-		var $ptr, _tuple, buf, ctx, dest, err, img, onMessage, onOpen, ws, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _tuple = $f._tuple; buf = $f.buf; ctx = $f.ctx; dest = $f.dest; err = $f.err; img = $f.img; onMessage = $f.onMessage; onOpen = $f.onOpen; ws = $f.ws; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+	setupConnection = function(ctx, buf, img, dest, renderChan) {
+		var $ptr, _tuple, buf, ctx, dest, err, img, onMessage, onOpen, renderChan, ws, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _tuple = $f._tuple; buf = $f.buf; ctx = $f.ctx; dest = $f.dest; err = $f.err; img = $f.img; onMessage = $f.onMessage; onOpen = $f.onOpen; renderChan = $f.renderChan; ws = $f.ws; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		buf = [buf];
 		ctx = [ctx];
 		dest = [dest];
 		img = [img];
+		renderChan = [renderChan];
 		ws = [ws];
 		_tuple = websocket.New("ws://localhost:8080/render");
 		ws[0] = _tuple[0];
@@ -25417,7 +25419,7 @@ $packages["main"] = (function() {
 		/* if (!($interfaceIsEqual(err, $ifaceNil))) { */ case 1:
 			$r = handleError(err); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		/* } */ case 2:
-		onOpen = (function(buf, ctx, dest, img, ws) { return function $b(ev) {
+		onOpen = (function(buf, ctx, dest, img, renderChan, ws) { return function $b(ev) {
 			var $ptr, _r, _tuple$1, err$1, err$2, ev, msg, setup, $s, $r;
 			/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple$1 = $f._tuple$1; err$1 = $f.err$1; err$2 = $f.err$2; ev = $f.ev; msg = $f.msg; setup = $f.setup; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 			setup = new setupMessage.ptr(320, 200, 45, "pack/test.oct");
@@ -25437,11 +25439,11 @@ $packages["main"] = (function() {
 				$r = handleError(err$2); /* */ $s = 7; case 7: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 			/* } */ case 6:
 			/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple$1 = _tuple$1; $f.err$1 = err$1; $f.err$2 = err$2; $f.ev = ev; $f.msg = msg; $f.setup = setup; $f.$s = $s; $f.$r = $r; return $f;
-		}; })(buf, ctx, dest, img, ws);
-		onMessage = (function(buf, ctx, dest, img, ws) { return function(ev) {
+		}; })(buf, ctx, dest, img, renderChan, ws);
+		onMessage = (function(buf, ctx, dest, img, renderChan, ws) { return function(ev) {
 			var $ptr, blob, ev;
 			blob = new jsblob.Blob.ptr($clone(new $jsObjectPtr(ev.data), js.Object));
-			$go((function(buf, ctx, dest, img, ws) { return function $b() {
+			$go((function(buf, ctx, dest, img, renderChan, ws) { return function $b() {
 				var $ptr, _arg, _arg$1, _arg$2, _arg$3, _arg$4, _r, $s, $r;
 				/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _arg = $f._arg; _arg$1 = $f._arg$1; _arg$2 = $f._arg$2; _arg$3 = $f._arg$3; _arg$4 = $f._arg$4; _r = $f._r; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 				_arg = ctx[0];
@@ -25451,19 +25453,20 @@ $packages["main"] = (function() {
 				_r = blob.Bytes(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
 				_arg$4 = _r;
 				$r = updateScreen(_arg, _arg$1, _arg$2, _arg$3, _arg$4); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+				$r = $send(renderChan[0], new structType.ptr()); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 				/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._arg = _arg; $f._arg$1 = _arg$1; $f._arg$2 = _arg$2; $f._arg$3 = _arg$3; $f._arg$4 = _arg$4; $f._r = _r; $f.$s = $s; $f.$r = $r; return $f;
-			}; })(buf, ctx, dest, img, ws), []);
-		}; })(buf, ctx, dest, img, ws);
+			}; })(buf, ctx, dest, img, renderChan, ws), []);
+		}; })(buf, ctx, dest, img, renderChan, ws);
 		ws[0].EventTarget.AddEventListener("open", false, onOpen);
 		ws[0].EventTarget.AddEventListener("message", false, onMessage);
 		return ws[0];
-		/* */ } return; } if ($f === undefined) { $f = { $blk: setupConnection }; } $f.$ptr = $ptr; $f._tuple = _tuple; $f.buf = buf; $f.ctx = ctx; $f.dest = dest; $f.err = err; $f.img = img; $f.onMessage = onMessage; $f.onOpen = onOpen; $f.ws = ws; $f.$s = $s; $f.$r = $r; return $f;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: setupConnection }; } $f.$ptr = $ptr; $f._tuple = _tuple; $f.buf = buf; $f.ctx = ctx; $f.dest = dest; $f.err = err; $f.img = img; $f.onMessage = onMessage; $f.onOpen = onOpen; $f.renderChan = renderChan; $f.ws = ws; $f.$s = $s; $f.$r = $r; return $f;
 	};
-	updateCamera = function(ws) {
-		var $ptr, _entry, _entry$1, _entry$2, _entry$3, _ok, _r, _r$1, _ref, _tuple, _tuple$1, err, err$1, msg, msg$1, pressed, ws, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _entry = $f._entry; _entry$1 = $f._entry$1; _entry$2 = $f._entry$2; _entry$3 = $f._entry$3; _ok = $f._ok; _r = $f._r; _r$1 = $f._r$1; _ref = $f._ref; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; err = $f.err; err$1 = $f.err$1; msg = $f.msg; msg$1 = $f.msg$1; pressed = $f.pressed; ws = $f.ws; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		pressed = false;
-		msg = new updateMessage.ptr(new structType.ptr(arrayType.zero(), arrayType.zero(), arrayType.zero()));
+	updateCamera = function(ws, renderChan) {
+		var $ptr, _entry, _entry$1, _entry$2, _entry$3, _ok, _r, _r$1, _r$2, _ref, _tuple, _tuple$1, err, err$1, msg, msg$1, pressed, renderChan, ws, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _entry = $f._entry; _entry$1 = $f._entry$1; _entry$2 = $f._entry$2; _entry$3 = $f._entry$3; _ok = $f._ok; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _ref = $f._ref; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; err = $f.err; err$1 = $f.err$1; msg = $f.msg; msg$1 = $f.msg$1; pressed = $f.pressed; renderChan = $f.renderChan; ws = $f.ws; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		pressed = true;
+		msg = new updateMessage.ptr(new structType$1.ptr(arrayType.zero(), arrayType.zero(), arrayType.zero()));
 		arrayType.copy(msg.Camera.LookAt, $toNativeArray($kindFloat32, [0, 0, -1]));
 		arrayType.copy(msg.Camera.Up, $toNativeArray($kindFloat32, [0, 1, 0]));
 		_ref = time.Tick(new time.Duration(0, 33000000));
@@ -25474,22 +25477,21 @@ $packages["main"] = (function() {
 			if (!_ok) {
 				/* break; */ $s = 2; continue;
 			}
-			pressed = false;
 			if ((_entry = keys[$Int.keyFor(38)], _entry !== undefined ? _entry.v : false)) {
-				msg.Camera.Position[2] = $fround(msg.Camera.Position[2] - (0.009999999776482582));
-				msg.Camera.LookAt[2] = $fround(msg.Camera.LookAt[2] - (0.009999999776482582));
+				msg.Camera.Position[2] = $fround(msg.Camera.Position[2] - (0.10000000149011612));
+				msg.Camera.LookAt[2] = $fround(msg.Camera.LookAt[2] - (0.10000000149011612));
 				pressed = true;
 			} else if ((_entry$1 = keys[$Int.keyFor(40)], _entry$1 !== undefined ? _entry$1.v : false)) {
-				msg.Camera.Position[2] = $fround(msg.Camera.Position[2] + (0.009999999776482582));
-				msg.Camera.LookAt[2] = $fround(msg.Camera.LookAt[2] + (0.009999999776482582));
+				msg.Camera.Position[2] = $fround(msg.Camera.Position[2] + (0.10000000149011612));
+				msg.Camera.LookAt[2] = $fround(msg.Camera.LookAt[2] + (0.10000000149011612));
 				pressed = true;
 			} else if ((_entry$2 = keys[$Int.keyFor(37)], _entry$2 !== undefined ? _entry$2.v : false)) {
-				msg.Camera.Position[0] = $fround(msg.Camera.Position[0] + (0.009999999776482582));
-				msg.Camera.LookAt[0] = $fround(msg.Camera.LookAt[0] + (0.009999999776482582));
+				msg.Camera.Position[0] = $fround(msg.Camera.Position[0] + (0.10000000149011612));
+				msg.Camera.LookAt[0] = $fround(msg.Camera.LookAt[0] + (0.10000000149011612));
 				pressed = true;
 			} else if ((_entry$3 = keys[$Int.keyFor(39)], _entry$3 !== undefined ? _entry$3.v : false)) {
-				msg.Camera.Position[0] = $fround(msg.Camera.Position[0] - (0.009999999776482582));
-				msg.Camera.LookAt[0] = $fround(msg.Camera.LookAt[0] - (0.009999999776482582));
+				msg.Camera.Position[0] = $fround(msg.Camera.Position[0] - (0.10000000149011612));
+				msg.Camera.LookAt[0] = $fround(msg.Camera.LookAt[0] - (0.10000000149011612));
 				pressed = true;
 			}
 			/* */ if (pressed) { $s = 4; continue; }
@@ -25510,9 +25512,12 @@ $packages["main"] = (function() {
 				/* if (!($interfaceIsEqual(err$1, $ifaceNil))) { */ case 10:
 					$r = handleError(err$1); /* */ $s = 12; case 12: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 				/* } */ case 11:
+				pressed = false;
+				_r$2 = $recv(renderChan); /* */ $s = 13; case 13: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
+				_r$2[0];
 			/* } */ case 5:
 		/* } */ $s = 1; continue; case 2:
-		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: updateCamera }; } $f.$ptr = $ptr; $f._entry = _entry; $f._entry$1 = _entry$1; $f._entry$2 = _entry$2; $f._entry$3 = _entry$3; $f._ok = _ok; $f._r = _r; $f._r$1 = _r$1; $f._ref = _ref; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.err = err; $f.err$1 = err$1; $f.msg = msg; $f.msg$1 = msg$1; $f.pressed = pressed; $f.ws = ws; $f.$s = $s; $f.$r = $r; return $f;
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: updateCamera }; } $f.$ptr = $ptr; $f._entry = _entry; $f._entry$1 = _entry$1; $f._entry$2 = _entry$2; $f._entry$3 = _entry$3; $f._ok = _ok; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._ref = _ref; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.err = err; $f.err$1 = err$1; $f.msg = msg; $f.msg$1 = msg$1; $f.pressed = pressed; $f.renderChan = renderChan; $f.ws = ws; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	updateTitle = function() {
 		var $ptr, _r, title, $s, $r;
@@ -25523,8 +25528,8 @@ $packages["main"] = (function() {
 		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: updateTitle }; } $f.$ptr = $ptr; $f._r = _r; $f.title = title; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	start = function() {
-		var $ptr, _r, arrBuf, buf, canvas, ctx, data, dest, document, img, ws, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; arrBuf = $f.arrBuf; buf = $f.buf; canvas = $f.canvas; ctx = $f.ctx; data = $f.data; dest = $f.dest; document = $f.document; img = $f.img; ws = $f.ws; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		var $ptr, _r, arrBuf, buf, canvas, ctx, data, dest, document, img, renderChan, ws, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; arrBuf = $f.arrBuf; buf = $f.buf; canvas = $f.canvas; ctx = $f.ctx; data = $f.data; dest = $f.dest; document = $f.document; img = $f.img; renderChan = $f.renderChan; ws = $f.ws; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		document = $global.document;
 		document.onkeydown = $externalize((function(e) {
 			var $ptr, _key, e;
@@ -25562,10 +25567,12 @@ $packages["main"] = (function() {
 		arrBuf = new ($global.ArrayBuffer)($parseInt(data.length));
 		buf = new ($global.Uint8ClampedArray)(arrBuf);
 		dest = $assertType($internalize(new ($global.Uint8Array)(arrBuf), $emptyInterface), sliceType$1);
-		_r = setupConnection(ctx, buf, img, dest); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		renderChan = new $Chan(structType, 1);
+		_r = setupConnection(ctx, buf, img, dest, renderChan); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
 		ws = _r;
-		$go(updateCamera, [ws]);
-		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: start }; } $f.$ptr = $ptr; $f._r = _r; $f.arrBuf = arrBuf; $f.buf = buf; $f.canvas = canvas; $f.ctx = ctx; $f.data = data; $f.dest = dest; $f.document = document; $f.img = img; $f.ws = ws; $f.$s = $s; $f.$r = $r; return $f;
+		$r = $send(renderChan, new structType.ptr()); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$go(updateCamera, [ws, renderChan]);
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: start }; } $f.$ptr = $ptr; $f._r = _r; $f.arrBuf = arrBuf; $f.buf = buf; $f.canvas = canvas; $f.ctx = ctx; $f.data = data; $f.dest = dest; $f.document = document; $f.img = img; $f.renderChan = renderChan; $f.ws = ws; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	main = function() {
 		var $ptr;
@@ -25575,7 +25582,7 @@ $packages["main"] = (function() {
 		}), funcType$1));
 	};
 	setupMessage.init([{prop: "Width", name: "Width", pkg: "", typ: $Int, tag: "width"}, {prop: "Height", name: "Height", pkg: "", typ: $Int, tag: "height"}, {prop: "FieldOfView", name: "FieldOfView", pkg: "", typ: $Float32, tag: "field_of_view"}, {prop: "Tree", name: "Tree", pkg: "", typ: $String, tag: "tree"}]);
-	updateMessage.init([{prop: "Camera", name: "Camera", pkg: "", typ: structType, tag: "camera"}]);
+	updateMessage.init([{prop: "Camera", name: "Camera", pkg: "", typ: structType$1, tag: "camera"}]);
 	$init = function() {
 		$pkg.$init = function() {};
 		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
