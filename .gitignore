@@ -29,3 +29,5 @@ _testmain.go
 *.ocz
 *.opt
 *.tmp
+
+*.map
