@@ -22,6 +22,7 @@ import (
 	"image/color"
 	"io"
 	"math"
+	"sync"
 
 	"github.com/andreas-jonsson/octatron/pack"
 	"github.com/ungerik/go3d/vec3"
@@ -40,6 +41,9 @@ type (
 		FieldOfView  float32
 		TreeScale    float32
 		TreePosition [3]float32
+
+		Tree  Octree
+		Image *image.RGBA
 	}
 )
 
@@ -185,31 +189,42 @@ func calcIncVectors(lookAtPoint, eyePoint, up vec3.T, width, height, fieldOfView
 	return xIncVector, yIncVector, viewPlaneBottomLeftPoint
 }
 
-func Raytrace(cfg *Config, tree Octree, camera *Camera, img *image.RGBA) {
-	rect := img.Rect
-	width := float32(rect.Max.X)
-	height := float32(rect.Max.Y)
-
+func traceScanLine(h int, wg *sync.WaitGroup, cfg *Config, eyePoint, xInc, yInc, bottomLeft vec3.T) {
+	width := cfg.Image.Rect.Max.X
+	height := cfg.Image.Rect.Max.Y
 	nodeScale := cfg.TreeScale
 	nodePos := cfg.TreePosition
-	eyePoint := vec3.T(camera.Position)
+	tree := cfg.Tree
 
-	xInc, yInc, bottomLeft := calcIncVectors(camera.LookAt, eyePoint, camera.Up, width, height, cfg.FieldOfView)
+	for w := 0; w < width; w++ {
+		x := xInc.Scaled(float32(w))
+		y := yInc.Scaled(float32(h))
 
-	for h := 0; h < int(height); h++ {
-		for w := 0; w < int(width); w++ {
-			x := xInc.Scaled(float32(w))
-			y := yInc.Scaled(float32(h))
+		x = vec3.Add(&x, &y)
+		viewPlanePoint := vec3.Add(&bottomLeft, &x)
 
-			x = vec3.Add(&x, &y)
-			viewPlanePoint := vec3.Add(&bottomLeft, &x)
+		dir := vec3.Sub(&viewPlanePoint, &eyePoint)
+		dir.Normalize()
 
-			dir := vec3.Sub(&viewPlanePoint, &eyePoint)
-			dir.Normalize()
-
-			ray := infiniteRay{eyePoint, dir}
-			_, col := intersectTree(tree, &ray, nodePos, nodeScale, math.MaxFloat32, 0)
-			img.SetRGBA(w, h, col)
-		}
+		ray := infiniteRay{eyePoint, dir}
+		_, col := intersectTree(tree, &ray, nodePos, nodeScale, math.MaxFloat32, 0)
+		cfg.Image.SetRGBA(w, height-h, col)
 	}
+
+	wg.Done()
+}
+
+func Raytrace(cfg *Config, camera *Camera) {
+	size := cfg.Image.Rect.Max
+	height := size.Y
+	xInc, yInc, bottomLeft := calcIncVectors(camera.LookAt, camera.Position, camera.Up, float32(size.X), float32(size.Y), cfg.FieldOfView)
+
+	var wg sync.WaitGroup
+	wg.Add(height)
+
+	for y := 0; y < height; y++ {
+		go traceScanLine(y, &wg, cfg, camera.Position, xInc, yInc, bottomLeft)
+	}
+
+	wg.Wait()
 }

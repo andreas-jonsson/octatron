@@ -84,7 +84,14 @@ func main() {
 		panic(err)
 	}
 
-	cfg := trace.Config{FieldOfView: 45, TreeScale: 1, TreePosition: [3]float32{-0.5, -0.5, -3}}
+	cfg := trace.Config{
+		FieldOfView:  45,
+		TreeScale:    1,
+		TreePosition: [3]float32{-0.5, -0.5, -3},
+		Tree:         tree,
+		Image:        surface,
+	}
+
 	camera := trace.Camera{LookAt: [3]float32{0, 0, -1}, Up: [3]float32{0, 1, 0}}
 
 	nf := 0
@@ -110,7 +117,7 @@ func main() {
 
 		renderer.Clear()
 
-		trace.Raytrace(&cfg, tree, &camera, surface)
+		trace.Raytrace(&cfg, &camera)
 
 		texture.Update(nil, unsafe.Pointer(&surface.Pix[0]), surface.Stride)
 		renderer.Copy(texture, nil, nil)
