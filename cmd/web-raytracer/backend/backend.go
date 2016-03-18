@@ -189,9 +189,10 @@ func renderServer(ws *websocket.Conn) {
 func main() {
 	trees.data = make(map[string]entry)
 
+	http.Handle("/", http.FileServer(http.Dir("cmd/web-raytracer/frontend")))
 	http.Handle("/render", websocket.Handler(renderServer))
-	log.Println("waiting for connections...")
 
+	log.Println("waiting for connections...")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Println(err)
 		os.Exit(-1)

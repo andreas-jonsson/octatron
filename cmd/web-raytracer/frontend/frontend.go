@@ -34,6 +34,8 @@ const (
 	imgWidth  = 320
 	imgHeight = 200
 	imgScale  = 3
+
+	hostAddress = "server.andreasjonsson.se"
 )
 
 type (
@@ -73,7 +75,7 @@ func updateScreen(ctx, buf, img *js.Object, dest, src []byte) {
 }
 
 func setupConnection(ctx, buf, img *js.Object, dest []byte, renderChan chan<- struct{}) *websocket.WebSocket {
-	ws, err := websocket.New("ws://localhost:8080/render")
+	ws, err := websocket.New(fmt.Sprintf("ws://%s:8080/render", hostAddress))
 	if err != nil {
 		handleError(err)
 	}

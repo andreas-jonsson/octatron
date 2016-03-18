@@ -25342,7 +25342,7 @@ $packages["github.com/gopherjs/websocket"] = (function() {
 	return $pkg;
 })();
 $packages["main"] = (function() {
-	var $pkg = {}, $init, json, fmt, jsblob, js, websocket, strconv, time, setupMessage, updateMessage, structType, arrayType, structType$1, sliceType, ptrType, funcType, sliceType$1, funcType$1, numFrames, keys, handleError, updateScreen, setupConnection, updateCamera, updateTitle, start, main;
+	var $pkg = {}, $init, json, fmt, jsblob, js, websocket, strconv, time, setupMessage, updateMessage, sliceType, structType, arrayType, structType$1, ptrType, funcType, sliceType$1, funcType$1, numFrames, keys, handleError, updateScreen, setupConnection, updateCamera, updateTitle, start, main;
 	json = $packages["encoding/json"];
 	fmt = $packages["fmt"];
 	jsblob = $packages["github.com/flimzy/jsblob"];
@@ -25372,10 +25372,10 @@ $packages["main"] = (function() {
 		}
 		this.Camera = Camera_;
 	});
+	sliceType = $sliceType($emptyInterface);
 	structType = $structType([]);
 	arrayType = $arrayType($Float32, 3);
 	structType$1 = $structType([{prop: "Position", name: "Position", pkg: "", typ: arrayType, tag: "position"}, {prop: "LookAt", name: "LookAt", pkg: "", typ: arrayType, tag: "look_at"}, {prop: "Up", name: "Up", pkg: "", typ: arrayType, tag: "up"}]);
-	sliceType = $sliceType($emptyInterface);
 	ptrType = $ptrType(js.Object);
 	funcType = $funcType([ptrType], [], false);
 	sliceType$1 = $sliceType($Uint8);
@@ -25403,28 +25403,30 @@ $packages["main"] = (function() {
 		numFrames = numFrames + (1) >> 0;
 	};
 	setupConnection = function(ctx, buf, img, dest, renderChan) {
-		var $ptr, _tuple, buf, ctx, dest, err, img, onMessage, onOpen, renderChan, ws, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _tuple = $f._tuple; buf = $f.buf; ctx = $f.ctx; dest = $f.dest; err = $f.err; img = $f.img; onMessage = $f.onMessage; onOpen = $f.onOpen; renderChan = $f.renderChan; ws = $f.ws; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		var $ptr, _r, _r$1, _tuple, buf, ctx, dest, err, img, onMessage, onOpen, renderChan, ws, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _tuple = $f._tuple; buf = $f.buf; ctx = $f.ctx; dest = $f.dest; err = $f.err; img = $f.img; onMessage = $f.onMessage; onOpen = $f.onOpen; renderChan = $f.renderChan; ws = $f.ws; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		buf = [buf];
 		ctx = [ctx];
 		dest = [dest];
 		img = [img];
 		renderChan = [renderChan];
 		ws = [ws];
-		_tuple = websocket.New("ws://localhost:8080/render");
+		_r = fmt.Sprintf("ws://%s:8080/render", new sliceType([new $String("server.andreasjonsson.se")])); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_r$1 = websocket.New(_r); /* */ $s = 2; case 2: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+		_tuple = _r$1;
 		ws[0] = _tuple[0];
 		err = _tuple[1];
-		/* */ if (!($interfaceIsEqual(err, $ifaceNil))) { $s = 1; continue; }
-		/* */ $s = 2; continue;
-		/* if (!($interfaceIsEqual(err, $ifaceNil))) { */ case 1:
-			$r = handleError(err); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		/* } */ case 2:
+		/* */ if (!($interfaceIsEqual(err, $ifaceNil))) { $s = 3; continue; }
+		/* */ $s = 4; continue;
+		/* if (!($interfaceIsEqual(err, $ifaceNil))) { */ case 3:
+			$r = handleError(err); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* } */ case 4:
 		onOpen = (function(buf, ctx, dest, img, renderChan, ws) { return function $b(ev) {
-			var $ptr, _r, _tuple$1, err$1, err$2, ev, msg, setup, $s, $r;
-			/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple$1 = $f._tuple$1; err$1 = $f.err$1; err$2 = $f.err$2; ev = $f.ev; msg = $f.msg; setup = $f.setup; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+			var $ptr, _r$2, _tuple$1, err$1, err$2, ev, msg, setup, $s, $r;
+			/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r$2 = $f._r$2; _tuple$1 = $f._tuple$1; err$1 = $f.err$1; err$2 = $f.err$2; ev = $f.ev; msg = $f.msg; setup = $f.setup; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 			setup = new setupMessage.ptr(320, 200, 45, "pack/test.oct");
-			_r = json.Marshal(new setup.constructor.elem(setup)); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-			_tuple$1 = _r;
+			_r$2 = json.Marshal(new setup.constructor.elem(setup)); /* */ $s = 1; case 1: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
+			_tuple$1 = _r$2;
 			msg = _tuple$1[0];
 			err$1 = _tuple$1[1];
 			/* */ if (!($interfaceIsEqual(err$1, $ifaceNil))) { $s = 2; continue; }
@@ -25438,29 +25440,29 @@ $packages["main"] = (function() {
 			/* if (!($interfaceIsEqual(err$2, $ifaceNil))) { */ case 5:
 				$r = handleError(err$2); /* */ $s = 7; case 7: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 			/* } */ case 6:
-			/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple$1 = _tuple$1; $f.err$1 = err$1; $f.err$2 = err$2; $f.ev = ev; $f.msg = msg; $f.setup = setup; $f.$s = $s; $f.$r = $r; return $f;
+			/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._r$2 = _r$2; $f._tuple$1 = _tuple$1; $f.err$1 = err$1; $f.err$2 = err$2; $f.ev = ev; $f.msg = msg; $f.setup = setup; $f.$s = $s; $f.$r = $r; return $f;
 		}; })(buf, ctx, dest, img, renderChan, ws);
 		onMessage = (function(buf, ctx, dest, img, renderChan, ws) { return function(ev) {
 			var $ptr, blob, ev;
 			blob = new jsblob.Blob.ptr($clone(new $jsObjectPtr(ev.data), js.Object));
 			$go((function(buf, ctx, dest, img, renderChan, ws) { return function $b() {
-				var $ptr, _arg, _arg$1, _arg$2, _arg$3, _arg$4, _r, $s, $r;
-				/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _arg = $f._arg; _arg$1 = $f._arg$1; _arg$2 = $f._arg$2; _arg$3 = $f._arg$3; _arg$4 = $f._arg$4; _r = $f._r; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+				var $ptr, _arg, _arg$1, _arg$2, _arg$3, _arg$4, _r$2, $s, $r;
+				/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _arg = $f._arg; _arg$1 = $f._arg$1; _arg$2 = $f._arg$2; _arg$3 = $f._arg$3; _arg$4 = $f._arg$4; _r$2 = $f._r$2; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 				_arg = ctx[0];
 				_arg$1 = buf[0];
 				_arg$2 = img[0];
 				_arg$3 = dest[0];
-				_r = blob.Bytes(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-				_arg$4 = _r;
+				_r$2 = blob.Bytes(); /* */ $s = 1; case 1: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
+				_arg$4 = _r$2;
 				$r = updateScreen(_arg, _arg$1, _arg$2, _arg$3, _arg$4); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 				$r = $send(renderChan[0], new structType.ptr()); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-				/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._arg = _arg; $f._arg$1 = _arg$1; $f._arg$2 = _arg$2; $f._arg$3 = _arg$3; $f._arg$4 = _arg$4; $f._r = _r; $f.$s = $s; $f.$r = $r; return $f;
+				/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._arg = _arg; $f._arg$1 = _arg$1; $f._arg$2 = _arg$2; $f._arg$3 = _arg$3; $f._arg$4 = _arg$4; $f._r$2 = _r$2; $f.$s = $s; $f.$r = $r; return $f;
 			}; })(buf, ctx, dest, img, renderChan, ws), []);
 		}; })(buf, ctx, dest, img, renderChan, ws);
 		ws[0].EventTarget.AddEventListener("open", false, onOpen);
 		ws[0].EventTarget.AddEventListener("message", false, onMessage);
 		return ws[0];
-		/* */ } return; } if ($f === undefined) { $f = { $blk: setupConnection }; } $f.$ptr = $ptr; $f._tuple = _tuple; $f.buf = buf; $f.ctx = ctx; $f.dest = dest; $f.err = err; $f.img = img; $f.onMessage = onMessage; $f.onOpen = onOpen; $f.renderChan = renderChan; $f.ws = ws; $f.$s = $s; $f.$r = $r; return $f;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: setupConnection }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._tuple = _tuple; $f.buf = buf; $f.ctx = ctx; $f.dest = dest; $f.err = err; $f.img = img; $f.onMessage = onMessage; $f.onOpen = onOpen; $f.renderChan = renderChan; $f.ws = ws; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	updateCamera = function(ws, renderChan) {
 		var $ptr, _entry, _entry$1, _entry$2, _entry$3, _ok, _r, _r$1, _r$2, _ref, _tuple, _tuple$1, err, err$1, msg, msg$1, pressed, renderChan, ws, $s, $r;
