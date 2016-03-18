@@ -20,10 +20,13 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"flag"
+	"fmt"
 	"image"
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"sync"
 
 	"golang.org/x/net/websocket"
@@ -138,6 +141,8 @@ func renderServer(ws *websocket.Conn) {
 
 	// TODO Verify message.
 
+	setup.Tree = path.Join(arguments.data, path.Base(setup.Tree))
+
 	tree, err := loadTree(setup.Tree)
 	if err != nil {
 		log.Println(err, setup.Tree)
@@ -186,14 +191,32 @@ func renderServer(ws *websocket.Conn) {
 	}
 }
 
+var arguments struct {
+	web,
+	data string
+	port uint
+}
+
+func init() {
+	flag.Usage = func() {
+		fmt.Printf("Usage: program [options]\n\n")
+		flag.PrintDefaults()
+	}
+
+	flag.StringVar(&arguments.web, "web", "cmd/web-raytracer/frontend", "web frontend location")
+	flag.StringVar(&arguments.data, "data", "pack", "data location")
+	flag.UintVar(&arguments.port, "port", 8080, "server port")
+}
+
 func main() {
+	flag.Parse()
 	trees.data = make(map[string]entry)
 
-	http.Handle("/", http.FileServer(http.Dir("cmd/web-raytracer/frontend")))
+	http.Handle("/", http.FileServer(http.Dir(arguments.web)))
 	http.Handle("/render", websocket.Handler(renderServer))
 
 	log.Println("waiting for connections...")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf(":%v", arguments.port), nil); err != nil {
 		log.Println(err)
 		os.Exit(-1)
 	}

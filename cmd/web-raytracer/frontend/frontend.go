@@ -35,6 +35,7 @@ const (
 	imgHeight = 200
 	imgScale  = 3
 
+	//hostAddress = "localhost"
 	hostAddress = "server.andreasjonsson.se"
 )
 
@@ -85,7 +86,7 @@ func startConnection(ctx, buf, img *js.Object, dest []byte, renderChan chan stru
 			Width:       imgWidth,
 			Height:      imgHeight,
 			FieldOfView: 45,
-			Tree:        "pack/test.oct",
+			Tree:        "test.oct",
 		}
 
 		msg, err := json.Marshal(setup)

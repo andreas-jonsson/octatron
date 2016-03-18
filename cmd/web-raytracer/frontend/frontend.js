@@ -25424,7 +25424,7 @@ $packages["main"] = (function() {
 		onOpen = (function(buf, ctx, dest, img, renderChan, ws) { return function $b(ev) {
 			var $ptr, _r$2, _tuple$1, err$1, err$2, ev, msg, setup, $s, $r;
 			/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r$2 = $f._r$2; _tuple$1 = $f._tuple$1; err$1 = $f.err$1; err$2 = $f.err$2; ev = $f.ev; msg = $f.msg; setup = $f.setup; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-			setup = new setupMessage.ptr(320, 200, 45, "pack/test.oct");
+			setup = new setupMessage.ptr(320, 200, 45, "test.oct");
 			_r$2 = json.Marshal(new setup.constructor.elem(setup)); /* */ $s = 1; case 1: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
 			_tuple$1 = _r$2;
 			msg = _tuple$1[0];
