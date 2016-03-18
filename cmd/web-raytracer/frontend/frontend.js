@@ -25342,7 +25342,7 @@ $packages["github.com/gopherjs/websocket"] = (function() {
 	return $pkg;
 })();
 $packages["main"] = (function() {
-	var $pkg = {}, $init, json, fmt, jsblob, js, websocket, strconv, time, setupMessage, updateMessage, sliceType, structType, arrayType, structType$1, ptrType, funcType, sliceType$1, funcType$1, numFrames, keys, handleError, updateScreen, setupConnection, updateCamera, updateTitle, start, main;
+	var $pkg = {}, $init, json, fmt, jsblob, js, websocket, strconv, time, setupMessage, updateMessage, sliceType, structType, arrayType, structType$1, ptrType, funcType, sliceType$1, funcType$1, numFrames, keys, handleError, updateScreen, startConnection, updateCamera, updateTitle, start, main;
 	json = $packages["encoding/json"];
 	fmt = $packages["fmt"];
 	jsblob = $packages["github.com/flimzy/jsblob"];
@@ -25402,7 +25402,7 @@ $packages["main"] = (function() {
 		ctx.putImageData(img, 0, 0);
 		numFrames = numFrames + (1) >> 0;
 	};
-	setupConnection = function(ctx, buf, img, dest, renderChan) {
+	startConnection = function(ctx, buf, img, dest, renderChan) {
 		var $ptr, _r, _r$1, _tuple, buf, ctx, dest, err, img, onMessage, onOpen, renderChan, ws, $s, $r;
 		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _tuple = $f._tuple; buf = $f.buf; ctx = $f.ctx; dest = $f.dest; err = $f.err; img = $f.img; onMessage = $f.onMessage; onOpen = $f.onOpen; renderChan = $f.renderChan; ws = $f.ws; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		buf = [buf];
@@ -25440,6 +25440,7 @@ $packages["main"] = (function() {
 			/* if (!($interfaceIsEqual(err$2, $ifaceNil))) { */ case 5:
 				$r = handleError(err$2); /* */ $s = 7; case 7: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 			/* } */ case 6:
+			$go(updateCamera, [ws[0], renderChan[0]]);
 			/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._r$2 = _r$2; $f._tuple$1 = _tuple$1; $f.err$1 = err$1; $f.err$2 = err$2; $f.ev = ev; $f.msg = msg; $f.setup = setup; $f.$s = $s; $f.$r = $r; return $f;
 		}; })(buf, ctx, dest, img, renderChan, ws);
 		onMessage = (function(buf, ctx, dest, img, renderChan, ws) { return function(ev) {
@@ -25461,8 +25462,7 @@ $packages["main"] = (function() {
 		}; })(buf, ctx, dest, img, renderChan, ws);
 		ws[0].EventTarget.AddEventListener("open", false, onOpen);
 		ws[0].EventTarget.AddEventListener("message", false, onMessage);
-		return ws[0];
-		/* */ } return; } if ($f === undefined) { $f = { $blk: setupConnection }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._tuple = _tuple; $f.buf = buf; $f.ctx = ctx; $f.dest = dest; $f.err = err; $f.img = img; $f.onMessage = onMessage; $f.onOpen = onOpen; $f.renderChan = renderChan; $f.ws = ws; $f.$s = $s; $f.$r = $r; return $f;
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: startConnection }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._tuple = _tuple; $f.buf = buf; $f.ctx = ctx; $f.dest = dest; $f.err = err; $f.img = img; $f.onMessage = onMessage; $f.onOpen = onOpen; $f.renderChan = renderChan; $f.ws = ws; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	updateCamera = function(ws, renderChan) {
 		var $ptr, _entry, _entry$1, _entry$2, _entry$3, _ok, _r, _r$1, _r$2, _ref, _tuple, _tuple$1, err, err$1, msg, msg$1, pressed, renderChan, ws, $s, $r;
@@ -25530,8 +25530,8 @@ $packages["main"] = (function() {
 		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: updateTitle }; } $f.$ptr = $ptr; $f._r = _r; $f.title = title; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	start = function() {
-		var $ptr, _r, arrBuf, buf, canvas, ctx, data, dest, document, img, renderChan, ws, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; arrBuf = $f.arrBuf; buf = $f.buf; canvas = $f.canvas; ctx = $f.ctx; data = $f.data; dest = $f.dest; document = $f.document; img = $f.img; renderChan = $f.renderChan; ws = $f.ws; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		var $ptr, arrBuf, buf, canvas, ctx, data, dest, document, img, renderChan, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; arrBuf = $f.arrBuf; buf = $f.buf; canvas = $f.canvas; ctx = $f.ctx; data = $f.data; dest = $f.dest; document = $f.document; img = $f.img; renderChan = $f.renderChan; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		document = $global.document;
 		document.onkeydown = $externalize((function(e) {
 			var $ptr, _key, e;
@@ -25570,11 +25570,9 @@ $packages["main"] = (function() {
 		buf = new ($global.Uint8ClampedArray)(arrBuf);
 		dest = $assertType($internalize(new ($global.Uint8Array)(arrBuf), $emptyInterface), sliceType$1);
 		renderChan = new $Chan(structType, 1);
-		_r = setupConnection(ctx, buf, img, dest, renderChan); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-		ws = _r;
-		$r = $send(renderChan, new structType.ptr()); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		$go(updateCamera, [ws, renderChan]);
-		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: start }; } $f.$ptr = $ptr; $f._r = _r; $f.arrBuf = arrBuf; $f.buf = buf; $f.canvas = canvas; $f.ctx = ctx; $f.data = data; $f.dest = dest; $f.document = document; $f.img = img; $f.renderChan = renderChan; $f.ws = ws; $f.$s = $s; $f.$r = $r; return $f;
+		$r = $send(renderChan, new structType.ptr()); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = startConnection(ctx, buf, img, dest, renderChan); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: start }; } $f.$ptr = $ptr; $f.arrBuf = arrBuf; $f.buf = buf; $f.canvas = canvas; $f.ctx = ctx; $f.data = data; $f.dest = dest; $f.document = document; $f.img = img; $f.renderChan = renderChan; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	main = function() {
 		var $ptr;

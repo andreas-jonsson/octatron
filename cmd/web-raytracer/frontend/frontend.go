@@ -74,7 +74,7 @@ func updateScreen(ctx, buf, img *js.Object, dest, src []byte) {
 	numFrames++
 }
 
-func setupConnection(ctx, buf, img *js.Object, dest []byte, renderChan chan<- struct{}) *websocket.WebSocket {
+func startConnection(ctx, buf, img *js.Object, dest []byte, renderChan chan struct{}) {
 	ws, err := websocket.New(fmt.Sprintf("ws://%s:8080/render", hostAddress))
 	if err != nil {
 		handleError(err)
@@ -96,6 +96,8 @@ func setupConnection(ctx, buf, img *js.Object, dest []byte, renderChan chan<- st
 		if err := ws.Send(string(msg)); err != nil {
 			handleError(err)
 		}
+
+		go updateCamera(ws, renderChan)
 	}
 
 	onMessage := func(ev *js.Object) {
@@ -108,8 +110,6 @@ func setupConnection(ctx, buf, img *js.Object, dest []byte, renderChan chan<- st
 
 	ws.AddEventListener("open", false, onOpen)
 	ws.AddEventListener("message", false, onMessage)
-
-	return ws
 }
 
 func updateCamera(ws *websocket.WebSocket, renderChan <-chan struct{}) {
@@ -200,10 +200,9 @@ func start() {
 	dest := js.Global.Get("Uint8Array").New(arrBuf).Interface().([]byte)
 
 	renderChan := make(chan struct{}, 1) // Ensure that we have at moast N frames in-flight.
-	ws := setupConnection(ctx, buf, img, dest, renderChan)
 	renderChan <- struct{}{}
 
-	go updateCamera(ws, renderChan)
+	startConnection(ctx, buf, img, dest, renderChan)
 }
 
 func main() {
