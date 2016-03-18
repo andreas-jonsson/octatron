@@ -28,11 +28,14 @@ import (
 	"os"
 	"path"
 	"sync"
+	"time"
 
 	"golang.org/x/net/websocket"
 
 	"github.com/andreas-jonsson/octatron/trace"
 )
+
+const maxSessionTime = 3
 
 var closeFrameErr = errors.New("close-frame")
 
@@ -131,15 +134,33 @@ func unloadTree(file string) {
 }
 
 func renderServer(ws *websocket.Conn) {
-	log.Println("new connection:", ws.RemoteAddr())
+	addr := ws.RemoteAddr()
+	log.Println("new connection:", addr)
+	defer func() { log.Println(addr, "was disconnected") }()
+
+	// Setup watchdog.
+	shutdownWatch := make(chan struct{}, 1)
+	defer func() { shutdownWatch <- struct{}{} }()
+	go func() {
+		select {
+		case <-shutdownWatch:
+		case <-time.After(maxSessionTime * time.Minute):
+			log.Println("session timeout")
+			ws.Close()
+		}
+	}()
 
 	var setup setupMessage
 	if err := messageCodec.Receive(ws, &setup); err != nil {
 		log.Println(err)
 		return
 	}
+	log.Println(setup)
 
-	// TODO Verify message.
+	if setup.Width*setup.Height > 1280*720 || setup.FieldOfView < 45 || setup.FieldOfView > 180 {
+		log.Println("invalid setup")
+		return
+	}
 
 	setup.Tree = path.Join(arguments.data, path.Base(setup.Tree))
 
@@ -149,8 +170,6 @@ func renderServer(ws *websocket.Conn) {
 		return
 	}
 	defer unloadTree(setup.Tree)
-
-	log.Println("reading from:", setup.Tree)
 
 	cfg := trace.Config{
 		FieldOfView:  setup.FieldOfView,
