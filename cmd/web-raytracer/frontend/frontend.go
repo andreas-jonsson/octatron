@@ -31,9 +31,9 @@ import (
 )
 
 const (
-	imgWidth  = 320
-	imgHeight = 200
-	imgScale  = 3
+	imgWidth  = 640
+	imgHeight = 360
+	imgScale  = 1
 
 	//hostAddress = "localhost"
 	hostAddress = "server.andreasjonsson.se"
