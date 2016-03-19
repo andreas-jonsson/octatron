@@ -171,15 +171,18 @@ func renderServer(ws *websocket.Conn) {
 	}
 	defer unloadTree(setup.Tree)
 
+	surface := image.NewRGBA(image.Rect(0, 0, setup.Width, setup.Height))
 	cfg := trace.Config{
 		FieldOfView:  setup.FieldOfView,
 		TreeScale:    1,
 		TreePosition: [3]float32{-0.5, -0.5, -3},
 		Tree:         tree,
-		Image:        image.NewRGBA(image.Rect(0, 0, setup.Width, setup.Height)),
+		Image:        surface,
 	}
 
+	raytracer := trace.NewRaytracer(cfg)
 	updateChan := make(chan updateMessage, 1)
+
 	go func() {
 		var update updateMessage
 		for {
@@ -201,9 +204,9 @@ func renderServer(ws *websocket.Conn) {
 			Up:       update.Camera.Up,
 		}
 
-		trace.Raytrace(&cfg, &camera)
+		raytracer.Trace(&camera)
 
-		if err := streamCodec.Send(ws, cfg.Image.Pix); err != nil {
+		if err := streamCodec.Send(ws, surface.Pix); err != nil {
 			log.Println(err)
 			return
 		}

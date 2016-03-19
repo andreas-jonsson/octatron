@@ -92,6 +92,7 @@ func main() {
 		Image:        surface,
 	}
 
+	raytracer := trace.NewRaytracer(cfg)
 	camera := trace.Camera{LookAt: [3]float32{0, 0, -1}, Up: [3]float32{0, 1, 0}}
 
 	nf := 0
@@ -150,7 +151,7 @@ func main() {
 
 		renderer.Clear()
 
-		trace.Raytrace(&cfg, &camera)
+		raytracer.Trace(&camera)
 
 		texture.Update(nil, unsafe.Pointer(&surface.Pix[0]), surface.Stride)
 		renderer.Copy(texture, nil, nil)

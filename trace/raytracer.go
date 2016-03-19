@@ -18,8 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package trace
 
 import (
-	"image"
 	"image/color"
+	"image/draw"
 	"io"
 	"math"
 	"sync"
@@ -43,7 +43,11 @@ type (
 		TreePosition [3]float32
 
 		Tree  Octree
-		Image *image.RGBA
+		Image draw.Image
+	}
+
+	Raytracer struct {
+		cfg Config
 	}
 )
 
@@ -61,6 +65,28 @@ func (n *octreeNode) setColor(color *pack.Color) {
 	n.color.G = uint8(color.G * 255)
 	n.color.B = uint8(color.B * 255)
 	n.color.A = uint8(color.A * 255)
+}
+
+func LoadOctree(reader io.Reader) (Octree, error) {
+	var (
+		color  pack.Color
+		header pack.OctreeHeader
+	)
+
+	if err := pack.DecodeHeader(reader, &header); err != nil {
+		return nil, err
+	}
+
+	data := make([]octreeNode, header.NumNodes)
+	for i := range data {
+		n := &data[i]
+		if err := pack.DecodeNode(reader, header.Format, &color, n.children[:]); err != nil {
+			return nil, err
+		}
+		n.setColor(&color)
+	}
+
+	return data, nil
 }
 
 func intersectBox(ray *infiniteRay, lenght float32, box *vec3.Box) float32 {
@@ -100,7 +126,7 @@ var (
 	}
 )
 
-func intersectTree(tree []octreeNode, ray *infiniteRay, nodePos vec3.T, nodeScale, length float32, nodeIndex uint32) (float32, color.RGBA) {
+func (rt *Raytracer) intersectTree(tree []octreeNode, ray *infiniteRay, nodePos vec3.T, nodeScale, length float32, nodeIndex uint32) (float32, color.RGBA) {
 	var (
 		color = clearColor
 		node  = tree[nodeIndex]
@@ -122,7 +148,7 @@ func intersectTree(tree []octreeNode, ray *infiniteRay, nodePos vec3.T, nodeScal
 			scaled := childPositions[i].Scaled(childScale)
 			pos := vec3.Add(&nodePos, &scaled)
 
-			if ln, col := intersectTree(tree, ray, pos, childScale, length, childIndex); ln < length {
+			if ln, col := rt.intersectTree(tree, ray, pos, childScale, length, childIndex); ln < length {
 				length = ln
 				color = col
 			}
@@ -136,14 +162,22 @@ func intersectTree(tree []octreeNode, ray *infiniteRay, nodePos vec3.T, nodeScal
 	return length, color
 }
 
-func calcIncVectors(lookAtPoint, eyePoint, up vec3.T, width, height, fieldOfView float32) (vec3.T, vec3.T, vec3.T) {
+func (rt *Raytracer) calcIncVectors(camera *Camera) (vec3.T, vec3.T, vec3.T) {
+	size := rt.cfg.Image.Bounds().Max
+	width := float32(size.X)
+	height := float32(size.Y)
+
+	lookAtPoint := vec3.T(camera.LookAt)
+	eyePoint := vec3.T(camera.Position)
+	up := vec3.T(camera.Up)
+
 	viewDirection := vec3.Sub(&lookAtPoint, &eyePoint)
 	u := vec3.Cross(&viewDirection, &up)
 	v := vec3.Cross(&u, &viewDirection)
 	u.Normalize()
 	v.Normalize()
 
-	viewPlaneHalfWidth := float32(math.Tan(float64(fieldOfView / 2)))
+	viewPlaneHalfWidth := float32(math.Tan(float64(rt.cfg.FieldOfView / 2)))
 	aspectRatio := height / width
 	viewPlaneHalfHeight := aspectRatio * viewPlaneHalfWidth
 
@@ -167,12 +201,13 @@ func calcIncVectors(lookAtPoint, eyePoint, up vec3.T, width, height, fieldOfView
 	return xIncVector, yIncVector, viewPlaneBottomLeftPoint
 }
 
-func traceScanLine(h int, wg *sync.WaitGroup, cfg *Config, eyePoint, xInc, yInc, bottomLeft vec3.T) {
-	width := cfg.Image.Rect.Max.X
-	height := cfg.Image.Rect.Max.Y
-	nodeScale := cfg.TreeScale
-	nodePos := cfg.TreePosition
-	tree := cfg.Tree
+func (rt *Raytracer) traceScanLine(h int, wg *sync.WaitGroup, eyePoint, xInc, yInc, bottomLeft vec3.T) {
+	bounds := rt.cfg.Image.Bounds()
+	width := bounds.Max.X
+	height := bounds.Max.Y
+	nodeScale := rt.cfg.TreeScale
+	nodePos := rt.cfg.TreePosition
+	tree := rt.cfg.Tree
 
 	for w := 0; w < width; w++ {
 		x := xInc.Scaled(float32(w))
@@ -185,46 +220,27 @@ func traceScanLine(h int, wg *sync.WaitGroup, cfg *Config, eyePoint, xInc, yInc,
 		dir.Normalize()
 
 		ray := infiniteRay{eyePoint, dir}
-		_, col := intersectTree(tree, &ray, nodePos, nodeScale, math.MaxFloat32, 0)
-		cfg.Image.SetRGBA(w, height-h, col)
+		_, col := rt.intersectTree(tree, &ray, nodePos, nodeScale, math.MaxFloat32, 0)
+		rt.cfg.Image.Set(w, height-h, col)
 	}
 
 	wg.Done()
 }
 
-func Raytrace(cfg *Config, camera *Camera) {
-	size := cfg.Image.Rect.Max
-	height := size.Y
-	xInc, yInc, bottomLeft := calcIncVectors(camera.LookAt, camera.Position, camera.Up, float32(size.X), float32(size.Y), cfg.FieldOfView)
+func (rt *Raytracer) Trace(camera *Camera) {
+	height := rt.cfg.Image.Bounds().Max.Y
+	xInc, yInc, bottomLeft := rt.calcIncVectors(camera)
 
 	var wg sync.WaitGroup
 	wg.Add(height)
 
 	for y := 0; y < height; y++ {
-		go traceScanLine(y, &wg, cfg, camera.Position, xInc, yInc, bottomLeft)
+		go rt.traceScanLine(y, &wg, camera.Position, xInc, yInc, bottomLeft)
 	}
 
 	wg.Wait()
 }
 
-func LoadOctree(reader io.Reader) (Octree, error) {
-	var (
-		color  pack.Color
-		header pack.OctreeHeader
-	)
-
-	if err := pack.DecodeHeader(reader, &header); err != nil {
-		return nil, err
-	}
-
-	data := make([]octreeNode, header.NumNodes)
-	for i := range data {
-		n := &data[i]
-		if err := pack.DecodeNode(reader, header.Format, &color, n.children[:]); err != nil {
-			return nil, err
-		}
-		n.setColor(&color)
-	}
-
-	return data, nil
+func NewRaytracer(cfg Config) *Raytracer {
+	return &Raytracer{cfg}
 }
