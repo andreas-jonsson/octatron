@@ -20,6 +20,7 @@ package main
 import (
 	"fmt"
 	"image"
+	"image/draw"
 	"os"
 	"runtime"
 	"time"
@@ -66,7 +67,9 @@ func main() {
 	renderer.SetLogicalSize(width, height)
 	renderer.SetDrawColor(0, 0, 0, 255)
 
-	surface := image.NewRGBA(image.Rect(0, 0, width, height))
+	rect := image.Rect(0, 0, width, height)
+	surfaces := [2]*image.RGBA{image.NewRGBA(rect), image.NewRGBA(rect)}
+
 	texture, err := renderer.CreateTexture(sdl.PIXELFORMAT_ABGR8888, sdl.TEXTUREACCESS_STREAMING, width, height)
 	if err != nil {
 		panic(err)
@@ -89,7 +92,8 @@ func main() {
 		TreeScale:    1,
 		TreePosition: [3]float32{-0.5, -0.5, -3},
 		Tree:         tree,
-		Image:        surface,
+		Image:        [2]draw.Image{surfaces[0], surfaces[1]},
+		Jitter:       false,
 	}
 
 	raytracer := trace.NewRaytracer(cfg)
@@ -152,8 +156,9 @@ func main() {
 		renderer.Clear()
 
 		raytracer.Trace(&camera)
+		s := surfaces[raytracer.Wait()]
 
-		texture.Update(nil, unsafe.Pointer(&surface.Pix[0]), surface.Stride)
+		texture.Update(nil, unsafe.Pointer(&s.Pix[0]), s.Stride)
 		renderer.Copy(texture, nil, nil)
 		renderer.Present()
 

@@ -23,6 +23,7 @@ import (
 	"flag"
 	"fmt"
 	"image"
+	"image/draw"
 	"log"
 	"net/http"
 	"os"
@@ -177,7 +178,7 @@ func renderServer(ws *websocket.Conn) {
 		TreeScale:    1,
 		TreePosition: [3]float32{-0.5, -0.5, -3},
 		Tree:         tree,
-		Image:        surface,
+		Image:        [2]draw.Image{surface, nil},
 	}
 
 	raytracer := trace.NewRaytracer(cfg)
@@ -205,6 +206,7 @@ func renderServer(ws *websocket.Conn) {
 		}
 
 		raytracer.Trace(&camera)
+		raytracer.Wait()
 
 		if err := streamCodec.Send(ws, surface.Pix); err != nil {
 			log.Println(err)

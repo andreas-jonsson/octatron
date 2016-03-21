@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package trace
 
 import (
+	"image"
 	"image/color"
 	"image/draw"
 	"io"
@@ -42,12 +43,16 @@ type (
 		TreeScale    float32
 		TreePosition [3]float32
 
-		Tree  Octree
-		Image draw.Image
+		Tree   Octree
+		Jitter bool
+		Image  [2]draw.Image
 	}
 
 	Raytracer struct {
-		cfg Config
+		cfg   Config
+		frame uint32
+		idx   int
+		wg    sync.WaitGroup
 	}
 )
 
@@ -162,8 +167,7 @@ func (rt *Raytracer) intersectTree(tree []octreeNode, ray *infiniteRay, nodePos 
 	return length, color
 }
 
-func (rt *Raytracer) calcIncVectors(camera *Camera) (vec3.T, vec3.T, vec3.T) {
-	size := rt.cfg.Image.Bounds().Max
+func (rt *Raytracer) calcIncVectors(camera *Camera, size image.Point) (vec3.T, vec3.T, vec3.T) {
 	width := float32(size.X)
 	height := float32(size.Y)
 
@@ -201,15 +205,22 @@ func (rt *Raytracer) calcIncVectors(camera *Camera) (vec3.T, vec3.T, vec3.T) {
 	return xIncVector, yIncVector, viewPlaneBottomLeftPoint
 }
 
-func (rt *Raytracer) traceScanLine(h int, wg *sync.WaitGroup, eyePoint, xInc, yInc, bottomLeft vec3.T) {
-	bounds := rt.cfg.Image.Bounds()
-	width := bounds.Max.X
-	height := bounds.Max.Y
-	nodeScale := rt.cfg.TreeScale
-	nodePos := rt.cfg.TreePosition
-	tree := rt.cfg.Tree
+func (rt *Raytracer) traceScanLine(h int, eyePoint, xInc, yInc, bottomLeft vec3.T) {
+	cfg := &rt.cfg
+	img := cfg.Image[rt.idx]
+	size := img.Bounds().Max
+	width, height := size.X, size.Y
 
-	for w := 0; w < width; w++ {
+	nodeScale := cfg.TreeScale
+	nodePos := cfg.TreePosition
+	tree := cfg.Tree
+
+	step := 1
+	if cfg.Jitter {
+		step = 2
+	}
+
+	for w := rt.idx; w < width; w += step {
 		x := xInc.Scaled(float32(w))
 		y := yInc.Scaled(float32(h))
 
@@ -221,26 +232,43 @@ func (rt *Raytracer) traceScanLine(h int, wg *sync.WaitGroup, eyePoint, xInc, yI
 
 		ray := infiniteRay{eyePoint, dir}
 		_, col := rt.intersectTree(tree, &ray, nodePos, nodeScale, math.MaxFloat32, 0)
-		rt.cfg.Image.Set(w, height-h, col)
+		img.Set(w/step, (height-h)/step, col)
 	}
 
-	wg.Done()
+	rt.wg.Done()
+}
+
+func (rt *Raytracer) Wait() int {
+	rt.wg.Wait()
+	return rt.idx
 }
 
 func (rt *Raytracer) Trace(camera *Camera) {
-	height := rt.cfg.Image.Bounds().Max.Y
-	xInc, yInc, bottomLeft := rt.calcIncVectors(camera)
+	rt.Wait()
 
-	var wg sync.WaitGroup
-	wg.Add(height)
+	cfg := &rt.cfg
+	rt.idx = int(rt.frame % 2)
+	img := cfg.Image[rt.idx]
+	size := img.Bounds().Max
+	step := 1
 
-	for y := 0; y < height; y++ {
-		go rt.traceScanLine(y, &wg, camera.Position, xInc, yInc, bottomLeft)
+	if cfg.Jitter {
+		step = 2
+		size.X *= 2
+		size.Y *= 2
+		rt.frame++
 	}
 
-	wg.Wait()
+	xInc, yInc, bottomLeft := rt.calcIncVectors(camera, size)
+
+	height := size.Y
+	rt.wg.Add(height / step)
+
+	for y := rt.idx; y < height; y += step {
+		go rt.traceScanLine(y, camera.Position, xInc, yInc, bottomLeft)
+	}
 }
 
 func NewRaytracer(cfg Config) *Raytracer {
-	return &Raytracer{cfg}
+	return &Raytracer{cfg: cfg}
 }
