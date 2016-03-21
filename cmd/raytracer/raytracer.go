@@ -20,7 +20,6 @@ package main
 import (
 	"fmt"
 	"image"
-	"image/draw"
 	"os"
 	"runtime"
 	"time"
@@ -28,6 +27,15 @@ import (
 
 	"github.com/andreas-jonsson/octatron/trace"
 	"github.com/veandco/go-sdl2/sdl"
+)
+
+const (
+	enableJitter    = true
+	enableDepthTest = false
+	screenWidth     = 1280
+	screenHeight    = 720
+	resolutionX     = 640
+	resolutionY     = 360
 )
 
 func toggleFullscreen(window *sdl.Window) {
@@ -50,7 +58,7 @@ func main() {
 	defer sdl.Quit()
 
 	title := "AJ's Raytracer"
-	window, err := sdl.CreateWindow(title, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 640, 320, sdl.WINDOW_SHOWN)
+	window, err := sdl.CreateWindow(title, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, screenWidth, screenHeight, sdl.WINDOW_SHOWN)
 	if err != nil {
 		panic(err)
 	}
@@ -62,15 +70,19 @@ func main() {
 	}
 	defer renderer.Destroy()
 
-	width, height := 640, 360
 	sdl.SetHint(sdl.HINT_RENDER_SCALE_QUALITY, "linear")
-	renderer.SetLogicalSize(width, height)
+	renderer.SetLogicalSize(resolutionX, resolutionY)
 	renderer.SetDrawColor(0, 0, 0, 255)
 
-	rect := image.Rect(0, 0, width, height)
-	surfaces := [2]*image.RGBA{image.NewRGBA(rect), image.NewRGBA(rect)}
+	rect := image.Rect(0, 0, resolutionX, resolutionY)
+	if enableJitter {
+		rect.Max.X /= 2
+	}
 
-	texture, err := renderer.CreateTexture(sdl.PIXELFORMAT_ABGR8888, sdl.TEXTUREACCESS_STREAMING, width, height)
+	surfaces := [2]*image.RGBA{image.NewRGBA(rect), image.NewRGBA(rect)}
+	backBuffer := image.NewRGBA(image.Rect(0, 0, resolutionX, resolutionY))
+
+	texture, err := renderer.CreateTexture(sdl.PIXELFORMAT_ABGR8888, sdl.TEXTUREACCESS_STREAMING, resolutionX, resolutionY)
 	if err != nil {
 		panic(err)
 	}
@@ -91,9 +103,11 @@ func main() {
 		FieldOfView:  45,
 		TreeScale:    1,
 		TreePosition: [3]float32{-0.5, -0.5, -3},
+		ViewDist:     10,
 		Tree:         tree,
-		Image:        [2]draw.Image{surfaces[0], surfaces[1]},
-		Jitter:       false,
+		Images:       [2]*image.RGBA{surfaces[0], surfaces[1]},
+		Jitter:       enableJitter,
+		Depth:        enableDepthTest,
 	}
 
 	raytracer := trace.NewRaytracer(cfg)
@@ -155,10 +169,23 @@ func main() {
 
 		renderer.Clear()
 
-		raytracer.Trace(&camera)
-		s := surfaces[raytracer.Wait()]
+		if enableDepthTest {
+			raytracer.ClearDepth(raytracer.Frame())
+		}
 
-		texture.Update(nil, unsafe.Pointer(&s.Pix[0]), s.Stride)
+		raytracer.Trace(&camera)
+		if enableJitter {
+			raytracer.Wait(0)
+			raytracer.Wait(1)
+			if err := trace.Reconstruct(cfg.Images[0], cfg.Images[1], backBuffer); err != nil {
+				panic(err)
+			}
+		} else {
+			backBuffer = cfg.Images[0]
+			raytracer.Wait(0)
+		}
+
+		texture.Update(nil, unsafe.Pointer(&backBuffer.Pix[0]), backBuffer.Stride)
 		renderer.Copy(texture, nil, nil)
 		renderer.Present()
 
