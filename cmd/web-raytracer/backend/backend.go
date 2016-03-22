@@ -66,7 +66,6 @@ type (
 		Camera struct {
 			Position [3]float32 "position"
 			LookAt   [3]float32 "look_at"
-			Up       [3]float32 "up"
 		} "camera"
 	}
 )
@@ -199,10 +198,9 @@ func renderServer(ws *websocket.Conn) {
 
 	for {
 		update := <-updateChan
-		camera := trace.Camera{
-			Position: update.Camera.Position,
-			LookAt:   update.Camera.LookAt,
-			Up:       update.Camera.Up,
+		camera := trace.LookAtCamera{
+			Pos:  update.Camera.Position,
+			Look: update.Camera.LookAt,
 		}
 
 		raytracer.Trace(&camera)

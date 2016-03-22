@@ -51,7 +51,6 @@ type (
 		Camera struct {
 			Position [3]float32 "position"
 			LookAt   [3]float32 "look_at"
-			Up       [3]float32 "up"
 		} "camera"
 	}
 )
@@ -125,7 +124,6 @@ func updateCamera(ws *websocket.WebSocket, renderChan <-chan struct{}) {
 	)
 
 	msg.Camera.LookAt = [3]float32{0, 0, -1}
-	msg.Camera.Up = [3]float32{0, 1, 0}
 
 	for _ = range time.Tick(tick30hz) {
 		switch {

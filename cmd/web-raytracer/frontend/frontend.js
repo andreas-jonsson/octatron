@@ -25367,7 +25367,7 @@ $packages["main"] = (function() {
 	updateMessage = $pkg.updateMessage = $newType(0, $kindStruct, "main.updateMessage", "updateMessage", "main", function(Camera_) {
 		this.$val = this;
 		if (arguments.length === 0) {
-			this.Camera = new structType$1.ptr(arrayType.zero(), arrayType.zero(), arrayType.zero());
+			this.Camera = new structType$1.ptr(arrayType.zero(), arrayType.zero());
 			return;
 		}
 		this.Camera = Camera_;
@@ -25375,7 +25375,7 @@ $packages["main"] = (function() {
 	sliceType = $sliceType($emptyInterface);
 	structType = $structType([]);
 	arrayType = $arrayType($Float32, 3);
-	structType$1 = $structType([{prop: "Position", name: "Position", pkg: "", typ: arrayType, tag: "position"}, {prop: "LookAt", name: "LookAt", pkg: "", typ: arrayType, tag: "look_at"}, {prop: "Up", name: "Up", pkg: "", typ: arrayType, tag: "up"}]);
+	structType$1 = $structType([{prop: "Position", name: "Position", pkg: "", typ: arrayType, tag: "position"}, {prop: "LookAt", name: "LookAt", pkg: "", typ: arrayType, tag: "look_at"}]);
 	ptrType = $ptrType(js.Object);
 	funcType = $funcType([ptrType], [], false);
 	sliceType$1 = $sliceType($Uint8);
@@ -25468,9 +25468,8 @@ $packages["main"] = (function() {
 		var $ptr, _entry, _entry$1, _entry$2, _entry$3, _ok, _r, _r$1, _r$2, _ref, _tuple, _tuple$1, err, err$1, msg, msg$1, pressed, renderChan, ws, $s, $r;
 		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _entry = $f._entry; _entry$1 = $f._entry$1; _entry$2 = $f._entry$2; _entry$3 = $f._entry$3; _ok = $f._ok; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _ref = $f._ref; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; err = $f.err; err$1 = $f.err$1; msg = $f.msg; msg$1 = $f.msg$1; pressed = $f.pressed; renderChan = $f.renderChan; ws = $f.ws; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		pressed = true;
-		msg = new updateMessage.ptr(new structType$1.ptr(arrayType.zero(), arrayType.zero(), arrayType.zero()));
+		msg = new updateMessage.ptr(new structType$1.ptr(arrayType.zero(), arrayType.zero()));
 		arrayType.copy(msg.Camera.LookAt, $toNativeArray($kindFloat32, [0, 0, -1]));
-		arrayType.copy(msg.Camera.Up, $toNativeArray($kindFloat32, [0, 1, 0]));
 		_ref = time.Tick(new time.Duration(0, 33000000));
 		/* while (true) { */ case 1:
 			_r = $recv(_ref); /* */ $s = 3; case 3: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
