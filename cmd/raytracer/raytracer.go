@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package main
 
 import (
+	"flag"
 	"fmt"
 	"image"
 	"os"
@@ -30,19 +31,33 @@ import (
 )
 
 const (
-	enableJitter    = true
 	enableDepthTest = false
-
-	screenWidth  = 640
-	screenHeight = 360
-	resolutionX  = 640
-	resolutionY  = 360
-
-	cameraSpeed = 0.001
-	mouseSpeed  = 0.00001
+	cameraSpeed     = 0.001
+	mouseSpeed      = 0.00001
 )
 
-var enableInput = true
+var arguments struct {
+	enableJitter bool
+
+	fieldOfView int
+	viewDistance,
+	treeScale float64
+
+	windowSize,
+	resolution,
+	treePosition,
+	scaleFilter,
+	inputFile string
+}
+
+var (
+	enableInput = true
+
+	screenWidth,
+	screenHeight,
+	resolutionX,
+	resolutionY int
+)
 
 func toggleFullscreen(window *sdl.Window) {
 	isFullscreen := (window.GetFlags() & sdl.WINDOW_FULLSCREEN) != 0
@@ -81,11 +96,30 @@ func moveCamera(camera *trace.FreeFlightCamera, dtf float32) {
 
 func init() {
 	runtime.LockOSThread()
+
+	flag.Usage = func() {
+		fmt.Printf("Usage: raytracer [options]\n\n")
+		flag.PrintDefaults()
+	}
+
+	flag.StringVar(&arguments.inputFile, "tree", "tree.oct", "path to .oct file.")
+	flag.StringVar(&arguments.treePosition, "pos", "0 0 0", "octree position in world")
+	flag.StringVar(&arguments.scaleFilter, "filter", "linear", "used to scale image")
+	flag.StringVar(&arguments.windowSize, "window", "640 360", "window size")
+	flag.StringVar(&arguments.resolution, "resolution", "640 360", "back-buffer size")
+	flag.IntVar(&arguments.fieldOfView, "fov", 45, "camera field-of-view")
+	flag.Float64Var(&arguments.viewDistance, "dist", 1, "max view-distance")
+	flag.Float64Var(&arguments.treeScale, "scale", 1, "octree scale")
+	flag.BoolVar(&arguments.enableJitter, "jitter", true, "enables frame jitter")
 }
 
 func main() {
+	flag.Parse()
 	sdl.Init(sdl.INIT_EVERYTHING)
 	defer sdl.Quit()
+
+	fmt.Sscan(arguments.windowSize, &screenWidth, &screenHeight)
+	fmt.Sscan(arguments.resolution, &resolutionX, &resolutionY)
 
 	title := "AJ's Raytracer"
 	window, err := sdl.CreateWindow(title, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, screenWidth, screenHeight, sdl.WINDOW_SHOWN)
@@ -101,12 +135,12 @@ func main() {
 	}
 	defer renderer.Destroy()
 
-	sdl.SetHint(sdl.HINT_RENDER_SCALE_QUALITY, "linear")
+	sdl.SetHint(sdl.HINT_RENDER_SCALE_QUALITY, arguments.scaleFilter)
 	renderer.SetLogicalSize(resolutionX, resolutionY)
 	renderer.SetDrawColor(0, 0, 0, 255)
 
 	rect := image.Rect(0, 0, resolutionX, resolutionY)
-	if enableJitter {
+	if arguments.enableJitter {
 		rect.Max.X /= 2
 	}
 
@@ -119,9 +153,10 @@ func main() {
 	}
 	defer texture.Destroy()
 
-	fp, err := os.Open("test_1k.priv.oct")
+	fp, err := os.Open(arguments.inputFile)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return
 	}
 	defer fp.Close()
 
@@ -130,14 +165,17 @@ func main() {
 		panic(err)
 	}
 
+	var pos [3]float32
+	fmt.Sscan(arguments.treePosition, &pos[0], &pos[1], &pos[2])
+
 	cfg := trace.Config{
-		FieldOfView:  45,
-		TreeScale:    1,
-		TreePosition: [3]float32{-0.5, -0.5, -3},
-		ViewDist:     10,
+		FieldOfView:  float32(arguments.fieldOfView),
+		TreeScale:    float32(arguments.treeScale),
+		TreePosition: pos,
+		ViewDist:     float32(arguments.viewDistance),
 		Tree:         tree,
 		Images:       [2]*image.RGBA{surfaces[0], surfaces[1]},
-		Jitter:       enableJitter,
+		Jitter:       arguments.enableJitter,
 		Depth:        enableDepthTest,
 	}
 
@@ -187,15 +225,14 @@ func main() {
 			raytracer.Trace(&camera)
 		}
 
-		if enableJitter {
-			raytracer.Wait(0)
+		raytracer.Wait(0)
+		if arguments.enableJitter {
 			raytracer.Wait(1)
 			if err := trace.Reconstruct(cfg.Images[0], cfg.Images[1], backBuffer); err != nil {
 				panic(err)
 			}
 		} else {
 			backBuffer = cfg.Images[0]
-			raytracer.Wait(0)
 		}
 
 		texture.Update(nil, unsafe.Pointer(&backBuffer.Pix[0]), backBuffer.Stride)
