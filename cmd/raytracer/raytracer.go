@@ -32,20 +32,48 @@ import (
 const (
 	enableJitter    = true
 	enableDepthTest = false
-	screenWidth     = 640
-	screenHeight    = 360
-	resolutionX     = 640
-	resolutionY     = 360
+
+	screenWidth  = 640
+	screenHeight = 360
+	resolutionX  = 640
+	resolutionY  = 360
+
+	cameraSpeed = 0.001
+	mouseSpeed  = 0.00001
 )
 
 func toggleFullscreen(window *sdl.Window) {
 	isFullscreen := (window.GetFlags() & sdl.WINDOW_FULLSCREEN) != 0
 	if isFullscreen {
 		window.SetFullscreen(0)
-		sdl.ShowCursor(1)
 	} else {
 		window.SetFullscreen(sdl.WINDOW_FULLSCREEN_DESKTOP)
-		sdl.ShowCursor(0)
+	}
+}
+
+func moveCamera(camera *trace.FreeFlightCamera, dtf float32) {
+	state := sdl.GetKeyboardState()
+	switch {
+	case state[sdl.GetScancodeFromKey(sdl.K_UP)] != 0:
+		camera.YRot += dtf * cameraSpeed
+	case state[sdl.GetScancodeFromKey(sdl.K_DOWN)] != 0:
+		camera.YRot -= dtf * cameraSpeed
+	case state[sdl.GetScancodeFromKey(sdl.K_LEFT)] != 0:
+		camera.XRot += dtf * cameraSpeed
+	case state[sdl.GetScancodeFromKey(sdl.K_RIGHT)] != 0:
+		camera.XRot -= dtf * cameraSpeed
+	case state[sdl.GetScancodeFromKey(sdl.K_w)] != 0:
+		camera.Move(dtf * cameraSpeed)
+	case state[sdl.GetScancodeFromKey(sdl.K_s)] != 0:
+		camera.Move(dtf * -cameraSpeed)
+	case state[sdl.GetScancodeFromKey(sdl.K_a)] != 0:
+		camera.Strafe(dtf * cameraSpeed)
+	case state[sdl.GetScancodeFromKey(sdl.K_d)] != 0:
+		camera.Strafe(dtf * -cameraSpeed)
+	case state[sdl.GetScancodeFromKey(sdl.K_e)] != 0:
+		camera.Lift(dtf * cameraSpeed)
+	case state[sdl.GetScancodeFromKey(sdl.K_q)] != 0:
+		camera.Lift(dtf * -cameraSpeed)
 	}
 }
 
@@ -63,6 +91,7 @@ func main() {
 		panic(err)
 	}
 	defer window.Destroy()
+	sdl.SetRelativeMouseMode(true)
 
 	renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
 	if err != nil {
@@ -88,7 +117,7 @@ func main() {
 	}
 	defer texture.Destroy()
 
-	fp, err := os.Open("pack/test.oct")
+	fp, err := os.Open("test_1k.priv.oct")
 	if err != nil {
 		panic(err)
 	}
@@ -121,41 +150,25 @@ func main() {
 		t := time.Now()
 		dtf := float32(dt / time.Millisecond)
 
-		const cameraSpeed = 0.001
-
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch t := event.(type) {
 			case *sdl.QuitEvent:
 				return
+			case *sdl.MouseMotionEvent:
+				camera.XRot -= dtf * float32(t.XRel) * mouseSpeed
+				camera.YRot -= dtf * float32(t.YRel) * mouseSpeed
 			case *sdl.KeyUpEvent:
 				switch t.Keysym.Sym {
 				case sdl.K_ESCAPE:
 					return
 				case sdl.K_f:
 					toggleFullscreen(window)
-				case sdl.K_UP:
-					camera.YRot += dtf * cameraSpeed
-				case sdl.K_DOWN:
-					camera.YRot -= dtf * cameraSpeed
-				case sdl.K_LEFT:
-					camera.XRot += dtf * cameraSpeed
-				case sdl.K_RIGHT:
-					camera.XRot -= dtf * cameraSpeed
-				case sdl.K_w:
-					camera.Move(dtf * cameraSpeed)
-				case sdl.K_s:
-					camera.Move(dtf * -cameraSpeed)
-				case sdl.K_a:
-					camera.Strafe(dtf * cameraSpeed)
-				case sdl.K_d:
-					camera.Strafe(dtf * -cameraSpeed)
-				case sdl.K_e:
-					camera.Lift(dtf * cameraSpeed)
-				case sdl.K_q:
-					camera.Lift(dtf * -cameraSpeed)
 				}
 			}
 		}
+
+		moveCamera(&camera, dtf)
+		window.WarpMouseInWindow(screenWidth/2, screenHeight/2)
 
 		renderer.Clear()
 
