@@ -21,6 +21,8 @@ import (
 	"flag"
 	"fmt"
 	"image"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"runtime"
 	"time"
@@ -37,6 +39,7 @@ const (
 )
 
 var arguments struct {
+	pprof,
 	enableJitter bool
 
 	fieldOfView int
@@ -111,15 +114,23 @@ func init() {
 	flag.Float64Var(&arguments.viewDistance, "dist", 1, "max view-distance")
 	flag.Float64Var(&arguments.treeScale, "scale", 1, "octree scale")
 	flag.BoolVar(&arguments.enableJitter, "jitter", true, "enables frame jitter")
+	flag.BoolVar(&arguments.pprof, "pprof", false, "enable pprof over http, port 6060")
 }
 
 func main() {
 	flag.Parse()
-	sdl.Init(sdl.INIT_EVERYTHING)
-	defer sdl.Quit()
+
+	if arguments.pprof {
+		go func() {
+			fmt.Fprintln(os.Stderr, http.ListenAndServe("localhost:6060", nil))
+		}()
+	}
 
 	fmt.Sscan(arguments.windowSize, &screenWidth, &screenHeight)
 	fmt.Sscan(arguments.resolution, &resolutionX, &resolutionY)
+
+	sdl.Init(sdl.INIT_EVERYTHING)
+	defer sdl.Quit()
 
 	title := "AJ's Raytracer"
 	window, err := sdl.CreateWindow(title, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, screenWidth, screenHeight, sdl.WINDOW_SHOWN)
@@ -155,7 +166,7 @@ func main() {
 
 	fp, err := os.Open(arguments.inputFile)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		return
 	}
 	defer fp.Close()
@@ -214,9 +225,11 @@ func main() {
 
 		renderer.Clear()
 
-		if enableInput {
-			moveCamera(&camera, dtf)
-			window.WarpMouseInWindow(screenWidth/2, screenHeight/2)
+		if enableInput || arguments.pprof {
+			if enableInput {
+				moveCamera(&camera, dtf)
+				window.WarpMouseInWindow(screenWidth/2, screenHeight/2)
+			}
 
 			if enableDepthTest {
 				raytracer.ClearDepth(raytracer.Frame())

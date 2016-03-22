@@ -191,10 +191,12 @@ func Reconstruct(a, b image.Image, out draw.Image) error {
 		return InvalidSizeError
 	}
 
+	img := [2]image.Image{a, b}
 	for y := 0; y < inputSize.Y; y++ {
 		for x := 0; x < inputSize.X; x++ {
-			out.Set(x*2, y, a.At(x, y))
-			out.Set(x*2+1, y, b.At(x, y))
+			left, right := img[y%2], img[(y+1)%2]
+			out.Set(x*2, y, left.At(x, y))
+			out.Set(x*2+1, y, right.At(x, y))
 		}
 	}
 
@@ -347,7 +349,7 @@ func (rt *Raytracer) traceScanLine(h, idx int, eyePoint, xInc, yInc, bottomLeft 
 	start, step := 0, 1
 	if cfg.Jitter {
 		step = 2
-		start = idx //(h + idx) % 2
+		start = (h + idx) % 2
 		size.X *= 2
 	}
 
