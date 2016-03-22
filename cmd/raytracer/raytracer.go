@@ -42,6 +42,8 @@ const (
 	mouseSpeed  = 0.00001
 )
 
+var enableInput = true
+
 func toggleFullscreen(window *sdl.Window) {
 	isFullscreen := (window.GetFlags() & sdl.WINDOW_FULLSCREEN) != 0
 	if isFullscreen {
@@ -155,28 +157,36 @@ func main() {
 			case *sdl.QuitEvent:
 				return
 			case *sdl.MouseMotionEvent:
-				camera.XRot -= dtf * float32(t.XRel) * mouseSpeed
-				camera.YRot -= dtf * float32(t.YRel) * mouseSpeed
+				if enableInput {
+					camera.XRot -= dtf * float32(t.XRel) * mouseSpeed
+					camera.YRot -= dtf * float32(t.YRel) * mouseSpeed
+				}
 			case *sdl.KeyUpEvent:
 				switch t.Keysym.Sym {
 				case sdl.K_ESCAPE:
 					return
 				case sdl.K_f:
 					toggleFullscreen(window)
+				case sdl.K_SPACE:
+					enableInput = !enableInput
+					sdl.SetRelativeMouseMode(enableInput)
 				}
 			}
 		}
 
-		moveCamera(&camera, dtf)
-		window.WarpMouseInWindow(screenWidth/2, screenHeight/2)
-
 		renderer.Clear()
 
-		if enableDepthTest {
-			raytracer.ClearDepth(raytracer.Frame())
+		if enableInput {
+			moveCamera(&camera, dtf)
+			window.WarpMouseInWindow(screenWidth/2, screenHeight/2)
+
+			if enableDepthTest {
+				raytracer.ClearDepth(raytracer.Frame())
+			}
+
+			raytracer.Trace(&camera)
 		}
 
-		raytracer.Trace(&camera)
 		if enableJitter {
 			raytracer.Wait(0)
 			raytracer.Wait(1)
