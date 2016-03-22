@@ -32,8 +32,8 @@ import (
 const (
 	enableJitter    = true
 	enableDepthTest = false
-	screenWidth     = 1280
-	screenHeight    = 720
+	screenWidth     = 640
+	screenHeight    = 360
 	resolutionX     = 640
 	resolutionY     = 360
 )
@@ -111,7 +111,7 @@ func main() {
 	}
 
 	raytracer := trace.NewRaytracer(cfg)
-	camera := trace.Camera{LookAt: [3]float32{0, 0, -1}, Up: [3]float32{0, 1, 0}}
+	camera := trace.FreeFlightCamera{XRot: 0, YRot: 0}
 
 	nf := 0
 	dt := time.Duration(1000 / 60)
@@ -133,36 +133,26 @@ func main() {
 					return
 				case sdl.K_f:
 					toggleFullscreen(window)
-				/*
-					case sdl.K_UP:
-						camera.Position[2] += dtf * cameraSpeed
-					case sdl.K_DOWN:
-						camera.Position[2] -= dtf * cameraSpeed
-					case sdl.K_LEFT:
-						camera.Position[0] += dtf * cameraSpeed
-					case sdl.K_RIGHT:
-						camera.Position[0] -= dtf * cameraSpeed
-					case sdl.K_w:
-						camera.LookAt[2] += dtf * cameraSpeed
-					case sdl.K_s:
-						camera.LookAt[2] -= dtf * cameraSpeed
-					case sdl.K_a:
-						camera.LookAt[0] += dtf * cameraSpeed
-					case sdl.K_d:
-						camera.LookAt[0] -= dtf * cameraSpeed
-				*/
 				case sdl.K_UP:
-					camera.Position[2] -= dtf * cameraSpeed
-					camera.LookAt[2] -= dtf * cameraSpeed
+					camera.YRot += dtf * cameraSpeed
 				case sdl.K_DOWN:
-					camera.Position[2] += dtf * cameraSpeed
-					camera.LookAt[2] += dtf * cameraSpeed
+					camera.YRot -= dtf * cameraSpeed
 				case sdl.K_LEFT:
-					camera.Position[0] += dtf * cameraSpeed
-					camera.LookAt[0] += dtf * cameraSpeed
+					camera.XRot += dtf * cameraSpeed
 				case sdl.K_RIGHT:
-					camera.Position[0] -= dtf * cameraSpeed
-					camera.LookAt[0] -= dtf * cameraSpeed
+					camera.XRot -= dtf * cameraSpeed
+				case sdl.K_w:
+					camera.Move(dtf * cameraSpeed)
+				case sdl.K_s:
+					camera.Move(dtf * -cameraSpeed)
+				case sdl.K_a:
+					camera.Strafe(dtf * cameraSpeed)
+				case sdl.K_d:
+					camera.Strafe(dtf * -cameraSpeed)
+				case sdl.K_e:
+					camera.Lift(dtf * cameraSpeed)
+				case sdl.K_q:
+					camera.Lift(dtf * -cameraSpeed)
 				}
 			}
 		}

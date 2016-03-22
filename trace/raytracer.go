@@ -28,16 +28,17 @@ import (
 	"sync/atomic"
 
 	"github.com/andreas-jonsson/octatron/pack"
+	"github.com/ungerik/go3d/quaternion"
 	"github.com/ungerik/go3d/vec3"
 )
 
 type (
 	Octree []octreeNode
 
-	Camera struct {
-		Position,
-		LookAt,
-		Up [3]float32
+	Camera interface {
+		Position() [3]float32
+		LookAt() [3]float32
+		Up() [3]float32
 	}
 
 	Config struct {
@@ -60,6 +61,8 @@ type (
 	}
 )
 
+var InvalidSizeError = errors.New("invalid size")
+
 type (
 	infiniteRay [2]vec3.T
 
@@ -69,13 +72,89 @@ type (
 	}
 )
 
-var InvalidSizeError = errors.New("invalid size")
-
 func (n *octreeNode) setColor(color *pack.Color) {
 	n.color.R = uint8(color.R * 255)
 	n.color.G = uint8(color.G * 255)
 	n.color.B = uint8(color.B * 255)
 	n.color.A = uint8(color.A * 255)
+}
+
+type LookAtCamera struct {
+	Pos  [3]float32
+	Look [3]float32
+}
+
+func (c *LookAtCamera) Up() [3]float32 {
+	return [3]float32{0, 1, 0}
+}
+
+func (c *LookAtCamera) Position() [3]float32 {
+	return c.Pos
+}
+
+func (c *LookAtCamera) LookAt() [3]float32 {
+	return c.Look
+}
+
+type FreeFlightCamera struct {
+	Pos        [3]float32
+	XRot, YRot float32
+}
+
+func (c *FreeFlightCamera) Up() [3]float32 {
+	return [3]float32{0, 1, 0}
+}
+
+func (c *FreeFlightCamera) Forward() [3]float32 {
+	lookAt := vec3.T(c.LookAt())
+	position := vec3.T(c.Pos)
+	return [3]float32(vec3.Sub(&lookAt, &position))
+}
+
+func (c *FreeFlightCamera) Right() [3]float32 {
+	up := vec3.T(c.Up())
+	forward := vec3.T(c.Forward())
+	return [3]float32(vec3.Cross(&up, &forward))
+}
+
+func (c *FreeFlightCamera) Position() [3]float32 {
+	return c.Pos
+}
+
+func (c *FreeFlightCamera) LookAt() [3]float32 {
+	forward := vec3.T{0, 0, -1}
+	position := vec3.T(c.Pos)
+
+	quat := quaternion.FromEulerAngles(c.XRot, c.YRot, 0)
+	quat.RotateVec3(&forward)
+
+	return vec3.Add(&position, &forward)
+}
+
+func (c *FreeFlightCamera) Move(dist float32) {
+	position := vec3.T(c.Pos)
+	forward := vec3.T(c.Forward())
+
+	forward.Scale(dist)
+	c.Pos = [3]float32(vec3.Add(&position, &forward))
+}
+
+func (c *FreeFlightCamera) Lift(dist float32) {
+	position := vec3.T(c.Pos)
+	forward := vec3.T(c.Forward())
+	right := vec3.T(c.Right())
+	up := vec3.Cross(&forward, &right)
+
+	up.Scale(dist)
+	c.Pos = [3]float32(vec3.Add(&position, &up))
+}
+
+func (c *FreeFlightCamera) Strafe(dist float32) {
+	position := vec3.T(c.Pos)
+	right := vec3.T(c.Right())
+
+	right.Scale(dist)
+	c.Pos = [3]float32(vec3.Add(&position, &right))
 }
 
 func LoadOctree(reader io.Reader) (Octree, error) {
@@ -215,13 +294,13 @@ func (rt *Raytracer) intersectTree(tree []octreeNode, ray *infiniteRay, nodePos 
 	return length, color
 }
 
-func (rt *Raytracer) calcIncVectors(camera *Camera, size image.Point) (vec3.T, vec3.T, vec3.T) {
+func (rt *Raytracer) calcIncVectors(camera Camera, size image.Point) (vec3.T, vec3.T, vec3.T) {
 	width := float32(size.X)
 	height := float32(size.Y)
 
-	lookAtPoint := vec3.T(camera.LookAt)
-	eyePoint := vec3.T(camera.Position)
-	up := vec3.T(camera.Up)
+	lookAtPoint := vec3.T(camera.LookAt())
+	eyePoint := vec3.T(camera.Position())
+	up := vec3.T(camera.Up())
 
 	viewDirection := vec3.Sub(&lookAtPoint, &eyePoint)
 	u := vec3.Cross(&viewDirection, &up)
@@ -304,9 +383,10 @@ func (rt *Raytracer) traceScanLine(h, idx int, eyePoint, xInc, yInc, bottomLeft 
 	rt.wg[idx].Done()
 }
 
-func (rt *Raytracer) Trace(camera *Camera) int {
+func (rt *Raytracer) Trace(camera Camera) int {
 	cfg := &rt.cfg
 	idx := int(atomic.LoadUint32(&rt.frame) % 2)
+	cameraPosition := camera.Position()
 
 	rt.Wait(idx)
 
@@ -324,7 +404,7 @@ func (rt *Raytracer) Trace(camera *Camera) int {
 	rt.wg[idx].Add(height)
 
 	for y := 0; y < height; y++ {
-		go rt.traceScanLine(y, idx, camera.Position, xInc, yInc, bottomLeft)
+		go rt.traceScanLine(y, idx, cameraPosition, xInc, yInc, bottomLeft)
 	}
 
 	return idx
