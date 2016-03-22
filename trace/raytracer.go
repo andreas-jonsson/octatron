@@ -33,18 +33,19 @@ import (
 )
 
 type (
+	Vec3   [3]float32
 	Octree []octreeNode
 
 	Camera interface {
-		Position() [3]float32
-		LookAt() [3]float32
-		Up() [3]float32
+		Position() Vec3
+		LookAt() Vec3
+		Up() Vec3
 	}
 
 	Config struct {
 		FieldOfView  float32
 		TreeScale    float32
-		TreePosition [3]float32
+		TreePosition Vec3
 
 		Tree          Octree
 		ViewDist      float32
@@ -80,55 +81,55 @@ func (n *octreeNode) setColor(color *pack.Color) {
 }
 
 type LookAtCamera struct {
-	Pos  [3]float32
-	Look [3]float32
+	Pos  Vec3
+	Look Vec3
 }
 
-func (c *LookAtCamera) Up() [3]float32 {
-	return [3]float32{0, 1, 0}
+func (c *LookAtCamera) Up() Vec3 {
+	return Vec3{0, 1, 0}
 }
 
-func (c *LookAtCamera) Position() [3]float32 {
+func (c *LookAtCamera) Position() Vec3 {
 	return c.Pos
 }
 
-func (c *LookAtCamera) LookAt() [3]float32 {
+func (c *LookAtCamera) LookAt() Vec3 {
 	return c.Look
 }
 
 type FreeFlightCamera struct {
-	Pos        [3]float32
+	Pos        Vec3
 	XRot, YRot float32
 }
 
-func (c *FreeFlightCamera) Up() [3]float32 {
-	return [3]float32{0, 1, 0}
+func (c *FreeFlightCamera) Up() Vec3 {
+	return Vec3{0, 1, 0}
 }
 
-func (c *FreeFlightCamera) Forward() [3]float32 {
+func (c *FreeFlightCamera) Forward() Vec3 {
 	lookAt := vec3.T(c.LookAt())
 	position := vec3.T(c.Pos)
-	return [3]float32(vec3.Sub(&lookAt, &position))
+	return Vec3(vec3.Sub(&lookAt, &position))
 }
 
-func (c *FreeFlightCamera) Right() [3]float32 {
+func (c *FreeFlightCamera) Right() Vec3 {
 	up := vec3.T(c.Up())
 	forward := vec3.T(c.Forward())
-	return [3]float32(vec3.Cross(&up, &forward))
+	return Vec3(vec3.Cross(&up, &forward))
 }
 
-func (c *FreeFlightCamera) Position() [3]float32 {
+func (c *FreeFlightCamera) Position() Vec3 {
 	return c.Pos
 }
 
-func (c *FreeFlightCamera) LookAt() [3]float32 {
+func (c *FreeFlightCamera) LookAt() Vec3 {
 	forward := vec3.T{0, 0, -1}
 	position := vec3.T(c.Pos)
 
 	quat := quaternion.FromEulerAngles(c.XRot, c.YRot, 0)
 	quat.RotateVec3(&forward)
 
-	return vec3.Add(&position, &forward)
+	return Vec3(vec3.Add(&position, &forward))
 }
 
 func (c *FreeFlightCamera) Move(dist float32) {
@@ -136,7 +137,7 @@ func (c *FreeFlightCamera) Move(dist float32) {
 	forward := vec3.T(c.Forward())
 
 	forward.Scale(dist)
-	c.Pos = [3]float32(vec3.Add(&position, &forward))
+	c.Pos = Vec3(vec3.Add(&position, &forward))
 }
 
 func (c *FreeFlightCamera) Lift(dist float32) {
@@ -146,7 +147,7 @@ func (c *FreeFlightCamera) Lift(dist float32) {
 	up := vec3.Cross(&forward, &right)
 
 	up.Scale(dist)
-	c.Pos = [3]float32(vec3.Add(&position, &up))
+	c.Pos = Vec3(vec3.Add(&position, &up))
 }
 
 func (c *FreeFlightCamera) Strafe(dist float32) {
@@ -154,7 +155,7 @@ func (c *FreeFlightCamera) Strafe(dist float32) {
 	right := vec3.T(c.Right())
 
 	right.Scale(dist)
-	c.Pos = [3]float32(vec3.Add(&position, &right))
+	c.Pos = Vec3(vec3.Add(&position, &right))
 }
 
 func LoadOctree(reader io.Reader) (Octree, error) {
@@ -342,7 +343,7 @@ func (rt *Raytracer) traceScanLine(h, idx int, eyePoint, xInc, yInc, bottomLeft 
 
 	testDepth := cfg.Depth
 	nodeScale := cfg.TreeScale
-	nodePos := cfg.TreePosition
+	nodePos := vec3.T(cfg.TreePosition)
 	viewDist := cfg.ViewDist
 	tree := cfg.Tree
 
@@ -388,7 +389,7 @@ func (rt *Raytracer) traceScanLine(h, idx int, eyePoint, xInc, yInc, bottomLeft 
 func (rt *Raytracer) Trace(camera Camera) int {
 	cfg := &rt.cfg
 	idx := int(atomic.LoadUint32(&rt.frame) % 2)
-	cameraPosition := camera.Position()
+	cameraPosition := vec3.T(camera.Position())
 
 	rt.Wait(idx)
 
