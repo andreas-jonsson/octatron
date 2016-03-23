@@ -88,32 +88,35 @@ func unmarshalMessage(data []byte, ty byte, v interface{}) error {
 	}
 }
 
-func loadTree(file string) (trace.Octree, error) {
+func loadTree(file string) (trace.Octree, int, error) {
 	trees.Lock()
 	defer trees.Unlock()
 
 	e, ok := trees.data[file]
 	if ok {
 		e.count++
-		return e.tree, nil
+		return e.tree, 0, nil
 	}
 
 	fp, err := os.Open(file)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer fp.Close()
 
-	e.tree, err = trace.LoadOctree(fp)
+	tree, vpa, err := trace.LoadOctree(fp)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
+
+	e.tree = tree
+	maxDepth := trace.TreeWidthToDepth(vpa)
 
 	log.Println("loading:", file)
 
 	e.count = 1
 	trees.data[file] = e
-	return e.tree, nil
+	return e.tree, maxDepth, nil
 }
 
 func unloadTree(file string) {
@@ -163,7 +166,7 @@ func renderServer(ws *websocket.Conn) {
 
 	setup.Tree = path.Join(arguments.data, path.Base(setup.Tree))
 
-	tree, err := loadTree(setup.Tree)
+	tree, maxDepth, err := loadTree(setup.Tree)
 	if err != nil {
 		log.Println(err, setup.Tree)
 		return
@@ -174,9 +177,8 @@ func renderServer(ws *websocket.Conn) {
 	cfg := trace.Config{
 		FieldOfView:  setup.FieldOfView,
 		TreeScale:    1,
-		TreePosition: [3]float32{-0.5, -0.5, -3},
+		TreePosition: trace.Vec3{-0.5, -0.5, -3},
 		ViewDist:     10,
-		Tree:         tree,
 		Images:       [2]*image.RGBA{surface, nil},
 	}
 
@@ -203,7 +205,7 @@ func renderServer(ws *websocket.Conn) {
 			Look: update.Camera.LookAt,
 		}
 
-		raytracer.Trace(&camera)
+		raytracer.Trace(&camera, tree, maxDepth)
 		raytracer.Wait(0)
 
 		if err := streamCodec.Send(ws, surface.Pix); err != nil {
