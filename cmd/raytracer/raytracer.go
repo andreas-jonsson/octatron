@@ -40,6 +40,7 @@ const (
 
 var arguments struct {
 	pprof,
+	multiThreaded,
 	enableJitter bool
 
 	fieldOfView int
@@ -114,7 +115,8 @@ func init() {
 	flag.Float64Var(&arguments.viewDistance, "dist", 1, "max view-distance")
 	flag.Float64Var(&arguments.treeScale, "scale", 1, "octree scale")
 	flag.BoolVar(&arguments.enableJitter, "jitter", true, "enables frame jitter")
-	flag.BoolVar(&arguments.pprof, "pprof", false, "enable pprof over http, port 6060")
+	flag.BoolVar(&arguments.multiThreaded, "mt", true, "enables multi-threading")
+	flag.BoolVar(&arguments.pprof, "pprof", false, "enables pprof over http, port 6060")
 }
 
 func main() {
@@ -171,23 +173,24 @@ func main() {
 	}
 	defer fp.Close()
 
-	tree, err := trace.LoadOctree(fp)
+	tree, vpa, err := trace.LoadOctree(fp)
 	if err != nil {
 		panic(err)
 	}
+	maxDepth := trace.TreeWidthToDepth(vpa)
 
 	var pos [3]float32
 	fmt.Sscan(arguments.treePosition, &pos[0], &pos[1], &pos[2])
 
 	cfg := trace.Config{
-		FieldOfView:  float32(arguments.fieldOfView),
-		TreeScale:    float32(arguments.treeScale),
-		TreePosition: pos,
-		ViewDist:     float32(arguments.viewDistance),
-		Tree:         tree,
-		Images:       [2]*image.RGBA{surfaces[0], surfaces[1]},
-		Jitter:       arguments.enableJitter,
-		Depth:        enableDepthTest,
+		FieldOfView:   float32(arguments.fieldOfView),
+		TreeScale:     float32(arguments.treeScale),
+		TreePosition:  pos,
+		ViewDist:      float32(arguments.viewDistance),
+		Images:        [2]*image.RGBA{surfaces[0], surfaces[1]},
+		Jitter:        arguments.enableJitter,
+		MultiThreaded: arguments.multiThreaded,
+		Depth:         enableDepthTest,
 	}
 
 	raytracer := trace.NewRaytracer(cfg)
@@ -235,7 +238,7 @@ func main() {
 				raytracer.ClearDepth(raytracer.Frame())
 			}
 
-			raytracer.Trace(&camera)
+			raytracer.Trace(&camera, tree, maxDepth)
 		}
 
 		raytracer.Wait(0)

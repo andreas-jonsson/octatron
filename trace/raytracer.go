@@ -47,9 +47,9 @@ type (
 		TreeScale    float32
 		TreePosition Vec3
 
-		Tree          Octree
 		ViewDist      float32
 		Jitter, Depth bool
+		MultiThreaded bool
 		Images        [2]*image.RGBA
 	}
 
@@ -158,26 +158,34 @@ func (c *FreeFlightCamera) Strafe(dist float32) {
 	c.Pos = Vec3(vec3.Add(&position, &right))
 }
 
-func LoadOctree(reader io.Reader) (Octree, error) {
+func TreeWidthToDepth(width int) int {
+	n, d := width, 0
+	for ; n > 0; d++ {
+		n >>= 1
+	}
+	return d
+}
+
+func LoadOctree(reader io.Reader) (Octree, int, error) {
 	var (
 		color  pack.Color
 		header pack.OctreeHeader
 	)
 
 	if err := pack.DecodeHeader(reader, &header); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	data := make([]octreeNode, header.NumNodes)
 	for i := range data {
 		n := &data[i]
 		if err := pack.DecodeNode(reader, header.Format, &color, n.children[:]); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		n.setColor(&color)
 	}
 
-	return data, nil
+	return data, int(header.VoxelsPerAxis), nil
 }
 
 func Reconstruct(a, b image.Image, out draw.Image) error {
@@ -261,29 +269,37 @@ func (rt *Raytracer) Frame() int {
 	return int(atomic.LoadUint32(&rt.frame) % 2)
 }
 
-func (rt *Raytracer) intersectTree(tree []octreeNode, ray *infiniteRay, nodePos vec3.T, nodeScale, length float32, nodeIndex uint32) (float32, color.RGBA) {
+func (rt *Raytracer) intersectTree(tree []octreeNode, ray *infiniteRay, nodePos *vec3.T, nodeScale, length, maxDepth float32, nodeIndex, treeDepth uint32) (float32, color.RGBA) {
 	var (
 		color = rt.clear
 		node  = tree[nodeIndex]
 	)
 
-	box := vec3.Box{nodePos, vec3.T{nodePos[0] + nodeScale, nodePos[1] + nodeScale, nodePos[2] + nodeScale}}
+	box := vec3.Box{*nodePos, vec3.T{nodePos[0] + nodeScale, nodePos[1] + nodeScale, nodePos[2] + nodeScale}}
 	boxDist := intersectBox(ray, length, &box)
 
 	if boxDist == length {
 		return length, color
 	}
 
+	{
+		d := (boxDist / rt.cfg.ViewDist)
+		if treeDepth > uint32(maxDepth*(1-d*d)) {
+			return boxDist, node.color
+		}
+	}
+
 	numChild := 0
 	childScale := nodeScale * 0.5
+	childDepth := treeDepth + 1
 
 	for i, childIndex := range node.children {
 		if childIndex != 0 {
 			numChild++
 			scaled := childPositions[i].Scaled(childScale)
-			pos := vec3.Add(&nodePos, &scaled)
+			pos := vec3.Add(nodePos, &scaled)
 
-			if ln, col := rt.intersectTree(tree, ray, pos, childScale, length, childIndex); ln < length {
+			if ln, col := rt.intersectTree(tree, ray, &pos, childScale, length, maxDepth, childIndex, childDepth); ln < length {
 				length = ln
 				color = col
 			}
@@ -335,7 +351,7 @@ func (rt *Raytracer) calcIncVectors(camera Camera, size image.Point) (vec3.T, ve
 	return xIncVector, yIncVector, viewPlaneBottomLeftPoint
 }
 
-func (rt *Raytracer) traceScanLine(h, idx int, eyePoint, xInc, yInc, bottomLeft vec3.T) {
+func (rt *Raytracer) traceScanLine(tree []octreeNode, h, idx int, eyePoint, xInc, yInc, bottomLeft vec3.T, maxDepth float32) {
 	cfg := &rt.cfg
 	img := cfg.Images[idx]
 	depth := rt.depth[idx]
@@ -345,7 +361,6 @@ func (rt *Raytracer) traceScanLine(h, idx int, eyePoint, xInc, yInc, bottomLeft 
 	nodeScale := cfg.TreeScale
 	nodePos := vec3.T(cfg.TreePosition)
 	viewDist := cfg.ViewDist
-	tree := cfg.Tree
 
 	start, step := 0, 1
 	if cfg.Jitter {
@@ -374,11 +389,11 @@ func (rt *Raytracer) traceScanLine(h, idx int, eyePoint, xInc, yInc, bottomLeft 
 
 		if testDepth {
 			max := (float32(depth.Gray16At(dx, dy).Y) / math.MaxUint16) * viewDist
-			dist, col = rt.intersectTree(tree, &ray, nodePos, nodeScale, max, 0)
+			dist, col = rt.intersectTree(tree, &ray, &nodePos, nodeScale, max, maxDepth, 0, 0)
 			d := color.Gray16{uint16(math.MaxUint16 * (dist / viewDist))}
 			depth.SetGray16(dx, dy, d)
 		} else {
-			_, col = rt.intersectTree(tree, &ray, nodePos, nodeScale, viewDist, 0)
+			_, col = rt.intersectTree(tree, &ray, &nodePos, nodeScale, viewDist, maxDepth, 0, 0)
 		}
 		img.SetRGBA(dx, dy, col)
 	}
@@ -386,7 +401,7 @@ func (rt *Raytracer) traceScanLine(h, idx int, eyePoint, xInc, yInc, bottomLeft 
 	rt.wg[idx].Done()
 }
 
-func (rt *Raytracer) Trace(camera Camera) int {
+func (rt *Raytracer) Trace(camera Camera, tree Octree, maxDepth int) int {
 	cfg := &rt.cfg
 	idx := int(atomic.LoadUint32(&rt.frame) % 2)
 	cameraPosition := vec3.T(camera.Position())
@@ -406,8 +421,14 @@ func (rt *Raytracer) Trace(camera Camera) int {
 	height := size.Y
 	rt.wg[idx].Add(height)
 
-	for y := 0; y < height; y++ {
-		go rt.traceScanLine(y, idx, cameraPosition, xInc, yInc, bottomLeft)
+	if cfg.MultiThreaded {
+		for y := 0; y < height; y++ {
+			go rt.traceScanLine(tree, y, idx, cameraPosition, xInc, yInc, bottomLeft, float32(maxDepth))
+		}
+	} else {
+		for y := 0; y < height; y++ {
+			rt.traceScanLine(tree, y, idx, cameraPosition, xInc, yInc, bottomLeft, float32(maxDepth))
+		}
 	}
 
 	return idx
