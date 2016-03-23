@@ -39,6 +39,7 @@ const (
 )
 
 var arguments struct {
+	ppm,
 	pprof,
 	multiThreaded,
 	enableJitter bool
@@ -98,6 +99,21 @@ func moveCamera(camera *trace.FreeFlightCamera, dtf float32) {
 	}
 }
 
+func writePPM(img image.Image) {
+	size := img.Bounds().Max
+	fmt.Printf("P6 %d %d 255\n", size.X, size.Y)
+
+	for y := 0; y < size.Y; y++ {
+		for x := 0; x < size.X; x++ {
+			r, g, b, _ := img.At(x, y).RGBA()
+			rgba := [3]byte{byte(r), byte(g), byte(b)}
+			os.Stdout.Write(rgba[:])
+		}
+	}
+
+	os.Stdout.Sync()
+}
+
 func init() {
 	runtime.LockOSThread()
 
@@ -117,6 +133,7 @@ func init() {
 	flag.BoolVar(&arguments.enableJitter, "jitter", true, "enables frame jitter")
 	flag.BoolVar(&arguments.multiThreaded, "mt", true, "enables multi-threading")
 	flag.BoolVar(&arguments.pprof, "pprof", false, "enables pprof over http, port 6060")
+	flag.BoolVar(&arguments.ppm, "ppm", false, "write ppm-stream to stdout")
 }
 
 func main() {
@@ -130,6 +147,19 @@ func main() {
 
 	fmt.Sscan(arguments.windowSize, &screenWidth, &screenHeight)
 	fmt.Sscan(arguments.resolution, &resolutionX, &resolutionY)
+
+	fp, err := os.Open(arguments.inputFile)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return
+	}
+	defer fp.Close()
+
+	tree, vpa, err := trace.LoadOctree(fp)
+	if err != nil {
+		panic(err)
+	}
+	maxDepth := trace.TreeWidthToDepth(vpa)
 
 	sdl.Init(sdl.INIT_EVERYTHING)
 	defer sdl.Quit()
@@ -165,19 +195,6 @@ func main() {
 		panic(err)
 	}
 	defer texture.Destroy()
-
-	fp, err := os.Open(arguments.inputFile)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		return
-	}
-	defer fp.Close()
-
-	tree, vpa, err := trace.LoadOctree(fp)
-	if err != nil {
-		panic(err)
-	}
-	maxDepth := trace.TreeWidthToDepth(vpa)
 
 	var pos [3]float32
 	fmt.Sscan(arguments.treePosition, &pos[0], &pos[1], &pos[2])
@@ -228,7 +245,7 @@ func main() {
 
 		renderer.Clear()
 
-		if enableInput || arguments.pprof {
+		if enableInput || arguments.ppm || arguments.pprof {
 			if enableInput {
 				moveCamera(&camera, dtf)
 				window.WarpMouseInWindow(screenWidth/2, screenHeight/2)
@@ -254,6 +271,10 @@ func main() {
 		texture.Update(nil, unsafe.Pointer(&backBuffer.Pix[0]), backBuffer.Stride)
 		renderer.Copy(texture, nil, nil)
 		renderer.Present()
+
+		if arguments.ppm {
+			writePPM(backBuffer)
+		}
 
 		dt = time.Since(t)
 		ft += dt
