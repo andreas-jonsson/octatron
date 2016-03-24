@@ -21,6 +21,7 @@ import (
 	"flag"
 	"fmt"
 	"image"
+	"image/draw"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -204,7 +205,7 @@ func main() {
 		TreeScale:     float32(arguments.treeScale),
 		TreePosition:  pos,
 		ViewDist:      float32(arguments.viewDistance),
-		Images:        [2]*image.RGBA{surfaces[0], surfaces[1]},
+		Images:        [2]draw.Image{surfaces[0], surfaces[1]},
 		Jitter:        arguments.enableJitter,
 		MultiThreaded: arguments.multiThreaded,
 		Depth:         enableDepthTest,
@@ -265,7 +266,7 @@ func main() {
 				panic(err)
 			}
 		} else {
-			backBuffer = cfg.Images[0]
+			backBuffer = surfaces[0]
 		}
 
 		texture.Update(nil, unsafe.Pointer(&backBuffer.Pix[0]), backBuffer.Stride)

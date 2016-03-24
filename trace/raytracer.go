@@ -24,6 +24,7 @@ import (
 	"image/draw"
 	"io"
 	"math"
+	"runtime"
 	"sync"
 	"sync/atomic"
 
@@ -50,15 +51,16 @@ type (
 		ViewDist      float32
 		Jitter, Depth bool
 		MultiThreaded bool
-		Images        [2]*image.RGBA
+		Images        [2]draw.Image
 	}
 
 	Raytracer struct {
-		cfg   Config
-		frame uint32
-		clear color.RGBA
-		depth [2]*image.Gray16
-		wg    [2]sync.WaitGroup
+		cfg        Config
+		frame      uint32
+		numThreads int
+		clear      color.RGBA
+		depth      [2]*image.Gray16
+		wg         [2]sync.WaitGroup
 	}
 )
 
@@ -351,51 +353,55 @@ func (rt *Raytracer) calcIncVectors(camera Camera, size image.Point) (vec3.T, ve
 	return xIncVector, yIncVector, viewPlaneBottomLeftPoint
 }
 
-func (rt *Raytracer) traceScanLine(tree []octreeNode, h, idx int, eyePoint, xInc, yInc, bottomLeft vec3.T, maxDepth float32) {
+func (rt *Raytracer) traceScanLine(tree []octreeNode, from, to, idx int, eyePoint, xInc, yInc, bottomLeft vec3.T, maxDepth float32) {
 	cfg := &rt.cfg
 	img := cfg.Images[idx]
 	depth := rt.depth[idx]
-	size := img.Bounds().Max
+	imgSize := img.Bounds().Max
 
 	testDepth := cfg.Depth
 	nodeScale := cfg.TreeScale
 	nodePos := vec3.T(cfg.TreePosition)
 	viewDist := cfg.ViewDist
 
-	start, step := 0, 1
-	if cfg.Jitter {
-		step = 2
-		start = (h + idx) % 2
-		size.X *= 2
-	}
-
 	var (
 		col  color.RGBA
 		dist float32
 	)
 
-	for w := start; w < size.X; w += step {
-		x := xInc.Scaled(float32(w))
-		y := yInc.Scaled(float32(h))
+	for h := from; h < to; h++ {
+		start, step := 0, 1
+		sizeX := imgSize.X
 
-		x = vec3.Add(&x, &y)
-		viewPlanePoint := vec3.Add(&bottomLeft, &x)
-
-		dir := vec3.Sub(&viewPlanePoint, &eyePoint)
-		dir.Normalize()
-
-		ray := infiniteRay{eyePoint, dir}
-		dx, dy := w/step, size.Y-h
-
-		if testDepth {
-			max := (float32(depth.Gray16At(dx, dy).Y) / math.MaxUint16) * viewDist
-			dist, col = rt.intersectTree(tree, &ray, &nodePos, nodeScale, max, maxDepth, 0, 0)
-			d := color.Gray16{uint16(math.MaxUint16 * (dist / viewDist))}
-			depth.SetGray16(dx, dy, d)
-		} else {
-			_, col = rt.intersectTree(tree, &ray, &nodePos, nodeScale, viewDist, maxDepth, 0, 0)
+		if cfg.Jitter {
+			step = 2
+			start = (h + idx) % 2
+			sizeX *= 2
 		}
-		img.SetRGBA(dx, dy, col)
+
+		for w := start; w < sizeX; w += step {
+			x := xInc.Scaled(float32(w))
+			y := yInc.Scaled(float32(h))
+
+			x = vec3.Add(&x, &y)
+			viewPlanePoint := vec3.Add(&bottomLeft, &x)
+
+			dir := vec3.Sub(&viewPlanePoint, &eyePoint)
+			dir.Normalize()
+
+			ray := infiniteRay{eyePoint, dir}
+			dx, dy := w/step, imgSize.Y-h
+
+			if testDepth {
+				max := (float32(depth.Gray16At(dx, dy).Y) / math.MaxUint16) * viewDist
+				dist, col = rt.intersectTree(tree, &ray, &nodePos, nodeScale, max, maxDepth, 0, 0)
+				d := color.Gray16{uint16(math.MaxUint16 * (dist / viewDist))}
+				depth.SetGray16(dx, dy, d)
+			} else {
+				_, col = rt.intersectTree(tree, &ray, &nodePos, nodeScale, viewDist, maxDepth, 0, 0)
+			}
+			img.Set(dx, dy, col)
+		}
 	}
 
 	rt.wg[idx].Done()
@@ -419,25 +425,33 @@ func (rt *Raytracer) Trace(camera Camera, tree Octree, maxDepth int) int {
 	xInc, yInc, bottomLeft := rt.calcIncVectors(camera, size)
 
 	height := size.Y
-	rt.wg[idx].Add(height)
+	batchSize := height / rt.numThreads
+	rt.wg[idx].Add(rt.numThreads)
 
-	if cfg.MultiThreaded {
-		for y := 0; y < height; y++ {
-			go rt.traceScanLine(tree, y, idx, cameraPosition, xInc, yInc, bottomLeft, float32(maxDepth))
-		}
-	} else {
-		for y := 0; y < height; y++ {
-			rt.traceScanLine(tree, y, idx, cameraPosition, xInc, yInc, bottomLeft, float32(maxDepth))
-		}
+	for y := 0; y < height; y += batchSize {
+		go rt.traceScanLine(tree, y, y+batchSize, idx, cameraPosition, xInc, yInc, bottomLeft, float32(maxDepth))
 	}
 
 	return idx
 }
 
 func NewRaytracer(cfg Config) *Raytracer {
+	rect := cfg.Images[0].Bounds()
+	numCPU := 1
+
+	if cfg.MultiThreaded {
+		numCPU = runtime.NumCPU()
+		for numCPU%rect.Max.Y == 0 {
+			numCPU++
+		}
+	}
+
+	rt := &Raytracer{cfg: cfg, clear: color.RGBA{0, 0, 0, 255}, numThreads: numCPU}
+
 	if cfg.Depth {
 		rect := cfg.Images[0].Bounds()
-		return &Raytracer{cfg: cfg, depth: [2]*image.Gray16{image.NewGray16(rect), image.NewGray16(rect)}}
+		rt.depth = [2]*image.Gray16{image.NewGray16(rect), image.NewGray16(rect)}
 	}
-	return &Raytracer{cfg: cfg, clear: color.RGBA{0, 0, 0, 255}}
+
+	return rt
 }
