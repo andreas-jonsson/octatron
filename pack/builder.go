@@ -1,20 +1,19 @@
-/*************************************************************************/
-/* Octatron                                                              */
-/* Copyright (C) 2015 Andreas T Jonsson <mail@andreasjonsson.se>         */
-/*                                                                       */
-/* This program is free software: you can redistribute it and/or modify  */
-/* it under the terms of the GNU General Public License as published by  */
-/* the Free Software Foundation, either version 3 of the License, or     */
-/* (at your option) any later version.                                   */
-/*                                                                       */
-/* This program is distributed in the hope that it will be useful,       */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of        */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         */
-/* GNU General Public License for more details.                          */
-/*                                                                       */
-/* You should have received a copy of the GNU General Public License     */
-/* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
-/*************************************************************************/
+/*
+Copyright (C) 2015-2016 Andreas T Jonsson
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 package pack
 
@@ -44,9 +43,9 @@ type BuildStatus struct {
 	Status OptStatus
 }
 
-type Sample interface {
-	Color() Color
-	Position() Point
+type Sample struct {
+	Pos Point
+	Col Color
 }
 
 type accNode struct {
@@ -169,7 +168,7 @@ func insertSample(cfg *BuildConfig, header *OctreeHeader, readWriter io.ReadWrit
 			return err
 		}
 
-		color := sample.Color()
+		color := sample.Col
 		node.Color[0] += uint64(color.R * 255)
 		node.Color[1] += uint64(color.G * 255)
 		node.Color[2] += uint64(color.B * 255)
@@ -195,7 +194,7 @@ func insertSample(cfg *BuildConfig, header *OctreeHeader, readWriter io.ReadWrit
 			childOffset := childPositions[i].scale(childBounds.Size)
 			childBounds.Pos = bounds.Pos.add(&childOffset)
 
-			if childBounds.Intersect(sample.Position()) == true {
+			if childBounds.Intersect(sample.Pos) == true {
 				if child == 0 {
 					currentPos, err := readWriter.Seek(0, 1)
 					if err != nil {

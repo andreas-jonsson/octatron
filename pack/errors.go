@@ -17,35 +17,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package pack
 
-import (
-	"os"
-	"testing"
+import "errors"
+
+var (
+	errUnsupportedFormat = errors.New("unsupported octree-format")
+	errInvalidFile       = errors.New("invalid file")
+	errOctreeOverflow    = errors.New("octree-format overflow")
+	errVoxelsPowerOfTwo  = errors.New("voxels must be a power of two")
+	errInputIsCompressed = errors.New("input is compressed")
 )
-
-func TestTranscode(t *testing.T) {
-	TestBuildTree(t)
-
-	in, _ := os.Open("test.oct")
-	defer in.Close()
-
-	out, _ := os.Create("test.opt")
-	defer out.Close()
-
-	if err := TranscodeTree(in, out, MipR8G8B8A8UnpackUI32); err != nil {
-		panic(err)
-	}
-}
-
-func TestCompress(t *testing.T) {
-	TestBuildTree(t)
-
-	in, _ := os.Open("test.oct")
-	defer in.Close()
-
-	out, _ := os.Create("test.ocz")
-	defer out.Close()
-
-	if err := CompressTree(in, out); err != nil {
-		panic(err)
-	}
-}

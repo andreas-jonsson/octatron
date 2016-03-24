@@ -23,6 +23,7 @@ import (
 	"flag"
 	"fmt"
 	"image"
+	"image/draw"
 	"log"
 	"net/http"
 	"os"
@@ -179,7 +180,7 @@ func renderServer(ws *websocket.Conn) {
 		TreeScale:    1,
 		TreePosition: trace.Vec3{-0.5, -0.5, -3},
 		ViewDist:     10,
-		Images:       [2]*image.RGBA{surface, nil},
+		Images:       [2]draw.Image{surface, nil},
 	}
 
 	raytracer := trace.NewRaytracer(cfg)
