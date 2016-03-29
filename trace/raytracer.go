@@ -33,6 +33,8 @@ import (
 	"github.com/ungerik/go3d/vec3"
 )
 
+const maxUint28 = 1<<28 - 1
+
 type (
 	Vec3   [3]float32
 	Octree []octreeNode
@@ -65,10 +67,14 @@ type (
 	}
 )
 
-var InvalidSizeError = errors.New("invalid size")
+var (
+	InvalidSizeError    = errors.New("invalid size")
+	Uint28OverflowError = errors.New("uint28 overflow")
+)
 
 type (
 	infiniteRay [2]vec3.T
+	octreeNode  [8]uint32
 
 	rtJob struct {
 		camera   Camera
@@ -77,18 +83,40 @@ type (
 
 		from, to, idx int
 	}
-
-	octreeNode struct {
-		color    color.RGBA
-		children [8]uint32
-	}
 )
 
-func (n *octreeNode) setColor(color *pack.Color) {
-	n.color.R = uint8(color.R * 255)
-	n.color.G = uint8(color.G * 255)
-	n.color.B = uint8(color.B * 255)
-	n.color.A = uint8(color.A * 255)
+func (n *octreeNode) setColor(color *pack.Color) error {
+	colors := [4]uint8{uint8(color.R * 255), uint8(color.G * 255), uint8(color.B * 255), 0}
+
+	for i, child := range n {
+		if child > maxUint28 {
+			return Uint28OverflowError
+		}
+
+		var colorNib uint32
+		if i%2 == 0 {
+			colorNib = uint32(colors[i/2]&0xF0) << 24
+		} else {
+			colorNib = uint32(colors[i/2]&0xF) << 28
+		}
+
+		n[i] = colorNib | child
+	}
+
+	return nil
+}
+
+func (n *octreeNode) getColor() color.RGBA {
+	return color.RGBA{
+		R: uint8(n[0]>>24 | n[1]>>28),
+		G: uint8(n[2]>>24 | n[3]>>28),
+		B: uint8(n[4]>>24 | n[5]>>28),
+		A: 1,
+	}
+}
+
+func (n *octreeNode) getChild(i int) uint32 {
+	return n[i] & 0xFFFFFFF
 }
 
 type LookAtCamera struct {
@@ -190,10 +218,12 @@ func LoadOctree(reader io.Reader) (Octree, int, error) {
 	data := make([]octreeNode, header.NumNodes)
 	for i := range data {
 		n := &data[i]
-		if err := pack.DecodeNode(reader, header.Format, &color, n.children[:]); err != nil {
+		if err := pack.DecodeNode(reader, header.Format, &color, n[:]); err != nil {
 			return nil, 0, err
 		}
-		n.setColor(&color)
+		if err := n.setColor(&color); err != nil {
+			return nil, 0, err
+		}
 	}
 
 	return data, int(header.VoxelsPerAxis), nil
@@ -299,7 +329,7 @@ func (rt *Raytracer) intersectTree(tree []octreeNode, ray *infiniteRay, nodePos 
 	{
 		d := (boxDist / rt.cfg.ViewDist)
 		if treeDepth > uint32(maxDepth*(1-d*d)) {
-			return boxDist, node.color
+			return boxDist, node.getColor()
 		}
 	}
 
@@ -307,7 +337,9 @@ func (rt *Raytracer) intersectTree(tree []octreeNode, ray *infiniteRay, nodePos 
 	childScale := nodeScale * 0.5
 	childDepth := treeDepth + 1
 
-	for i, childIndex := range node.children {
+	for i := range node {
+		childIndex := node.getChild(i)
+
 		if childIndex != 0 {
 			numChild++
 			scaled := childPositions[i].Scaled(childScale)
@@ -321,7 +353,7 @@ func (rt *Raytracer) intersectTree(tree []octreeNode, ray *infiniteRay, nodePos 
 	}
 
 	if numChild == 0 {
-		return boxDist, node.color
+		return boxDist, node.getColor()
 	}
 
 	return length, color
