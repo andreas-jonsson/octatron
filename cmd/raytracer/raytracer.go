@@ -21,7 +21,6 @@ import (
 	"flag"
 	"fmt"
 	"image"
-	"image/draw"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -200,7 +199,7 @@ func main() {
 		TreeScale:     float32(arguments.treeScale),
 		TreePosition:  pos,
 		ViewDist:      float32(arguments.viewDistance),
-		Images:        [2]draw.Image{surfaces[0], surfaces[1]},
+		Images:        surfaces,
 		Jitter:        arguments.enableJitter,
 		MultiThreaded: arguments.multiThreaded,
 		Depth:         enableDepthTest,

@@ -51,7 +51,7 @@ type (
 		ViewDist      float32
 		Jitter, Depth bool
 		MultiThreaded bool
-		Images        [2]draw.Image
+		Images        [2]*image.RGBA
 	}
 
 	Raytracer struct {
@@ -284,6 +284,9 @@ func (rt *Raytracer) intersectTree(tree []octreeNode, ray *infiniteRay, nodePos 
 	var (
 		color = rt.clear
 		node  = tree[nodeIndex]
+
+		// Declare this here to avoid runtime allocation.
+		pos vec3.T
 	)
 
 	box := vec3.Box{*nodePos, vec3.T{nodePos[0] + nodeScale, nodePos[1] + nodeScale, nodePos[2] + nodeScale}}
@@ -308,7 +311,7 @@ func (rt *Raytracer) intersectTree(tree []octreeNode, ray *infiniteRay, nodePos 
 		if childIndex != 0 {
 			numChild++
 			scaled := childPositions[i].Scaled(childScale)
-			pos := vec3.Add(nodePos, &scaled)
+			pos = vec3.Add(nodePos, &scaled)
 
 			if ln, col := rt.intersectTree(tree, ray, &pos, childScale, length, maxDepth, childIndex, childDepth); ln < length {
 				length = ln
@@ -413,7 +416,7 @@ func (rt *Raytracer) traceScanLines(job *rtJob) {
 			} else {
 				_, col = rt.intersectTree(job.tree, &ray, &nodePos, nodeScale, viewDist, job.maxDepth, 0, 0)
 			}
-			img.Set(dx, dy, col)
+			img.SetRGBA(dx, dy, col)
 		}
 	}
 }
