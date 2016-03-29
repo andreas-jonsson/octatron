@@ -26,6 +26,7 @@ import (
 	_ "net/http/pprof"
 	"os"
 	"runtime"
+	"runtime/pprof"
 	"time"
 	"unsafe"
 
@@ -133,18 +134,12 @@ func init() {
 	flag.Float64Var(&arguments.treeScale, "scale", 1, "octree scale")
 	flag.BoolVar(&arguments.enableJitter, "jitter", true, "enables frame jitter")
 	flag.BoolVar(&arguments.multiThreaded, "mt", true, "enables multi-threading")
-	flag.BoolVar(&arguments.pprof, "pprof", false, "enables pprof over http, port 6060")
+	flag.BoolVar(&arguments.pprof, "pprof", false, "enables cpu profiler and pprof over http, port 6060")
 	flag.BoolVar(&arguments.ppm, "ppm", false, "write ppm-stream to stdout")
 }
 
 func main() {
 	flag.Parse()
-
-	if arguments.pprof {
-		go func() {
-			fmt.Fprintln(os.Stderr, http.ListenAndServe("localhost:6060", nil))
-		}()
-	}
 
 	fmt.Sscan(arguments.windowSize, &screenWidth, &screenHeight)
 	fmt.Sscan(arguments.resolution, &resolutionX, &resolutionY)
@@ -219,6 +214,21 @@ func main() {
 	nf := 0
 	dt := time.Duration(1000 / 60)
 	ft := time.Duration(nf)
+
+	if arguments.pprof {
+		go func() {
+			fmt.Fprintln(os.Stderr, http.ListenAndServe("localhost:6060", nil))
+		}()
+
+		fp, err := os.Create("raytracer.pprof")
+		if err != nil {
+			panic(err)
+		}
+		defer fp.Close()
+
+		pprof.StartCPUProfile(fp)
+		defer pprof.StopCPUProfile()
+	}
 
 	for {
 		t := time.Now()
