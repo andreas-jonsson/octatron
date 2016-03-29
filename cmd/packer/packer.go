@@ -71,7 +71,7 @@ var arguments struct {
 	threshold float64
 
 	reflectComponent, compress bool
-	optimize, filter           bool
+	optimize, filter, dryRun   bool
 }
 
 func init() {
@@ -95,6 +95,7 @@ func init() {
 	flag.BoolVar(&arguments.optimize, "optimize", true, "optimize tree")
 	flag.BoolVar(&arguments.filter, "filter", true, "apply color-filter")
 	flag.BoolVar(&arguments.reflectComponent, "reflect", true, "reflection component")
+	flag.BoolVar(&arguments.dryRun, "dry", false, "dry-run, parses and transform cloud")
 }
 
 func main() {
@@ -165,12 +166,19 @@ func main() {
 				fmt.Printf("\rProgress: %v%%", p)
 			}
 
-			samples <- s
+			if !arguments.dryRun {
+				samples <- s
+			}
 		}
 
 		fmt.Println("\rProgress: 100%")
 		fmt.Println("Bounds:", box)
 		return scanner.Err()
+	}
+
+	if arguments.dryRun {
+		parser(nil)
+		return
 	}
 
 	var bounds pack.Box
