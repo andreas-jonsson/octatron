@@ -51,6 +51,7 @@ type (
 		TreePosition Vec3
 
 		ViewDist      float32
+		FrameSeed     int
 		Jitter, Depth bool
 		MultiThreaded bool
 		Images        [2]*image.RGBA
@@ -508,7 +509,13 @@ func NewRaytracer(cfg Config) *Raytracer {
 		}
 	}
 
-	rt := &Raytracer{cfg: cfg, clear: color.RGBA{0, 0, 0, 255}, numThreads: numCPU, work: make(chan rtJob, numCPU*2)}
+	rt := &Raytracer{
+		cfg:        cfg,
+		frame:      uint32(cfg.FrameSeed),
+		clear:      color.RGBA{0, 0, 0, 255},
+		numThreads: numCPU,
+		work:       make(chan rtJob, numCPU*2),
+	}
 
 	if cfg.Depth {
 		rect := cfg.Images[0].Bounds()
