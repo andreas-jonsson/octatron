@@ -61,6 +61,7 @@ type (
 		clear      color.RGBA
 		depth      [2]*image.Gray16
 		wg         [2]sync.WaitGroup
+		work       chan rtJob
 	}
 )
 
@@ -68,6 +69,14 @@ var InvalidSizeError = errors.New("invalid size")
 
 type (
 	infiniteRay [2]vec3.T
+
+	rtJob struct {
+		camera   Camera
+		tree     Octree
+		maxDepth float32
+
+		from, to, idx int
+	}
 
 	octreeNode struct {
 		color    color.RGBA
@@ -353,33 +362,37 @@ func (rt *Raytracer) calcIncVectors(camera Camera, size image.Point) (vec3.T, ve
 	return xIncVector, yIncVector, viewPlaneBottomLeftPoint
 }
 
-func (rt *Raytracer) traceScanLine(tree []octreeNode, from, to, idx int, eyePoint, xInc, yInc, bottomLeft vec3.T, maxDepth float32) {
+func (rt *Raytracer) traceScanLines(job *rtJob) {
 	cfg := &rt.cfg
+	idx := job.idx
 	img := cfg.Images[idx]
 	depth := rt.depth[idx]
-	imgSize := img.Bounds().Max
+	size := img.Bounds().Max
 
 	testDepth := cfg.Depth
 	nodeScale := cfg.TreeScale
 	nodePos := vec3.T(cfg.TreePosition)
 	viewDist := cfg.ViewDist
 
+	jitter, step := 0, 1
+	if cfg.Jitter {
+		jitter = 1
+		step = 2
+		size.X *= 2
+	}
+
+	xInc, yInc, bottomLeft := rt.calcIncVectors(job.camera, size)
+	eyePoint := vec3.T(job.camera.Position())
+
 	var (
 		col  color.RGBA
 		dist float32
 	)
 
-	for h := from; h < to; h++ {
-		start, step := 0, 1
-		sizeX := imgSize.X
+	for h := job.from; h < job.to; h++ {
+		start := ((h + idx) % 2) * jitter
 
-		if cfg.Jitter {
-			step = 2
-			start = (h + idx) % 2
-			sizeX *= 2
-		}
-
-		for w := start; w < sizeX; w += step {
+		for w := start; w < size.X; w += step {
 			x := xInc.Scaled(float32(w))
 			y := yInc.Scaled(float32(h))
 
@@ -390,49 +403,63 @@ func (rt *Raytracer) traceScanLine(tree []octreeNode, from, to, idx int, eyePoin
 			dir.Normalize()
 
 			ray := infiniteRay{eyePoint, dir}
-			dx, dy := w/step, imgSize.Y-h
+			dx, dy := w/step, size.Y-h
 
 			if testDepth {
 				max := (float32(depth.Gray16At(dx, dy).Y) / math.MaxUint16) * viewDist
-				dist, col = rt.intersectTree(tree, &ray, &nodePos, nodeScale, max, maxDepth, 0, 0)
+				dist, col = rt.intersectTree(job.tree, &ray, &nodePos, nodeScale, max, job.maxDepth, 0, 0)
 				d := color.Gray16{uint16(math.MaxUint16 * (dist / viewDist))}
 				depth.SetGray16(dx, dy, d)
 			} else {
-				_, col = rt.intersectTree(tree, &ray, &nodePos, nodeScale, viewDist, maxDepth, 0, 0)
+				_, col = rt.intersectTree(job.tree, &ray, &nodePos, nodeScale, viewDist, job.maxDepth, 0, 0)
 			}
 			img.Set(dx, dy, col)
 		}
 	}
+}
 
-	rt.wg[idx].Done()
+func (rt *Raytracer) workerLoop() {
+	for {
+		job, ok := <-rt.work
+		if !ok {
+			return
+		}
+
+		rt.traceScanLines(&job)
+		rt.wg[job.idx].Done()
+	}
 }
 
 func (rt *Raytracer) Trace(camera Camera, tree Octree, maxDepth int) int {
 	cfg := &rt.cfg
 	idx := int(atomic.LoadUint32(&rt.frame) % 2)
-	cameraPosition := vec3.T(camera.Position())
+	size := cfg.Images[0].Bounds().Max // We assume this call is thread-safe.
 
 	rt.Wait(idx)
 
-	img := cfg.Images[idx]
-	size := img.Bounds().Max
-
 	if cfg.Jitter {
-		size.X *= 2
 		atomic.AddUint32(&rt.frame, 1)
 	}
-
-	xInc, yInc, bottomLeft := rt.calcIncVectors(camera, size)
 
 	height := size.Y
 	batchSize := height / rt.numThreads
 	rt.wg[idx].Add(rt.numThreads)
 
 	for y := 0; y < height; y += batchSize {
-		go rt.traceScanLine(tree, y, y+batchSize, idx, cameraPosition, xInc, yInc, bottomLeft, float32(maxDepth))
+		rt.work <- rtJob{camera: camera,
+			tree:     tree,
+			maxDepth: float32(maxDepth),
+			from:     y,
+			to:       y + batchSize,
+			idx:      idx,
+		}
 	}
 
 	return idx
+}
+
+func (rt *Raytracer) Close() {
+	close(rt.work)
 }
 
 func NewRaytracer(cfg Config) *Raytracer {
@@ -446,11 +473,15 @@ func NewRaytracer(cfg Config) *Raytracer {
 		}
 	}
 
-	rt := &Raytracer{cfg: cfg, clear: color.RGBA{0, 0, 0, 255}, numThreads: numCPU}
+	rt := &Raytracer{cfg: cfg, clear: color.RGBA{0, 0, 0, 255}, numThreads: numCPU, work: make(chan rtJob, numCPU*2)}
 
 	if cfg.Depth {
 		rect := cfg.Images[0].Bounds()
 		rt.depth = [2]*image.Gray16{image.NewGray16(rect), image.NewGray16(rect)}
+	}
+
+	for i := 0; i < numCPU; i++ {
+		go rt.workerLoop()
 	}
 
 	return rt

@@ -212,6 +212,8 @@ func main() {
 	}
 
 	raytracer := trace.NewRaytracer(cfg)
+	defer raytracer.Close()
+
 	camera := trace.FreeFlightCamera{XRot: 0, YRot: 0}
 
 	nf := 0
