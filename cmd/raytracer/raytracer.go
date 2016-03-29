@@ -21,11 +21,11 @@ import (
 	"flag"
 	"fmt"
 	"image"
-	"image/draw"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"runtime"
+	"runtime/pprof"
 	"time"
 	"unsafe"
 
@@ -133,18 +133,12 @@ func init() {
 	flag.Float64Var(&arguments.treeScale, "scale", 1, "octree scale")
 	flag.BoolVar(&arguments.enableJitter, "jitter", true, "enables frame jitter")
 	flag.BoolVar(&arguments.multiThreaded, "mt", true, "enables multi-threading")
-	flag.BoolVar(&arguments.pprof, "pprof", false, "enables pprof over http, port 6060")
+	flag.BoolVar(&arguments.pprof, "pprof", false, "enables cpu profiler and pprof over http, port 6060")
 	flag.BoolVar(&arguments.ppm, "ppm", false, "write ppm-stream to stdout")
 }
 
 func main() {
 	flag.Parse()
-
-	if arguments.pprof {
-		go func() {
-			fmt.Fprintln(os.Stderr, http.ListenAndServe("localhost:6060", nil))
-		}()
-	}
 
 	fmt.Sscan(arguments.windowSize, &screenWidth, &screenHeight)
 	fmt.Sscan(arguments.resolution, &resolutionX, &resolutionY)
@@ -205,18 +199,35 @@ func main() {
 		TreeScale:     float32(arguments.treeScale),
 		TreePosition:  pos,
 		ViewDist:      float32(arguments.viewDistance),
-		Images:        [2]draw.Image{surfaces[0], surfaces[1]},
+		Images:        surfaces,
 		Jitter:        arguments.enableJitter,
 		MultiThreaded: arguments.multiThreaded,
 		Depth:         enableDepthTest,
 	}
 
 	raytracer := trace.NewRaytracer(cfg)
+	defer raytracer.Close()
+
 	camera := trace.FreeFlightCamera{XRot: 0, YRot: 0}
 
 	nf := 0
 	dt := time.Duration(1000 / 60)
 	ft := time.Duration(nf)
+
+	if arguments.pprof {
+		go func() {
+			fmt.Fprintln(os.Stderr, http.ListenAndServe("localhost:6060", nil))
+		}()
+
+		fp, err := os.Create("raytracer.pprof")
+		if err != nil {
+			panic(err)
+		}
+		defer fp.Close()
+
+		pprof.StartCPUProfile(fp)
+		defer pprof.StopCPUProfile()
+	}
 
 	for {
 		t := time.Now()
