@@ -287,30 +287,6 @@ var childPositions = []vec3.T{
 	vec3.T{0, 0, 1}, vec3.T{1, 0, 1}, vec3.T{0, 1, 1}, vec3.T{1, 1, 1},
 }
 
-func (rt *Raytracer) Wait(frame int) {
-	rt.wg[frame].Wait()
-}
-
-func (rt *Raytracer) Depth(frame int) *image.Gray16 {
-	rt.Wait(frame)
-	return rt.depth[frame]
-}
-
-func (rt *Raytracer) ClearDepth(frame int) {
-	rt.Wait(frame)
-	img := rt.depth[frame]
-	clear := image.Uniform{color.Gray16{math.MaxUint16}}
-	draw.Draw(img, img.Bounds(), &clear, image.ZP, draw.Src)
-}
-
-func (rt *Raytracer) SetClearColor(c color.RGBA) {
-	rt.clear = c
-}
-
-func (rt *Raytracer) Frame() int {
-	return int(atomic.LoadUint32(&rt.frame) % 2)
-}
-
 func (rt *Raytracer) intersectTree(tree []octreeNode, ray *infiniteRay, nodePos *vec3.T, nodeScale, length, maxDepth float32, nodeIndex, treeDepth uint32) (float32, color.RGBA) {
 	var (
 		color = rt.clear
@@ -466,12 +442,16 @@ func (rt *Raytracer) workerLoop() {
 	}
 }
 
+func (rt *Raytracer) wait(idx int) {
+	rt.wg[idx].Wait()
+}
+
 func (rt *Raytracer) Trace(camera Camera, tree Octree, maxDepth int) int {
 	cfg := &rt.cfg
 	idx := int(atomic.LoadUint32(&rt.frame) % 2)
 	size := cfg.Images[0].Bounds().Max // We assume this call is thread-safe.
 
-	rt.Wait(idx)
+	rt.wait(idx)
 
 	if cfg.Jitter {
 		atomic.AddUint32(&rt.frame, 1)
@@ -492,6 +472,31 @@ func (rt *Raytracer) Trace(camera Camera, tree Octree, maxDepth int) int {
 	}
 
 	return idx
+}
+
+func (rt *Raytracer) Image(frame int) *image.RGBA {
+	rt.wait(frame)
+	return rt.cfg.Images[frame]
+}
+
+func (rt *Raytracer) Depth(frame int) *image.Gray16 {
+	rt.wait(frame)
+	return rt.depth[frame]
+}
+
+func (rt *Raytracer) ClearDepth(frame int) {
+	rt.wait(frame)
+	img := rt.depth[frame]
+	clear := image.Uniform{color.Gray16{math.MaxUint16}}
+	draw.Draw(img, img.Bounds(), &clear, image.ZP, draw.Src)
+}
+
+func (rt *Raytracer) SetClearColor(c color.RGBA) {
+	rt.clear = c
+}
+
+func (rt *Raytracer) Frame() int {
+	return int(atomic.LoadUint32(&rt.frame) % 2)
 }
 
 func (rt *Raytracer) Close() {

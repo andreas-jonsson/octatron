@@ -124,10 +124,10 @@ func init() {
 	}
 
 	flag.StringVar(&arguments.inputFile, "tree", "tree.oct", "path to .oct file.")
-	flag.StringVar(&arguments.treePosition, "pos", "0 0 0", "octree position in world")
+	flag.StringVar(&arguments.treePosition, "pos", "0,0,0", "octree position in world")
 	flag.StringVar(&arguments.scaleFilter, "filter", "linear", "used to scale image")
-	flag.StringVar(&arguments.windowSize, "window", "640 360", "window size")
-	flag.StringVar(&arguments.resolution, "resolution", "640 360", "back-buffer size")
+	flag.StringVar(&arguments.windowSize, "window", "640,360", "window size")
+	flag.StringVar(&arguments.resolution, "resolution", "640,360", "back-buffer size")
 	flag.IntVar(&arguments.fieldOfView, "fov", 45, "camera field-of-view")
 	flag.Float64Var(&arguments.viewDistance, "dist", 1, "max view-distance")
 	flag.Float64Var(&arguments.treeScale, "scale", 1, "octree scale")
@@ -140,8 +140,8 @@ func init() {
 func main() {
 	flag.Parse()
 
-	fmt.Sscan(arguments.windowSize, &screenWidth, &screenHeight)
-	fmt.Sscan(arguments.resolution, &resolutionX, &resolutionY)
+	fmt.Sscanf(arguments.windowSize, "%f,%f", &screenWidth, &screenHeight)
+	fmt.Sscanf(arguments.resolution, "%f,%f", &resolutionX, &resolutionY)
 
 	fp, err := os.Open(arguments.inputFile)
 	if err != nil {
@@ -192,7 +192,7 @@ func main() {
 	defer texture.Destroy()
 
 	var pos [3]float32
-	fmt.Sscan(arguments.treePosition, &pos[0], &pos[1], &pos[2])
+	fmt.Sscanf(arguments.treePosition, "%f,%f,%f", &pos[0], &pos[1], &pos[2])
 
 	cfg := trace.Config{
 		FieldOfView:   float32(arguments.fieldOfView),
@@ -270,10 +270,8 @@ func main() {
 			raytracer.Trace(&camera, tree, maxDepth)
 		}
 
-		raytracer.Wait(0)
 		if arguments.enableJitter {
-			raytracer.Wait(1)
-			if err := trace.Reconstruct(cfg.Images[0], cfg.Images[1], backBuffer); err != nil {
+			if err := trace.Reconstruct(raytracer.Image(0), raytracer.Image(1), backBuffer); err != nil {
 				panic(err)
 			}
 		} else {
