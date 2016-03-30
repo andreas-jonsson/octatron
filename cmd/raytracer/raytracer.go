@@ -140,8 +140,8 @@ func init() {
 func main() {
 	flag.Parse()
 
-	fmt.Sscanf(arguments.windowSize, "%f,%f", &screenWidth, &screenHeight)
-	fmt.Sscanf(arguments.resolution, "%f,%f", &resolutionX, &resolutionY)
+	fmt.Sscanf(arguments.windowSize, "%d,%d", &screenWidth, &screenHeight)
+	fmt.Sscanf(arguments.resolution, "%d,%d", &resolutionX, &resolutionY)
 
 	fp, err := os.Open(arguments.inputFile)
 	if err != nil {
