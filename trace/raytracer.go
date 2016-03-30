@@ -509,7 +509,7 @@ func NewRaytracer(cfg Config) *Raytracer {
 
 	if cfg.MultiThreaded {
 		numCPU = runtime.NumCPU()
-		for numCPU%rect.Max.Y == 0 {
+		for numCPU%rect.Max.Y != 0 {
 			numCPU++
 		}
 	}
