@@ -23,12 +23,12 @@ import (
 	"flag"
 	"fmt"
 	"image"
+	"image/color"
+	"image/color/palette"
 	"image/draw"
 	"log"
 	"net/http"
 	"os"
-	"path"
-	"sync"
 	"time"
 
 	"golang.org/x/net/websocket"
@@ -45,14 +45,9 @@ var (
 	streamCodec  = websocket.Codec{Marshal: marshalData, Unmarshal: nil}
 )
 
-type entry struct {
-	count int
-	tree  trace.Octree
-}
-
-var trees struct {
-	sync.Mutex
-	data map[string]entry
+var loadedTree struct {
+	maxDepth int
+	tree     trace.Octree
 }
 
 type (
@@ -60,13 +55,14 @@ type (
 		Width       int     "width"
 		Height      int     "height"
 		FieldOfView float32 "field_of_view"
-		Tree        string  "tree"
+		ViewDist    float32 "view_dist"
 	}
 
 	updateMessage struct {
 		Camera struct {
 			Position [3]float32 "position"
-			LookAt   [3]float32 "look_at"
+			XRot     float32    "x_rot"
+			YRot     float32    "y_rot"
 		} "camera"
 	}
 )
@@ -89,51 +85,22 @@ func unmarshalMessage(data []byte, ty byte, v interface{}) error {
 	}
 }
 
-func loadTree(file string) (trace.Octree, int, error) {
-	trees.Lock()
-	defer trees.Unlock()
-
-	e, ok := trees.data[file]
-	if ok {
-		e.count++
-		return e.tree, 0, nil
-	}
-
+func loadTree(file string) error {
 	fp, err := os.Open(file)
 	if err != nil {
-		return nil, 0, err
+		return err
 	}
 	defer fp.Close()
 
 	tree, vpa, err := trace.LoadOctree(fp)
 	if err != nil {
-		return nil, 0, err
+		return err
 	}
 
-	e.tree = tree
-	maxDepth := trace.TreeWidthToDepth(vpa)
+	loadedTree.maxDepth = trace.TreeWidthToDepth(vpa)
+	loadedTree.tree = tree
 
-	log.Println("loading:", file)
-
-	e.count = 1
-	trees.data[file] = e
-	return e.tree, maxDepth, nil
-}
-
-func unloadTree(file string) {
-	trees.Lock()
-	defer trees.Unlock()
-
-	e, ok := trees.data[file]
-	if !ok {
-		panic("file not loaded: " + file)
-	}
-
-	e.count--
-	if e.count == 0 {
-		delete(trees.data, file)
-		log.Println("unloading:", file)
-	}
+	return nil
 }
 
 func renderServer(ws *websocket.Conn) {
@@ -162,28 +129,29 @@ func renderServer(ws *websocket.Conn) {
 
 	if setup.Width*setup.Height > 1280*720 || setup.FieldOfView < 45 || setup.FieldOfView > 180 {
 		log.Println("invalid setup")
+		log.Println(setup)
 		return
 	}
 
-	setup.Tree = path.Join(arguments.data, path.Base(setup.Tree))
-
-	tree, maxDepth, err := loadTree(setup.Tree)
-	if err != nil {
-		log.Println(err, setup.Tree)
-		return
+	backBuffer := image.NewPaletted(image.Rect(0, 0, setup.Width/2, setup.Height), palette.Plan9)
+	rect := image.Rect(0, 0, setup.Width, setup.Height)
+	surfaces := [2]*image.RGBA{
+		image.NewRGBA(rect),
+		image.NewRGBA(rect),
 	}
-	defer unloadTree(setup.Tree)
 
-	surface := image.NewRGBA(image.Rect(0, 0, setup.Width, setup.Height))
 	cfg := trace.Config{
-		FieldOfView:  setup.FieldOfView,
-		TreeScale:    1,
-		TreePosition: trace.Vec3{-0.5, -0.5, -3},
-		ViewDist:     10,
-		Images:       [2]draw.Image{surface, nil},
+		FieldOfView:   setup.FieldOfView,
+		TreeScale:     1,
+		ViewDist:      setup.ViewDist,
+		Images:        surfaces,
+		Jitter:        true,
+		MultiThreaded: true,
+		FrameSeed:     1,
 	}
 
 	raytracer := trace.NewRaytracer(cfg)
+	raytracer.SetClearColor(color.RGBA{127, 127, 127, 255})
 	updateChan := make(chan updateMessage, 1)
 
 	go func() {
@@ -201,15 +169,18 @@ func renderServer(ws *websocket.Conn) {
 
 	for {
 		update := <-updateChan
-		camera := trace.LookAtCamera{
+		camera := trace.FreeFlightCamera{
 			Pos:  update.Camera.Position,
-			Look: update.Camera.LookAt,
+			XRot: update.Camera.XRot,
+			YRot: update.Camera.YRot,
 		}
 
-		raytracer.Trace(&camera, tree, maxDepth)
-		raytracer.Wait(0)
+		frame := raytracer.Trace(&camera, loadedTree.tree, loadedTree.maxDepth)
+		idx := frame % 2
 
-		if err := streamCodec.Send(ws, surface.Pix); err != nil {
+		draw.Draw(backBuffer, backBuffer.Bounds(), raytracer.Image(idx), image.ZP, draw.Src)
+
+		if err := streamCodec.Send(ws, backBuffer.Pix); err != nil {
 			log.Println(err)
 			return
 		}
@@ -218,7 +189,7 @@ func renderServer(ws *websocket.Conn) {
 
 var arguments struct {
 	web,
-	data string
+	tree string
 	port uint
 }
 
@@ -229,13 +200,17 @@ func init() {
 	}
 
 	flag.StringVar(&arguments.web, "web", "cmd/web-raytracer/frontend", "web frontend location")
-	flag.StringVar(&arguments.data, "data", "pack", "data location")
+	flag.StringVar(&arguments.tree, "tree", "tree.oct", "octree to serve clients")
 	flag.UintVar(&arguments.port, "port", 8080, "server port")
 }
 
 func main() {
 	flag.Parse()
-	trees.data = make(map[string]entry)
+
+	if err := loadTree(arguments.tree); err != nil {
+		log.Println(err)
+		os.Exit(-1)
+	}
 
 	http.Handle("/", http.FileServer(http.Dir(arguments.web)))
 	http.Handle("/render", websocket.Handler(renderServer))
