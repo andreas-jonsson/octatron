@@ -248,6 +248,10 @@ func main() {
 					return
 				case sdl.K_f:
 					toggleFullscreen(window)
+				case sdl.K_c:
+					if !arguments.ppm {
+						fmt.Println("Camera:", camera)
+					}
 				case sdl.K_SPACE:
 					enableInput = !enableInput
 					sdl.SetRelativeMouseMode(enableInput)
