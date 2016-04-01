@@ -2076,7 +2076,7 @@ var $internalize = function(v, t, recv) {
 };
 
 $packages["github.com/gopherjs/gopherjs/js"] = (function() {
-	var $pkg = {}, $init, Object, Error, sliceType, ptrType, ptrType$1, init;
+	var $pkg = {}, $init, Object, Error, sliceType, ptrType, ptrType$1, NewArrayBuffer, init;
 	Object = $pkg.Object = $newType(0, $kindStruct, "js.Object", "Object", "github.com/gopherjs/gopherjs/js", function(object_) {
 		this.$val = this;
 		if (arguments.length === 0) {
@@ -2210,6 +2210,14 @@ $packages["github.com/gopherjs/gopherjs/js"] = (function() {
 		return $internalize(err.Object.stack, $String);
 	};
 	Error.prototype.Stack = function() { return this.$val.Stack(); };
+	NewArrayBuffer = function(b) {
+		var $ptr, b, length, offset, slice;
+		slice = b;
+		offset = $parseInt(slice.$offset) >> 0;
+		length = $parseInt(slice.$length) >> 0;
+		return slice.$array.buffer.slice(offset, offset + length >> 0);
+	};
+	$pkg.NewArrayBuffer = NewArrayBuffer;
 	init = function() {
 		var $ptr, e;
 		e = new Error.ptr(null);
@@ -2416,7 +2424,7 @@ $packages["sync/atomic"] = (function() {
 	return $pkg;
 })();
 $packages["sync"] = (function() {
-	var $pkg = {}, $init, race, runtime, atomic, Pool, WaitGroup, Mutex, Locker, Once, poolLocal, syncSema, RWMutex, rlocker, ptrType, sliceType, ptrType$1, chanType, sliceType$1, structType, ptrType$4, ptrType$6, sliceType$3, ptrType$7, ptrType$8, funcType, arrayType, ptrType$10, ptrType$11, chanType$1, ptrType$12, funcType$1, ptrType$13, arrayType$1, semWaiters, allPools, runtime_Syncsemcheck, runtime_registerPoolCleanup, runtime_Semacquire, runtime_Semrelease, runtime_canSpin, poolCleanup, init, indexLocal, init$1, runtime_doSpin;
+	var $pkg = {}, $init, race, runtime, atomic, Pool, Mutex, Locker, Once, poolLocal, syncSema, RWMutex, rlocker, ptrType, sliceType, ptrType$1, chanType, sliceType$1, ptrType$4, ptrType$6, sliceType$3, ptrType$7, ptrType$8, funcType, ptrType$12, funcType$1, ptrType$13, arrayType$1, semWaiters, allPools, runtime_Syncsemcheck, runtime_registerPoolCleanup, runtime_Semacquire, runtime_Semrelease, runtime_canSpin, poolCleanup, init, indexLocal, init$1, runtime_doSpin;
 	race = $packages["internal/race"];
 	runtime = $packages["runtime"];
 	atomic = $packages["sync/atomic"];
@@ -2433,20 +2441,6 @@ $packages["sync"] = (function() {
 		this.localSize = localSize_;
 		this.store = store_;
 		this.New = New_;
-	});
-	WaitGroup = $pkg.WaitGroup = $newType(0, $kindStruct, "sync.WaitGroup", "WaitGroup", "sync", function(counter_, ch_, state1_, sema_) {
-		this.$val = this;
-		if (arguments.length === 0) {
-			this.counter = 0;
-			this.ch = $chanNil;
-			this.state1 = arrayType.zero();
-			this.sema = 0;
-			return;
-		}
-		this.counter = counter_;
-		this.ch = ch_;
-		this.state1 = state1_;
-		this.sema = sema_;
 	});
 	Mutex = $pkg.Mutex = $newType(0, $kindStruct, "sync.Mutex", "Mutex", "sync", function(state_, sema_) {
 		this.$val = this;
@@ -2532,17 +2526,12 @@ $packages["sync"] = (function() {
 	ptrType$1 = $ptrType($Uint32);
 	chanType = $chanType($Bool, false, false);
 	sliceType$1 = $sliceType(chanType);
-	structType = $structType([]);
 	ptrType$4 = $ptrType($Int32);
 	ptrType$6 = $ptrType(poolLocal);
 	sliceType$3 = $sliceType($emptyInterface);
 	ptrType$7 = $ptrType(rlocker);
 	ptrType$8 = $ptrType(RWMutex);
 	funcType = $funcType([], [$emptyInterface], false);
-	arrayType = $arrayType($Uint8, 12);
-	ptrType$10 = $ptrType($Uint64);
-	ptrType$11 = $ptrType(WaitGroup);
-	chanType$1 = $chanType(structType, false, false);
 	ptrType$12 = $ptrType(Mutex);
 	funcType$1 = $funcType([], [], false);
 	ptrType$13 = $ptrType(Once);
@@ -2619,35 +2608,6 @@ $packages["sync"] = (function() {
 		var $ptr, i;
 		return false;
 	};
-	WaitGroup.ptr.prototype.Add = function(delta) {
-		var $ptr, delta, wg;
-		wg = this;
-		wg.counter = wg.counter + (delta) >> 0;
-		if (wg.counter < 0) {
-			$panic(new $String("sync: negative WaitGroup counter"));
-		}
-		if (wg.counter > 0 && wg.ch === $chanNil) {
-			wg.ch = new $Chan(structType, 0);
-		}
-		if ((wg.counter === 0) && !(wg.ch === $chanNil)) {
-			$close(wg.ch);
-			wg.ch = $chanNil;
-		}
-	};
-	WaitGroup.prototype.Add = function(delta) { return this.$val.Add(delta); };
-	WaitGroup.ptr.prototype.Wait = function() {
-		var $ptr, _r, wg, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; wg = $f.wg; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		wg = this;
-		/* */ if (wg.counter > 0) { $s = 1; continue; }
-		/* */ $s = 2; continue;
-		/* if (wg.counter > 0) { */ case 1:
-			_r = $recv(wg.ch); /* */ $s = 3; case 3: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-			_r[0];
-		/* } */ case 2:
-		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: WaitGroup.ptr.prototype.Wait }; } $f.$ptr = $ptr; $f._r = _r; $f.wg = wg; $f.$s = $s; $f.$r = $r; return $f;
-	};
-	WaitGroup.prototype.Wait = function() { return this.$val.Wait(); };
 	Mutex.ptr.prototype.Lock = function() {
 		var $ptr, awoke, iter, m, new$1, old, $s, $r;
 		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; awoke = $f.awoke; iter = $f.iter; m = $f.m; new$1 = $f.new$1; old = $f.old; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
@@ -2871,20 +2831,12 @@ $packages["sync"] = (function() {
 		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: rlocker.ptr.prototype.Unlock }; } $f.$ptr = $ptr; $f.r = r; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	rlocker.prototype.Unlock = function() { return this.$val.Unlock(); };
-	WaitGroup.ptr.prototype.Done = function() {
-		var $ptr, wg;
-		wg = this;
-		wg.Add(-1);
-	};
-	WaitGroup.prototype.Done = function() { return this.$val.Done(); };
 	ptrType.methods = [{prop: "Get", name: "Get", pkg: "", typ: $funcType([], [$emptyInterface], false)}, {prop: "Put", name: "Put", pkg: "", typ: $funcType([$emptyInterface], [], false)}, {prop: "getSlow", name: "getSlow", pkg: "sync", typ: $funcType([], [$emptyInterface], false)}, {prop: "pin", name: "pin", pkg: "sync", typ: $funcType([], [ptrType$6], false)}, {prop: "pinSlow", name: "pinSlow", pkg: "sync", typ: $funcType([], [ptrType$6], false)}];
-	ptrType$11.methods = [{prop: "Add", name: "Add", pkg: "", typ: $funcType([$Int], [], false)}, {prop: "Wait", name: "Wait", pkg: "", typ: $funcType([], [], false)}, {prop: "state", name: "state", pkg: "sync", typ: $funcType([], [ptrType$10], false)}, {prop: "Done", name: "Done", pkg: "", typ: $funcType([], [], false)}];
 	ptrType$12.methods = [{prop: "Lock", name: "Lock", pkg: "", typ: $funcType([], [], false)}, {prop: "Unlock", name: "Unlock", pkg: "", typ: $funcType([], [], false)}];
 	ptrType$13.methods = [{prop: "Do", name: "Do", pkg: "", typ: $funcType([funcType$1], [], false)}];
 	ptrType$8.methods = [{prop: "RLock", name: "RLock", pkg: "", typ: $funcType([], [], false)}, {prop: "RUnlock", name: "RUnlock", pkg: "", typ: $funcType([], [], false)}, {prop: "Lock", name: "Lock", pkg: "", typ: $funcType([], [], false)}, {prop: "Unlock", name: "Unlock", pkg: "", typ: $funcType([], [], false)}, {prop: "RLocker", name: "RLocker", pkg: "", typ: $funcType([], [Locker], false)}];
 	ptrType$7.methods = [{prop: "Lock", name: "Lock", pkg: "", typ: $funcType([], [], false)}, {prop: "Unlock", name: "Unlock", pkg: "", typ: $funcType([], [], false)}];
 	Pool.init([{prop: "local", name: "local", pkg: "sync", typ: $UnsafePointer, tag: ""}, {prop: "localSize", name: "localSize", pkg: "sync", typ: $Uintptr, tag: ""}, {prop: "store", name: "store", pkg: "sync", typ: sliceType$3, tag: ""}, {prop: "New", name: "New", pkg: "", typ: funcType, tag: ""}]);
-	WaitGroup.init([{prop: "counter", name: "counter", pkg: "sync", typ: $Int, tag: ""}, {prop: "ch", name: "ch", pkg: "sync", typ: chanType$1, tag: ""}, {prop: "state1", name: "state1", pkg: "sync", typ: arrayType, tag: ""}, {prop: "sema", name: "sema", pkg: "sync", typ: $Uint32, tag: ""}]);
 	Mutex.init([{prop: "state", name: "state", pkg: "sync", typ: $Int32, tag: ""}, {prop: "sema", name: "sema", pkg: "sync", typ: $Uint32, tag: ""}]);
 	Locker.init([{prop: "Lock", name: "Lock", pkg: "", typ: $funcType([], [], false)}, {prop: "Unlock", name: "Unlock", pkg: "", typ: $funcType([], [], false)}]);
 	Once.init([{prop: "m", name: "m", pkg: "sync", typ: Mutex, tag: ""}, {prop: "done", name: "done", pkg: "sync", typ: $Uint32, tag: ""}]);
@@ -22827,83 +22779,1905 @@ $packages["encoding/json"] = (function() {
 	$pkg.$init = $init;
 	return $pkg;
 })();
-$packages["github.com/flimzy/jsblob"] = (function() {
-	var $pkg = {}, $init, js, sync, Blob, arrayType, sliceType$1, ptrType;
-	js = $packages["github.com/gopherjs/gopherjs/js"];
-	sync = $packages["sync"];
-	Blob = $pkg.Blob = $newType(0, $kindStruct, "jsblob.Blob", "Blob", "github.com/flimzy/jsblob", function(Object_) {
-		this.$val = this;
-		if (arguments.length === 0) {
-			this.Object = new js.Object.ptr(null);
-			return;
-		}
-		this.Object = Object_;
-	});
-	arrayType = $arrayType($Uint8, 12);
-	sliceType$1 = $sliceType($Uint8);
-	ptrType = $ptrType(Blob);
-	Blob.ptr.prototype.IsClosed = function() {
-		var $ptr, b;
-		b = this;
-		return !!(b.Object.object.isClosed);
-	};
-	Blob.prototype.IsClosed = function() { return this.$val.IsClosed(); };
-	Blob.ptr.prototype.Size = function() {
-		var $ptr, b;
-		b = this;
-		return $parseInt(b.Object.object.size) >> 0;
-	};
-	Blob.prototype.Size = function() { return this.$val.Size(); };
-	Blob.ptr.prototype.Type = function() {
-		var $ptr, b;
-		b = this;
-		return $internalize(b.Object.object.type, $String);
-	};
-	Blob.prototype.Type = function() { return this.$val.Type(); };
-	Blob.ptr.prototype.Close = function() {
-		var $ptr, b;
-		b = this;
-		b.Object.object.close();
-	};
-	Blob.prototype.Close = function() { return this.$val.Close(); };
-	Blob.ptr.prototype.Slice = function(start, end, contenttype) {
-		var $ptr, b, contenttype, end, newBlob, start;
-		b = this;
-		newBlob = b.Object.object.slice(start, end, $externalize(contenttype, $String));
-		return new Blob.ptr($clone(new $jsObjectPtr(newBlob), js.Object));
-	};
-	Blob.prototype.Slice = function(start, end, contenttype) { return this.$val.Slice(start, end, contenttype); };
-	Blob.ptr.prototype.Bytes = function() {
-		var $ptr, b, buf, fileReader, wg, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; b = $f.b; buf = $f.buf; fileReader = $f.fileReader; wg = $f.wg; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		buf = [buf];
-		wg = [wg];
-		b = this;
-		fileReader = new ($global.FileReader)();
-		wg[0] = new sync.WaitGroup.ptr(0, $chanNil, arrayType.zero(), 0);
-		buf[0] = sliceType$1.nil;
-		wg[0].Add(1);
-		fileReader.onload = (function() { return $externalize((function(buf, wg) { return function(this$1, param) {
-			var $ptr, param, this$1, $deferred;
-			/* */ var $err = null; try { $deferred = []; $deferred.index = $curGoroutine.deferStack.length; $curGoroutine.deferStack.push($deferred);
-			$deferred.push([$methodVal(wg[0], "Done"), []]);
-			buf[0] = $assertType($internalize(new ($global.Uint8Array)(this$1.result), $emptyInterface), sliceType$1);
-			return $ifaceNil;
-			/* */ } catch(err) { $err = err; return $ifaceNil; } finally { $callDeferred($deferred, $err); }
-		}; })(buf, wg)(this, new ($sliceType($jsObjectPtr))($global.Array.prototype.slice.call(arguments, []))), $emptyInterface); });
-		fileReader.readAsArrayBuffer($externalize(b, ptrType));
-		$r = wg[0].Wait(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		return buf[0];
-		/* */ } return; } if ($f === undefined) { $f = { $blk: Blob.ptr.prototype.Bytes }; } $f.$ptr = $ptr; $f.b = b; $f.buf = buf; $f.fileReader = fileReader; $f.wg = wg; $f.$s = $s; $f.$r = $r; return $f;
-	};
-	Blob.prototype.Bytes = function() { return this.$val.Bytes(); };
-	ptrType.methods = [{prop: "IsClosed", name: "IsClosed", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "Size", name: "Size", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "Type", name: "Type", pkg: "", typ: $funcType([], [$String], false)}, {prop: "Close", name: "Close", pkg: "", typ: $funcType([], [], false)}, {prop: "Slice", name: "Slice", pkg: "", typ: $funcType([$Int, $Int, $String], [ptrType], false)}, {prop: "Bytes", name: "Bytes", pkg: "", typ: $funcType([], [sliceType$1], false)}];
-	Blob.init([{prop: "Object", name: "", pkg: "", typ: js.Object, tag: ""}]);
+$packages["bufio"] = (function() {
+	var $pkg = {}, $init, bytes, errors, io, utf8, errNegativeRead, errNegativeWrite;
+	bytes = $packages["bytes"];
+	errors = $packages["errors"];
+	io = $packages["io"];
+	utf8 = $packages["unicode/utf8"];
 	$init = function() {
 		$pkg.$init = function() {};
 		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		$r = js.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		$r = sync.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = bytes.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = errors.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = io.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = utf8.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$pkg.ErrInvalidUnreadByte = errors.New("bufio: invalid use of UnreadByte");
+		$pkg.ErrInvalidUnreadRune = errors.New("bufio: invalid use of UnreadRune");
+		$pkg.ErrBufferFull = errors.New("bufio: buffer full");
+		$pkg.ErrNegativeCount = errors.New("bufio: negative count");
+		errNegativeRead = errors.New("bufio: reader returned negative count from Read");
+		errNegativeWrite = errors.New("bufio: writer returned negative count from Write");
+		$pkg.ErrTooLong = errors.New("bufio.Scanner: token too long");
+		$pkg.ErrNegativeAdvance = errors.New("bufio.Scanner: SplitFunc returns negative advance count");
+		$pkg.ErrAdvanceTooFar = errors.New("bufio.Scanner: SplitFunc returns advance count beyond input");
+		$pkg.ErrFinalToken = errors.New("final token");
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["compress/flate"] = (function() {
+	var $pkg = {}, $init, bufio, fmt, io, math, sort, strconv, sync, huffmanEncoder, literalNode, sliceType$4, sliceType$8, ptrType$4, sliceType$9, sliceType$10, fixedLiteralEncoding, fixedOffsetEncoding, reverseByte, newHuffmanEncoder, generateFixedLiteralEncoding, generateFixedOffsetEncoding, reverseUint16, reverseBits;
+	bufio = $packages["bufio"];
+	fmt = $packages["fmt"];
+	io = $packages["io"];
+	math = $packages["math"];
+	sort = $packages["sort"];
+	strconv = $packages["strconv"];
+	sync = $packages["sync"];
+	huffmanEncoder = $pkg.huffmanEncoder = $newType(0, $kindStruct, "flate.huffmanEncoder", "huffmanEncoder", "compress/flate", function(codeBits_, code_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.codeBits = sliceType$4.nil;
+			this.code = sliceType$9.nil;
+			return;
+		}
+		this.codeBits = codeBits_;
+		this.code = code_;
+	});
+	literalNode = $pkg.literalNode = $newType(0, $kindStruct, "flate.literalNode", "literalNode", "compress/flate", function(literal_, freq_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.literal = 0;
+			this.freq = 0;
+			return;
+		}
+		this.literal = literal_;
+		this.freq = freq_;
+	});
+	sliceType$4 = $sliceType($Uint8);
+	sliceType$8 = $sliceType($Int32);
+	ptrType$4 = $ptrType(huffmanEncoder);
+	sliceType$9 = $sliceType($Uint16);
+	sliceType$10 = $sliceType(literalNode);
+	newHuffmanEncoder = function(size) {
+		var $ptr, size;
+		return new huffmanEncoder.ptr($makeSlice(sliceType$4, size), $makeSlice(sliceType$9, size));
+	};
+	generateFixedLiteralEncoding = function() {
+		var $ptr, bits, ch, code, codeBits, h, size;
+		h = newHuffmanEncoder(286);
+		codeBits = h.codeBits;
+		code = h.code;
+		ch = 0;
+		ch = 0;
+		while (true) {
+			if (!(ch < 286)) { break; }
+			bits = 0;
+			size = 0;
+			switch (0) { default: if (ch < 144) {
+				bits = ch + 48 << 16 >>> 16;
+				size = 8;
+				break;
+			} else if (ch < 256) {
+				bits = (ch + 400 << 16 >>> 16) - 144 << 16 >>> 16;
+				size = 9;
+				break;
+			} else if (ch < 280) {
+				bits = ch - 256 << 16 >>> 16;
+				size = 7;
+				break;
+			} else {
+				bits = (ch + 192 << 16 >>> 16) - 280 << 16 >>> 16;
+				size = 8;
+			} }
+			((ch < 0 || ch >= codeBits.$length) ? $throwRuntimeError("index out of range") : codeBits.$array[codeBits.$offset + ch] = size);
+			((ch < 0 || ch >= code.$length) ? $throwRuntimeError("index out of range") : code.$array[code.$offset + ch] = reverseBits(bits, size));
+			ch = ch + (1) << 16 >>> 16;
+		}
+		return h;
+	};
+	generateFixedOffsetEncoding = function() {
+		var $ptr, ch, code, codeBits, h;
+		h = newHuffmanEncoder(30);
+		codeBits = h.codeBits;
+		code = h.code;
+		ch = 0;
+		while (true) {
+			if (!(ch < 30)) { break; }
+			((ch < 0 || ch >= codeBits.$length) ? $throwRuntimeError("index out of range") : codeBits.$array[codeBits.$offset + ch] = 5);
+			((ch < 0 || ch >= code.$length) ? $throwRuntimeError("index out of range") : code.$array[code.$offset + ch] = reverseBits(ch, 5));
+			ch = ch + (1) << 16 >>> 16;
+		}
+		return h;
+	};
+	reverseUint16 = function(v) {
+		var $ptr, v, x, x$1;
+		return (((x = v >>> 8 << 16 >>> 16, ((x < 0 || x >= reverseByte.length) ? $throwRuntimeError("index out of range") : reverseByte[x])) << 16 >>> 16) | (((x$1 = (v & 255) >>> 0, ((x$1 < 0 || x$1 >= reverseByte.length) ? $throwRuntimeError("index out of range") : reverseByte[x$1])) << 16 >>> 16) << 8 << 16 >>> 16)) >>> 0;
+	};
+	reverseBits = function(number, bitLength) {
+		var $ptr, bitLength, number, y;
+		return reverseUint16((y = (16 - bitLength << 24 >>> 24), y < 32 ? (number << y) : 0) << 16 >>> 16);
+	};
+	ptrType$4.methods = [{prop: "bitLength", name: "bitLength", pkg: "compress/flate", typ: $funcType([sliceType$8], [$Int64], false)}, {prop: "bitCounts", name: "bitCounts", pkg: "compress/flate", typ: $funcType([sliceType$10, $Int32], [sliceType$8], false)}, {prop: "assignEncodingAndSize", name: "assignEncodingAndSize", pkg: "compress/flate", typ: $funcType([sliceType$8, sliceType$10], [], false)}, {prop: "generate", name: "generate", pkg: "compress/flate", typ: $funcType([sliceType$8, $Int32], [], false)}];
+	huffmanEncoder.init([{prop: "codeBits", name: "codeBits", pkg: "compress/flate", typ: sliceType$4, tag: ""}, {prop: "code", name: "code", pkg: "compress/flate", typ: sliceType$9, tag: ""}]);
+	literalNode.init([{prop: "literal", name: "literal", pkg: "compress/flate", typ: $Uint16, tag: ""}, {prop: "freq", name: "freq", pkg: "compress/flate", typ: $Int32, tag: ""}]);
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = bufio.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = fmt.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = io.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = math.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = sort.$init(); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = strconv.$init(); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = sync.$init(); /* */ $s = 7; case 7: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		reverseByte = $toNativeArray($kindUint8, [0, 128, 64, 192, 32, 160, 96, 224, 16, 144, 80, 208, 48, 176, 112, 240, 8, 136, 72, 200, 40, 168, 104, 232, 24, 152, 88, 216, 56, 184, 120, 248, 4, 132, 68, 196, 36, 164, 100, 228, 20, 148, 84, 212, 52, 180, 116, 244, 12, 140, 76, 204, 44, 172, 108, 236, 28, 156, 92, 220, 60, 188, 124, 252, 2, 130, 66, 194, 34, 162, 98, 226, 18, 146, 82, 210, 50, 178, 114, 242, 10, 138, 74, 202, 42, 170, 106, 234, 26, 154, 90, 218, 58, 186, 122, 250, 6, 134, 70, 198, 38, 166, 102, 230, 22, 150, 86, 214, 54, 182, 118, 246, 14, 142, 78, 206, 46, 174, 110, 238, 30, 158, 94, 222, 62, 190, 126, 254, 1, 129, 65, 193, 33, 161, 97, 225, 17, 145, 81, 209, 49, 177, 113, 241, 9, 137, 73, 201, 41, 169, 105, 233, 25, 153, 89, 217, 57, 185, 121, 249, 5, 133, 69, 197, 37, 165, 101, 229, 21, 149, 85, 213, 53, 181, 117, 245, 13, 141, 77, 205, 45, 173, 109, 237, 29, 157, 93, 221, 61, 189, 125, 253, 3, 131, 67, 195, 35, 163, 99, 227, 19, 147, 83, 211, 51, 179, 115, 243, 11, 139, 75, 203, 43, 171, 107, 235, 27, 155, 91, 219, 59, 187, 123, 251, 7, 135, 71, 199, 39, 167, 103, 231, 23, 151, 87, 215, 55, 183, 119, 247, 15, 143, 79, 207, 47, 175, 111, 239, 31, 159, 95, 223, 63, 191, 127, 255]);
+		fixedLiteralEncoding = generateFixedLiteralEncoding();
+		fixedOffsetEncoding = generateFixedOffsetEncoding();
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["hash"] = (function() {
+	var $pkg = {}, $init, io;
+	io = $packages["io"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = io.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["hash/adler32"] = (function() {
+	var $pkg = {}, $init, hash;
+	hash = $packages["hash"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = hash.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["compress/zlib"] = (function() {
+	var $pkg = {}, $init, bufio, flate, errors, fmt, hash, adler32, io;
+	bufio = $packages["bufio"];
+	flate = $packages["compress/flate"];
+	errors = $packages["errors"];
+	fmt = $packages["fmt"];
+	hash = $packages["hash"];
+	adler32 = $packages["hash/adler32"];
+	io = $packages["io"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = bufio.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = flate.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = errors.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = fmt.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = hash.$init(); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = adler32.$init(); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = io.$init(); /* */ $s = 7; case 7: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$pkg.ErrChecksum = errors.New("zlib: invalid checksum");
+		$pkg.ErrDictionary = errors.New("zlib: invalid dictionary");
+		$pkg.ErrHeader = errors.New("zlib: invalid header");
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["encoding/binary"] = (function() {
+	var $pkg = {}, $init, errors, io, math, reflect, overflow;
+	errors = $packages["errors"];
+	io = $packages["io"];
+	math = $packages["math"];
+	reflect = $packages["reflect"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = errors.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = io.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = math.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = reflect.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		overflow = errors.New("binary: varint overflows a 64-bit integer");
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["path/filepath"] = (function() {
+	var $pkg = {}, $init, errors, os, runtime, sort, strings, utf8;
+	errors = $packages["errors"];
+	os = $packages["os"];
+	runtime = $packages["runtime"];
+	sort = $packages["sort"];
+	strings = $packages["strings"];
+	utf8 = $packages["unicode/utf8"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = errors.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = os.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = runtime.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = sort.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = strings.$init(); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = utf8.$init(); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$pkg.ErrBadPattern = errors.New("syntax error in pattern");
+		$pkg.SkipDir = errors.New("skip this directory");
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["io/ioutil"] = (function() {
+	var $pkg = {}, $init, bytes, io, os, filepath, sort, strconv, sync, time, sliceType, sliceType$1, ptrType, blackHolePool;
+	bytes = $packages["bytes"];
+	io = $packages["io"];
+	os = $packages["os"];
+	filepath = $packages["path/filepath"];
+	sort = $packages["sort"];
+	strconv = $packages["strconv"];
+	sync = $packages["sync"];
+	time = $packages["time"];
+	sliceType = $sliceType($emptyInterface);
+	sliceType$1 = $sliceType($Uint8);
+	ptrType = $ptrType(sliceType$1);
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = bytes.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = io.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = os.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = filepath.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = sort.$init(); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = strconv.$init(); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = sync.$init(); /* */ $s = 7; case 7: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = time.$init(); /* */ $s = 8; case 8: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		blackHolePool = new sync.Pool.ptr(0, 0, sliceType.nil, (function() {
+			var $ptr, b, b$24ptr;
+			b = $makeSlice(sliceType$1, 8192);
+			return (b$24ptr || (b$24ptr = new ptrType(function() { return b; }, function($v) { b = $subslice(new sliceType$1($v.$array), $v.$offset, $v.$offset + $v.$length); })));
+		}));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["github.com/andreas-jonsson/octatron/pack"] = (function() {
+	var $pkg = {}, $init, zlib, binary, errors, io, ioutil, math, os, errUnsupportedFormat, errInvalidFile, errOctreeOverflow, errVoxelsPowerOfTwo, errInputIsCompressed;
+	zlib = $packages["compress/zlib"];
+	binary = $packages["encoding/binary"];
+	errors = $packages["errors"];
+	io = $packages["io"];
+	ioutil = $packages["io/ioutil"];
+	math = $packages["math"];
+	os = $packages["os"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = zlib.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = binary.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = errors.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = io.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = ioutil.$init(); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = math.$init(); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = os.$init(); /* */ $s = 7; case 7: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		errUnsupportedFormat = errors.New("unsupported octree-format");
+		errInvalidFile = errors.New("invalid file");
+		errOctreeOverflow = errors.New("octree-format overflow");
+		errVoxelsPowerOfTwo = errors.New("voxels must be a power of two");
+		errInputIsCompressed = errors.New("input is compressed");
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["github.com/barnex/fmath"] = (function() {
+	var $pkg = {}, $init, math;
+	math = $packages["math"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = math.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["github.com/ungerik/go3d/generic"] = (function() {
+	var $pkg = {}, $init;
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["github.com/ungerik/go3d/vec3"] = (function() {
+	var $pkg = {}, $init, fmt, fmath, generic;
+	fmt = $packages["fmt"];
+	fmath = $packages["github.com/barnex/fmath"];
+	generic = $packages["github.com/ungerik/go3d/generic"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = fmt.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = fmath.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = generic.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["github.com/ungerik/go3d/vec4"] = (function() {
+	var $pkg = {}, $init, fmt, fmath, generic, vec3;
+	fmt = $packages["fmt"];
+	fmath = $packages["github.com/barnex/fmath"];
+	generic = $packages["github.com/ungerik/go3d/generic"];
+	vec3 = $packages["github.com/ungerik/go3d/vec3"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = fmt.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = fmath.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = generic.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = vec3.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["github.com/ungerik/go3d/quaternion"] = (function() {
+	var $pkg = {}, $init, fmt, fmath, vec3, vec4;
+	fmt = $packages["fmt"];
+	fmath = $packages["github.com/barnex/fmath"];
+	vec3 = $packages["github.com/ungerik/go3d/vec3"];
+	vec4 = $packages["github.com/ungerik/go3d/vec4"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = fmt.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = fmath.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = vec3.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = vec4.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["image/color"] = (function() {
+	var $pkg = {}, $init, Color, RGBA, RGBA64, NRGBA, NRGBA64, Alpha, Alpha16, Gray, Gray16, Model, modelFunc, Palette, YCbCr, NYCbCrA, CMYK, ptrType, funcType, ModelFunc, rgbaModel, rgba64Model, nrgbaModel, nrgba64Model, alphaModel, alpha16Model, grayModel, gray16Model, sqDiff, RGBToYCbCr, yCbCrModel, nYCbCrAModel, RGBToCMYK, cmykModel;
+	Color = $pkg.Color = $newType(8, $kindInterface, "color.Color", "Color", "image/color", null);
+	RGBA = $pkg.RGBA = $newType(0, $kindStruct, "color.RGBA", "RGBA", "image/color", function(R_, G_, B_, A_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.R = 0;
+			this.G = 0;
+			this.B = 0;
+			this.A = 0;
+			return;
+		}
+		this.R = R_;
+		this.G = G_;
+		this.B = B_;
+		this.A = A_;
+	});
+	RGBA64 = $pkg.RGBA64 = $newType(0, $kindStruct, "color.RGBA64", "RGBA64", "image/color", function(R_, G_, B_, A_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.R = 0;
+			this.G = 0;
+			this.B = 0;
+			this.A = 0;
+			return;
+		}
+		this.R = R_;
+		this.G = G_;
+		this.B = B_;
+		this.A = A_;
+	});
+	NRGBA = $pkg.NRGBA = $newType(0, $kindStruct, "color.NRGBA", "NRGBA", "image/color", function(R_, G_, B_, A_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.R = 0;
+			this.G = 0;
+			this.B = 0;
+			this.A = 0;
+			return;
+		}
+		this.R = R_;
+		this.G = G_;
+		this.B = B_;
+		this.A = A_;
+	});
+	NRGBA64 = $pkg.NRGBA64 = $newType(0, $kindStruct, "color.NRGBA64", "NRGBA64", "image/color", function(R_, G_, B_, A_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.R = 0;
+			this.G = 0;
+			this.B = 0;
+			this.A = 0;
+			return;
+		}
+		this.R = R_;
+		this.G = G_;
+		this.B = B_;
+		this.A = A_;
+	});
+	Alpha = $pkg.Alpha = $newType(0, $kindStruct, "color.Alpha", "Alpha", "image/color", function(A_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.A = 0;
+			return;
+		}
+		this.A = A_;
+	});
+	Alpha16 = $pkg.Alpha16 = $newType(0, $kindStruct, "color.Alpha16", "Alpha16", "image/color", function(A_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.A = 0;
+			return;
+		}
+		this.A = A_;
+	});
+	Gray = $pkg.Gray = $newType(0, $kindStruct, "color.Gray", "Gray", "image/color", function(Y_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.Y = 0;
+			return;
+		}
+		this.Y = Y_;
+	});
+	Gray16 = $pkg.Gray16 = $newType(0, $kindStruct, "color.Gray16", "Gray16", "image/color", function(Y_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.Y = 0;
+			return;
+		}
+		this.Y = Y_;
+	});
+	Model = $pkg.Model = $newType(8, $kindInterface, "color.Model", "Model", "image/color", null);
+	modelFunc = $pkg.modelFunc = $newType(0, $kindStruct, "color.modelFunc", "modelFunc", "image/color", function(f_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.f = $throwNilPointerError;
+			return;
+		}
+		this.f = f_;
+	});
+	Palette = $pkg.Palette = $newType(12, $kindSlice, "color.Palette", "Palette", "image/color", null);
+	YCbCr = $pkg.YCbCr = $newType(0, $kindStruct, "color.YCbCr", "YCbCr", "image/color", function(Y_, Cb_, Cr_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.Y = 0;
+			this.Cb = 0;
+			this.Cr = 0;
+			return;
+		}
+		this.Y = Y_;
+		this.Cb = Cb_;
+		this.Cr = Cr_;
+	});
+	NYCbCrA = $pkg.NYCbCrA = $newType(0, $kindStruct, "color.NYCbCrA", "NYCbCrA", "image/color", function(YCbCr_, A_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.YCbCr = new YCbCr.ptr(0, 0, 0);
+			this.A = 0;
+			return;
+		}
+		this.YCbCr = YCbCr_;
+		this.A = A_;
+	});
+	CMYK = $pkg.CMYK = $newType(0, $kindStruct, "color.CMYK", "CMYK", "image/color", function(C_, M_, Y_, K_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.C = 0;
+			this.M = 0;
+			this.Y = 0;
+			this.K = 0;
+			return;
+		}
+		this.C = C_;
+		this.M = M_;
+		this.Y = Y_;
+		this.K = K_;
+	});
+	ptrType = $ptrType(modelFunc);
+	funcType = $funcType([Color], [Color], false);
+	RGBA.ptr.prototype.RGBA = function() {
+		var $ptr, a, b, c, g, r;
+		r = 0;
+		g = 0;
+		b = 0;
+		a = 0;
+		c = $clone(this, RGBA);
+		r = (c.R >>> 0);
+		r = (r | ((r << 8 >>> 0))) >>> 0;
+		g = (c.G >>> 0);
+		g = (g | ((g << 8 >>> 0))) >>> 0;
+		b = (c.B >>> 0);
+		b = (b | ((b << 8 >>> 0))) >>> 0;
+		a = (c.A >>> 0);
+		a = (a | ((a << 8 >>> 0))) >>> 0;
+		return [r, g, b, a];
+	};
+	RGBA.prototype.RGBA = function() { return this.$val.RGBA(); };
+	RGBA64.ptr.prototype.RGBA = function() {
+		var $ptr, _tmp, _tmp$1, _tmp$2, _tmp$3, a, b, c, g, r;
+		r = 0;
+		g = 0;
+		b = 0;
+		a = 0;
+		c = $clone(this, RGBA64);
+		_tmp = (c.R >>> 0);
+		_tmp$1 = (c.G >>> 0);
+		_tmp$2 = (c.B >>> 0);
+		_tmp$3 = (c.A >>> 0);
+		r = _tmp;
+		g = _tmp$1;
+		b = _tmp$2;
+		a = _tmp$3;
+		return [r, g, b, a];
+	};
+	RGBA64.prototype.RGBA = function() { return this.$val.RGBA(); };
+	NRGBA.ptr.prototype.RGBA = function() {
+		var $ptr, _q, _q$1, _q$2, a, b, c, g, r;
+		r = 0;
+		g = 0;
+		b = 0;
+		a = 0;
+		c = $clone(this, NRGBA);
+		r = (c.R >>> 0);
+		r = (r | ((r << 8 >>> 0))) >>> 0;
+		r = $imul(r, ((c.A >>> 0))) >>> 0;
+		r = (_q = r / (255), (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
+		g = (c.G >>> 0);
+		g = (g | ((g << 8 >>> 0))) >>> 0;
+		g = $imul(g, ((c.A >>> 0))) >>> 0;
+		g = (_q$1 = g / (255), (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		b = (c.B >>> 0);
+		b = (b | ((b << 8 >>> 0))) >>> 0;
+		b = $imul(b, ((c.A >>> 0))) >>> 0;
+		b = (_q$2 = b / (255), (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		a = (c.A >>> 0);
+		a = (a | ((a << 8 >>> 0))) >>> 0;
+		return [r, g, b, a];
+	};
+	NRGBA.prototype.RGBA = function() { return this.$val.RGBA(); };
+	NRGBA64.ptr.prototype.RGBA = function() {
+		var $ptr, _q, _q$1, _q$2, a, b, c, g, r;
+		r = 0;
+		g = 0;
+		b = 0;
+		a = 0;
+		c = $clone(this, NRGBA64);
+		r = (c.R >>> 0);
+		r = $imul(r, ((c.A >>> 0))) >>> 0;
+		r = (_q = r / (65535), (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
+		g = (c.G >>> 0);
+		g = $imul(g, ((c.A >>> 0))) >>> 0;
+		g = (_q$1 = g / (65535), (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		b = (c.B >>> 0);
+		b = $imul(b, ((c.A >>> 0))) >>> 0;
+		b = (_q$2 = b / (65535), (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		a = (c.A >>> 0);
+		return [r, g, b, a];
+	};
+	NRGBA64.prototype.RGBA = function() { return this.$val.RGBA(); };
+	Alpha.ptr.prototype.RGBA = function() {
+		var $ptr, _tmp, _tmp$1, _tmp$2, _tmp$3, a, b, c, g, r;
+		r = 0;
+		g = 0;
+		b = 0;
+		a = 0;
+		c = $clone(this, Alpha);
+		a = (c.A >>> 0);
+		a = (a | ((a << 8 >>> 0))) >>> 0;
+		_tmp = a;
+		_tmp$1 = a;
+		_tmp$2 = a;
+		_tmp$3 = a;
+		r = _tmp;
+		g = _tmp$1;
+		b = _tmp$2;
+		a = _tmp$3;
+		return [r, g, b, a];
+	};
+	Alpha.prototype.RGBA = function() { return this.$val.RGBA(); };
+	Alpha16.ptr.prototype.RGBA = function() {
+		var $ptr, _tmp, _tmp$1, _tmp$2, _tmp$3, a, b, c, g, r;
+		r = 0;
+		g = 0;
+		b = 0;
+		a = 0;
+		c = $clone(this, Alpha16);
+		a = (c.A >>> 0);
+		_tmp = a;
+		_tmp$1 = a;
+		_tmp$2 = a;
+		_tmp$3 = a;
+		r = _tmp;
+		g = _tmp$1;
+		b = _tmp$2;
+		a = _tmp$3;
+		return [r, g, b, a];
+	};
+	Alpha16.prototype.RGBA = function() { return this.$val.RGBA(); };
+	Gray.ptr.prototype.RGBA = function() {
+		var $ptr, _tmp, _tmp$1, _tmp$2, _tmp$3, a, b, c, g, r, y;
+		r = 0;
+		g = 0;
+		b = 0;
+		a = 0;
+		c = $clone(this, Gray);
+		y = (c.Y >>> 0);
+		y = (y | ((y << 8 >>> 0))) >>> 0;
+		_tmp = y;
+		_tmp$1 = y;
+		_tmp$2 = y;
+		_tmp$3 = 65535;
+		r = _tmp;
+		g = _tmp$1;
+		b = _tmp$2;
+		a = _tmp$3;
+		return [r, g, b, a];
+	};
+	Gray.prototype.RGBA = function() { return this.$val.RGBA(); };
+	Gray16.ptr.prototype.RGBA = function() {
+		var $ptr, _tmp, _tmp$1, _tmp$2, _tmp$3, a, b, c, g, r, y;
+		r = 0;
+		g = 0;
+		b = 0;
+		a = 0;
+		c = $clone(this, Gray16);
+		y = (c.Y >>> 0);
+		_tmp = y;
+		_tmp$1 = y;
+		_tmp$2 = y;
+		_tmp$3 = 65535;
+		r = _tmp;
+		g = _tmp$1;
+		b = _tmp$2;
+		a = _tmp$3;
+		return [r, g, b, a];
+	};
+	Gray16.prototype.RGBA = function() { return this.$val.RGBA(); };
+	ModelFunc = function(f) {
+		var $ptr, f;
+		return new modelFunc.ptr(f);
+	};
+	$pkg.ModelFunc = ModelFunc;
+	modelFunc.ptr.prototype.Convert = function(c) {
+		var $ptr, _r, c, m, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; c = $f.c; m = $f.m; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		m = this;
+		_r = m.f(c); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		/* */ $s = 2; case 2:
+		return _r;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: modelFunc.ptr.prototype.Convert }; } $f.$ptr = $ptr; $f._r = _r; $f.c = c; $f.m = m; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	modelFunc.prototype.Convert = function(c) { return this.$val.Convert(c); };
+	rgbaModel = function(c) {
+		var $ptr, _r, _tuple, _tuple$1, a, b, c, g, ok, r, x, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; a = $f.a; b = $f.b; c = $f.c; g = $f.g; ok = $f.ok; r = $f.r; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_tuple = $assertType(c, RGBA, true);
+		ok = _tuple[1];
+		if (ok) {
+			return c;
+		}
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple$1 = _r;
+		r = _tuple$1[0];
+		g = _tuple$1[1];
+		b = _tuple$1[2];
+		a = _tuple$1[3];
+		return (x = new RGBA.ptr(((r >>> 8 >>> 0) << 24 >>> 24), ((g >>> 8 >>> 0) << 24 >>> 24), ((b >>> 8 >>> 0) << 24 >>> 24), ((a >>> 8 >>> 0) << 24 >>> 24)), new x.constructor.elem(x));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: rgbaModel }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.a = a; $f.b = b; $f.c = c; $f.g = g; $f.ok = ok; $f.r = r; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	rgba64Model = function(c) {
+		var $ptr, _r, _tuple, _tuple$1, a, b, c, g, ok, r, x, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; a = $f.a; b = $f.b; c = $f.c; g = $f.g; ok = $f.ok; r = $f.r; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_tuple = $assertType(c, RGBA64, true);
+		ok = _tuple[1];
+		if (ok) {
+			return c;
+		}
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple$1 = _r;
+		r = _tuple$1[0];
+		g = _tuple$1[1];
+		b = _tuple$1[2];
+		a = _tuple$1[3];
+		return (x = new RGBA64.ptr((r << 16 >>> 16), (g << 16 >>> 16), (b << 16 >>> 16), (a << 16 >>> 16)), new x.constructor.elem(x));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: rgba64Model }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.a = a; $f.b = b; $f.c = c; $f.g = g; $f.ok = ok; $f.r = r; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	nrgbaModel = function(c) {
+		var $ptr, _q, _q$1, _q$2, _r, _tuple, _tuple$1, a, b, c, g, ok, r, x, x$1, x$2, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _q = $f._q; _q$1 = $f._q$1; _q$2 = $f._q$2; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; a = $f.a; b = $f.b; c = $f.c; g = $f.g; ok = $f.ok; r = $f.r; x = $f.x; x$1 = $f.x$1; x$2 = $f.x$2; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_tuple = $assertType(c, NRGBA, true);
+		ok = _tuple[1];
+		if (ok) {
+			return c;
+		}
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple$1 = _r;
+		r = _tuple$1[0];
+		g = _tuple$1[1];
+		b = _tuple$1[2];
+		a = _tuple$1[3];
+		if (a === 65535) {
+			return (x = new NRGBA.ptr(((r >>> 8 >>> 0) << 24 >>> 24), ((g >>> 8 >>> 0) << 24 >>> 24), ((b >>> 8 >>> 0) << 24 >>> 24), 255), new x.constructor.elem(x));
+		}
+		if (a === 0) {
+			return (x$1 = new NRGBA.ptr(0, 0, 0, 0), new x$1.constructor.elem(x$1));
+		}
+		r = (_q = (($imul(r, 65535) >>> 0)) / a, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
+		g = (_q$1 = (($imul(g, 65535) >>> 0)) / a, (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		b = (_q$2 = (($imul(b, 65535) >>> 0)) / a, (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		return (x$2 = new NRGBA.ptr(((r >>> 8 >>> 0) << 24 >>> 24), ((g >>> 8 >>> 0) << 24 >>> 24), ((b >>> 8 >>> 0) << 24 >>> 24), ((a >>> 8 >>> 0) << 24 >>> 24)), new x$2.constructor.elem(x$2));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: nrgbaModel }; } $f.$ptr = $ptr; $f._q = _q; $f._q$1 = _q$1; $f._q$2 = _q$2; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.a = a; $f.b = b; $f.c = c; $f.g = g; $f.ok = ok; $f.r = r; $f.x = x; $f.x$1 = x$1; $f.x$2 = x$2; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	nrgba64Model = function(c) {
+		var $ptr, _q, _q$1, _q$2, _r, _tuple, _tuple$1, a, b, c, g, ok, r, x, x$1, x$2, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _q = $f._q; _q$1 = $f._q$1; _q$2 = $f._q$2; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; a = $f.a; b = $f.b; c = $f.c; g = $f.g; ok = $f.ok; r = $f.r; x = $f.x; x$1 = $f.x$1; x$2 = $f.x$2; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_tuple = $assertType(c, NRGBA64, true);
+		ok = _tuple[1];
+		if (ok) {
+			return c;
+		}
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple$1 = _r;
+		r = _tuple$1[0];
+		g = _tuple$1[1];
+		b = _tuple$1[2];
+		a = _tuple$1[3];
+		if (a === 65535) {
+			return (x = new NRGBA64.ptr((r << 16 >>> 16), (g << 16 >>> 16), (b << 16 >>> 16), 65535), new x.constructor.elem(x));
+		}
+		if (a === 0) {
+			return (x$1 = new NRGBA64.ptr(0, 0, 0, 0), new x$1.constructor.elem(x$1));
+		}
+		r = (_q = (($imul(r, 65535) >>> 0)) / a, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
+		g = (_q$1 = (($imul(g, 65535) >>> 0)) / a, (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		b = (_q$2 = (($imul(b, 65535) >>> 0)) / a, (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		return (x$2 = new NRGBA64.ptr((r << 16 >>> 16), (g << 16 >>> 16), (b << 16 >>> 16), (a << 16 >>> 16)), new x$2.constructor.elem(x$2));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: nrgba64Model }; } $f.$ptr = $ptr; $f._q = _q; $f._q$1 = _q$1; $f._q$2 = _q$2; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.a = a; $f.b = b; $f.c = c; $f.g = g; $f.ok = ok; $f.r = r; $f.x = x; $f.x$1 = x$1; $f.x$2 = x$2; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	alphaModel = function(c) {
+		var $ptr, _r, _tuple, _tuple$1, a, c, ok, x, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; a = $f.a; c = $f.c; ok = $f.ok; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_tuple = $assertType(c, Alpha, true);
+		ok = _tuple[1];
+		if (ok) {
+			return c;
+		}
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple$1 = _r;
+		a = _tuple$1[3];
+		return (x = new Alpha.ptr(((a >>> 8 >>> 0) << 24 >>> 24)), new x.constructor.elem(x));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: alphaModel }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.a = a; $f.c = c; $f.ok = ok; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	alpha16Model = function(c) {
+		var $ptr, _r, _tuple, _tuple$1, a, c, ok, x, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; a = $f.a; c = $f.c; ok = $f.ok; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_tuple = $assertType(c, Alpha16, true);
+		ok = _tuple[1];
+		if (ok) {
+			return c;
+		}
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple$1 = _r;
+		a = _tuple$1[3];
+		return (x = new Alpha16.ptr((a << 16 >>> 16)), new x.constructor.elem(x));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: alpha16Model }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.a = a; $f.c = c; $f.ok = ok; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	grayModel = function(c) {
+		var $ptr, _q, _r, _tuple, _tuple$1, b, c, g, ok, r, x, y, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _q = $f._q; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; b = $f.b; c = $f.c; g = $f.g; ok = $f.ok; r = $f.r; x = $f.x; y = $f.y; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_tuple = $assertType(c, Gray, true);
+		ok = _tuple[1];
+		if (ok) {
+			return c;
+		}
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple$1 = _r;
+		r = _tuple$1[0];
+		g = _tuple$1[1];
+		b = _tuple$1[2];
+		y = (_q = ((((($imul(299, r) >>> 0) + ($imul(587, g) >>> 0) >>> 0) + ($imul(114, b) >>> 0) >>> 0) + 500 >>> 0)) / 1000, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
+		return (x = new Gray.ptr(((y >>> 8 >>> 0) << 24 >>> 24)), new x.constructor.elem(x));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: grayModel }; } $f.$ptr = $ptr; $f._q = _q; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.b = b; $f.c = c; $f.g = g; $f.ok = ok; $f.r = r; $f.x = x; $f.y = y; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	gray16Model = function(c) {
+		var $ptr, _q, _r, _tuple, _tuple$1, b, c, g, ok, r, x, y, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _q = $f._q; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; b = $f.b; c = $f.c; g = $f.g; ok = $f.ok; r = $f.r; x = $f.x; y = $f.y; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_tuple = $assertType(c, Gray16, true);
+		ok = _tuple[1];
+		if (ok) {
+			return c;
+		}
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple$1 = _r;
+		r = _tuple$1[0];
+		g = _tuple$1[1];
+		b = _tuple$1[2];
+		y = (_q = ((((($imul(299, r) >>> 0) + ($imul(587, g) >>> 0) >>> 0) + ($imul(114, b) >>> 0) >>> 0) + 500 >>> 0)) / 1000, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
+		return (x = new Gray16.ptr((y << 16 >>> 16)), new x.constructor.elem(x));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: gray16Model }; } $f.$ptr = $ptr; $f._q = _q; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.b = b; $f.c = c; $f.g = g; $f.ok = ok; $f.r = r; $f.x = x; $f.y = y; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	Palette.prototype.Convert = function(c) {
+		var $ptr, _r, c, p, x, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; c = $f.c; p = $f.p; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		p = this;
+		if (p.$length === 0) {
+			return $ifaceNil;
+		}
+		_r = p.Index(c); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		/* */ $s = 2; case 2:
+		return (x = _r, ((x < 0 || x >= p.$length) ? $throwRuntimeError("index out of range") : p.$array[p.$offset + x]));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Palette.prototype.Convert }; } $f.$ptr = $ptr; $f._r = _r; $f.c = c; $f.p = p; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$ptrType(Palette).prototype.Convert = function(c) { return this.$get().Convert(c); };
+	Palette.prototype.Index = function(c) {
+		var $ptr, _i, _r, _r$1, _ref, _tmp, _tmp$1, _tmp$2, _tmp$3, _tuple, _tuple$1, bestSum, c, ca, cb, cg, cr, i, p, ret, sum, v, va, vb, vg, vr, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _i = $f._i; _r = $f._r; _r$1 = $f._r$1; _ref = $f._ref; _tmp = $f._tmp; _tmp$1 = $f._tmp$1; _tmp$2 = $f._tmp$2; _tmp$3 = $f._tmp$3; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; bestSum = $f.bestSum; c = $f.c; ca = $f.ca; cb = $f.cb; cg = $f.cg; cr = $f.cr; i = $f.i; p = $f.p; ret = $f.ret; sum = $f.sum; v = $f.v; va = $f.va; vb = $f.vb; vg = $f.vg; vr = $f.vr; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		p = this;
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple = _r;
+		cr = _tuple[0];
+		cg = _tuple[1];
+		cb = _tuple[2];
+		ca = _tuple[3];
+		_tmp = 0;
+		_tmp$1 = 4294967295;
+		ret = _tmp;
+		bestSum = _tmp$1;
+		_ref = p;
+		_i = 0;
+		/* while (true) { */ case 2:
+			/* if (!(_i < _ref.$length)) { break; } */ if(!(_i < _ref.$length)) { $s = 3; continue; }
+			i = _i;
+			v = ((_i < 0 || _i >= _ref.$length) ? $throwRuntimeError("index out of range") : _ref.$array[_ref.$offset + _i]);
+			_r$1 = v.RGBA(); /* */ $s = 4; case 4: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+			_tuple$1 = _r$1;
+			vr = _tuple$1[0];
+			vg = _tuple$1[1];
+			vb = _tuple$1[2];
+			va = _tuple$1[3];
+			sum = ((sqDiff(cr, vr) + sqDiff(cg, vg) >>> 0) + sqDiff(cb, vb) >>> 0) + sqDiff(ca, va) >>> 0;
+			if (sum < bestSum) {
+				if (sum === 0) {
+					return i;
+				}
+				_tmp$2 = i;
+				_tmp$3 = sum;
+				ret = _tmp$2;
+				bestSum = _tmp$3;
+			}
+			_i++;
+		/* } */ $s = 2; continue; case 3:
+		return ret;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Palette.prototype.Index }; } $f.$ptr = $ptr; $f._i = _i; $f._r = _r; $f._r$1 = _r$1; $f._ref = _ref; $f._tmp = _tmp; $f._tmp$1 = _tmp$1; $f._tmp$2 = _tmp$2; $f._tmp$3 = _tmp$3; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.bestSum = bestSum; $f.c = c; $f.ca = ca; $f.cb = cb; $f.cg = cg; $f.cr = cr; $f.i = i; $f.p = p; $f.ret = ret; $f.sum = sum; $f.v = v; $f.va = va; $f.vb = vb; $f.vg = vg; $f.vr = vr; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$ptrType(Palette).prototype.Index = function(c) { return this.$get().Index(c); };
+	sqDiff = function(x, y) {
+		var $ptr, d, x, y;
+		d = 0;
+		if (x > y) {
+			d = x - y >>> 0;
+		} else {
+			d = y - x >>> 0;
+		}
+		return (($imul(d, d) >>> 0)) >>> 2 >>> 0;
+	};
+	RGBToYCbCr = function(r, g, b) {
+		var $ptr, b, b1, cb, cr, g, g1, r, r1, yy;
+		r1 = (r >> 0);
+		g1 = (g >> 0);
+		b1 = (b >> 0);
+		yy = ((((($imul(19595, r1)) + ($imul(38470, g1)) >> 0) + ($imul(7471, b1)) >> 0) + 32768 >> 0)) >> 16 >> 0;
+		cb = ((((($imul(-11056, r1)) - ($imul(21712, g1)) >> 0) + ($imul(32768, b1)) >> 0) + 8421376 >> 0)) >> 16 >> 0;
+		cr = ((((($imul(32768, r1)) - ($imul(27440, g1)) >> 0) - ($imul(5328, b1)) >> 0) + 8421376 >> 0)) >> 16 >> 0;
+		if (yy < 0) {
+			yy = 0;
+		} else if (yy > 255) {
+			yy = 255;
+		}
+		if (cb < 0) {
+			cb = 0;
+		} else if (cb > 255) {
+			cb = 255;
+		}
+		if (cr < 0) {
+			cr = 0;
+		} else if (cr > 255) {
+			cr = 255;
+		}
+		return [(yy << 24 >>> 24), (cb << 24 >>> 24), (cr << 24 >>> 24)];
+	};
+	$pkg.RGBToYCbCr = RGBToYCbCr;
+	YCbCr.ptr.prototype.RGBA = function() {
+		var $ptr, b, c, cb1, cr1, g, r, yy1;
+		c = $clone(this, YCbCr);
+		yy1 = $imul((c.Y >> 0), 65792);
+		cb1 = (c.Cb >> 0) - 128 >> 0;
+		cr1 = (c.Cr >> 0) - 128 >> 0;
+		r = ((yy1 + ($imul(91881, cr1)) >> 0)) >> 8 >> 0;
+		g = (((yy1 - ($imul(22554, cb1)) >> 0) - ($imul(46802, cr1)) >> 0)) >> 8 >> 0;
+		b = ((yy1 + ($imul(116130, cb1)) >> 0)) >> 8 >> 0;
+		if (r < 0) {
+			r = 0;
+		} else if (r > 65535) {
+			r = 65535;
+		}
+		if (g < 0) {
+			g = 0;
+		} else if (g > 65535) {
+			g = 65535;
+		}
+		if (b < 0) {
+			b = 0;
+		} else if (b > 65535) {
+			b = 65535;
+		}
+		return [(r >>> 0), (g >>> 0), (b >>> 0), 65535];
+	};
+	YCbCr.prototype.RGBA = function() { return this.$val.RGBA(); };
+	yCbCrModel = function(c) {
+		var $ptr, _r, _tuple, _tuple$1, _tuple$2, b, c, g, ok, r, u, v, x, y, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; _tuple$2 = $f._tuple$2; b = $f.b; c = $f.c; g = $f.g; ok = $f.ok; r = $f.r; u = $f.u; v = $f.v; x = $f.x; y = $f.y; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_tuple = $assertType(c, YCbCr, true);
+		ok = _tuple[1];
+		if (ok) {
+			return c;
+		}
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple$1 = _r;
+		r = _tuple$1[0];
+		g = _tuple$1[1];
+		b = _tuple$1[2];
+		_tuple$2 = RGBToYCbCr(((r >>> 8 >>> 0) << 24 >>> 24), ((g >>> 8 >>> 0) << 24 >>> 24), ((b >>> 8 >>> 0) << 24 >>> 24));
+		y = _tuple$2[0];
+		u = _tuple$2[1];
+		v = _tuple$2[2];
+		return (x = new YCbCr.ptr(y, u, v), new x.constructor.elem(x));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: yCbCrModel }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f._tuple$2 = _tuple$2; $f.b = b; $f.c = c; $f.g = g; $f.ok = ok; $f.r = r; $f.u = u; $f.v = v; $f.x = x; $f.y = y; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	NYCbCrA.ptr.prototype.RGBA = function() {
+		var $ptr, _q, _q$1, _q$2, a, b, c, cb1, cr1, g, r, yy1;
+		c = $clone(this, NYCbCrA);
+		yy1 = $imul((c.YCbCr.Y >> 0), 65792);
+		cb1 = (c.YCbCr.Cb >> 0) - 128 >> 0;
+		cr1 = (c.YCbCr.Cr >> 0) - 128 >> 0;
+		r = ((yy1 + ($imul(91881, cr1)) >> 0)) >> 8 >> 0;
+		g = (((yy1 - ($imul(22554, cb1)) >> 0) - ($imul(46802, cr1)) >> 0)) >> 8 >> 0;
+		b = ((yy1 + ($imul(116130, cb1)) >> 0)) >> 8 >> 0;
+		if (r < 0) {
+			r = 0;
+		} else if (r > 65535) {
+			r = 65535;
+		}
+		if (g < 0) {
+			g = 0;
+		} else if (g > 65535) {
+			g = 65535;
+		}
+		if (b < 0) {
+			b = 0;
+		} else if (b > 65535) {
+			b = 65535;
+		}
+		a = $imul((c.A >>> 0), 257) >>> 0;
+		return [(_q = ($imul((r >>> 0), a) >>> 0) / 65535, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero")), (_q$1 = ($imul((g >>> 0), a) >>> 0) / 65535, (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero")), (_q$2 = ($imul((b >>> 0), a) >>> 0) / 65535, (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero")), a];
+	};
+	NYCbCrA.prototype.RGBA = function() { return this.$val.RGBA(); };
+	nYCbCrAModel = function(c) {
+		var $ptr, _q, _q$1, _q$2, _r, _ref, _tuple, _tuple$1, a, b, c, c$1, c$2, g, r, u, v, x, x$1, y, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _q = $f._q; _q$1 = $f._q$1; _q$2 = $f._q$2; _r = $f._r; _ref = $f._ref; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; a = $f.a; b = $f.b; c = $f.c; c$1 = $f.c$1; c$2 = $f.c$2; g = $f.g; r = $f.r; u = $f.u; v = $f.v; x = $f.x; x$1 = $f.x$1; y = $f.y; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_ref = c;
+		if ($assertType(_ref, NYCbCrA, true)[1]) {
+			c$1 = _ref.$val;
+			return new c$1.constructor.elem(c$1);
+		} else if ($assertType(_ref, YCbCr, true)[1]) {
+			c$2 = _ref.$val;
+			return (x = new NYCbCrA.ptr($clone(c$2, YCbCr), 255), new x.constructor.elem(x));
+		}
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple = _r;
+		r = _tuple[0];
+		g = _tuple[1];
+		b = _tuple[2];
+		a = _tuple[3];
+		if (!((a === 0))) {
+			r = (_q = (($imul(r, 65535) >>> 0)) / a, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
+			g = (_q$1 = (($imul(g, 65535) >>> 0)) / a, (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero"));
+			b = (_q$2 = (($imul(b, 65535) >>> 0)) / a, (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		}
+		_tuple$1 = RGBToYCbCr(((r >>> 8 >>> 0) << 24 >>> 24), ((g >>> 8 >>> 0) << 24 >>> 24), ((b >>> 8 >>> 0) << 24 >>> 24));
+		y = _tuple$1[0];
+		u = _tuple$1[1];
+		v = _tuple$1[2];
+		return (x$1 = new NYCbCrA.ptr(new YCbCr.ptr(y, u, v), ((a >>> 8 >>> 0) << 24 >>> 24)), new x$1.constructor.elem(x$1));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: nYCbCrAModel }; } $f.$ptr = $ptr; $f._q = _q; $f._q$1 = _q$1; $f._q$2 = _q$2; $f._r = _r; $f._ref = _ref; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.a = a; $f.b = b; $f.c = c; $f.c$1 = c$1; $f.c$2 = c$2; $f.g = g; $f.r = r; $f.u = u; $f.v = v; $f.x = x; $f.x$1 = x$1; $f.y = y; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	RGBToCMYK = function(r, g, b) {
+		var $ptr, _q, _q$1, _q$2, b, bb, c, g, gg, m, r, rr, w, y;
+		rr = (r >>> 0);
+		gg = (g >>> 0);
+		bb = (b >>> 0);
+		w = rr;
+		if (w < gg) {
+			w = gg;
+		}
+		if (w < bb) {
+			w = bb;
+		}
+		if (w === 0) {
+			return [0, 0, 0, 255];
+		}
+		c = (_q = ($imul(((w - rr >>> 0)), 255) >>> 0) / w, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
+		m = (_q$1 = ($imul(((w - gg >>> 0)), 255) >>> 0) / w, (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		y = (_q$2 = ($imul(((w - bb >>> 0)), 255) >>> 0) / w, (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		return [(c << 24 >>> 24), (m << 24 >>> 24), (y << 24 >>> 24), ((255 - w >>> 0) << 24 >>> 24)];
+	};
+	$pkg.RGBToCMYK = RGBToCMYK;
+	CMYK.ptr.prototype.RGBA = function() {
+		var $ptr, _q, _q$1, _q$2, b, c, g, r, w;
+		c = $clone(this, CMYK);
+		w = (65535 - ($imul((c.K >>> 0), 257) >>> 0) >>> 0);
+		r = (_q = ($imul((65535 - ($imul((c.C >>> 0), 257) >>> 0) >>> 0), w) >>> 0) / 65535, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
+		g = (_q$1 = ($imul((65535 - ($imul((c.M >>> 0), 257) >>> 0) >>> 0), w) >>> 0) / 65535, (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		b = (_q$2 = ($imul((65535 - ($imul((c.Y >>> 0), 257) >>> 0) >>> 0), w) >>> 0) / 65535, (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		return [r, g, b, 65535];
+	};
+	CMYK.prototype.RGBA = function() { return this.$val.RGBA(); };
+	cmykModel = function(c) {
+		var $ptr, _r, _tuple, _tuple$1, _tuple$2, b, c, cc, g, kk, mm, ok, r, x, yy, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; _tuple$2 = $f._tuple$2; b = $f.b; c = $f.c; cc = $f.cc; g = $f.g; kk = $f.kk; mm = $f.mm; ok = $f.ok; r = $f.r; x = $f.x; yy = $f.yy; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_tuple = $assertType(c, CMYK, true);
+		ok = _tuple[1];
+		if (ok) {
+			return c;
+		}
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple$1 = _r;
+		r = _tuple$1[0];
+		g = _tuple$1[1];
+		b = _tuple$1[2];
+		_tuple$2 = RGBToCMYK(((r >>> 8 >>> 0) << 24 >>> 24), ((g >>> 8 >>> 0) << 24 >>> 24), ((b >>> 8 >>> 0) << 24 >>> 24));
+		cc = _tuple$2[0];
+		mm = _tuple$2[1];
+		yy = _tuple$2[2];
+		kk = _tuple$2[3];
+		return (x = new CMYK.ptr(cc, mm, yy, kk), new x.constructor.elem(x));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: cmykModel }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f._tuple$2 = _tuple$2; $f.b = b; $f.c = c; $f.cc = cc; $f.g = g; $f.kk = kk; $f.mm = mm; $f.ok = ok; $f.r = r; $f.x = x; $f.yy = yy; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	RGBA.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
+	RGBA64.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
+	NRGBA.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
+	NRGBA64.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
+	Alpha.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
+	Alpha16.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
+	Gray.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
+	Gray16.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
+	ptrType.methods = [{prop: "Convert", name: "Convert", pkg: "", typ: $funcType([Color], [Color], false)}];
+	Palette.methods = [{prop: "Convert", name: "Convert", pkg: "", typ: $funcType([Color], [Color], false)}, {prop: "Index", name: "Index", pkg: "", typ: $funcType([Color], [$Int], false)}];
+	YCbCr.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
+	NYCbCrA.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
+	CMYK.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
+	Color.init([{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}]);
+	RGBA.init([{prop: "R", name: "R", pkg: "", typ: $Uint8, tag: ""}, {prop: "G", name: "G", pkg: "", typ: $Uint8, tag: ""}, {prop: "B", name: "B", pkg: "", typ: $Uint8, tag: ""}, {prop: "A", name: "A", pkg: "", typ: $Uint8, tag: ""}]);
+	RGBA64.init([{prop: "R", name: "R", pkg: "", typ: $Uint16, tag: ""}, {prop: "G", name: "G", pkg: "", typ: $Uint16, tag: ""}, {prop: "B", name: "B", pkg: "", typ: $Uint16, tag: ""}, {prop: "A", name: "A", pkg: "", typ: $Uint16, tag: ""}]);
+	NRGBA.init([{prop: "R", name: "R", pkg: "", typ: $Uint8, tag: ""}, {prop: "G", name: "G", pkg: "", typ: $Uint8, tag: ""}, {prop: "B", name: "B", pkg: "", typ: $Uint8, tag: ""}, {prop: "A", name: "A", pkg: "", typ: $Uint8, tag: ""}]);
+	NRGBA64.init([{prop: "R", name: "R", pkg: "", typ: $Uint16, tag: ""}, {prop: "G", name: "G", pkg: "", typ: $Uint16, tag: ""}, {prop: "B", name: "B", pkg: "", typ: $Uint16, tag: ""}, {prop: "A", name: "A", pkg: "", typ: $Uint16, tag: ""}]);
+	Alpha.init([{prop: "A", name: "A", pkg: "", typ: $Uint8, tag: ""}]);
+	Alpha16.init([{prop: "A", name: "A", pkg: "", typ: $Uint16, tag: ""}]);
+	Gray.init([{prop: "Y", name: "Y", pkg: "", typ: $Uint8, tag: ""}]);
+	Gray16.init([{prop: "Y", name: "Y", pkg: "", typ: $Uint16, tag: ""}]);
+	Model.init([{prop: "Convert", name: "Convert", pkg: "", typ: $funcType([Color], [Color], false)}]);
+	modelFunc.init([{prop: "f", name: "f", pkg: "image/color", typ: funcType, tag: ""}]);
+	Palette.init(Color);
+	YCbCr.init([{prop: "Y", name: "Y", pkg: "", typ: $Uint8, tag: ""}, {prop: "Cb", name: "Cb", pkg: "", typ: $Uint8, tag: ""}, {prop: "Cr", name: "Cr", pkg: "", typ: $Uint8, tag: ""}]);
+	NYCbCrA.init([{prop: "YCbCr", name: "", pkg: "", typ: YCbCr, tag: ""}, {prop: "A", name: "A", pkg: "", typ: $Uint8, tag: ""}]);
+	CMYK.init([{prop: "C", name: "C", pkg: "", typ: $Uint8, tag: ""}, {prop: "M", name: "M", pkg: "", typ: $Uint8, tag: ""}, {prop: "Y", name: "Y", pkg: "", typ: $Uint8, tag: ""}, {prop: "K", name: "K", pkg: "", typ: $Uint8, tag: ""}]);
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$pkg.RGBAModel = ModelFunc(rgbaModel);
+		$pkg.RGBA64Model = ModelFunc(rgba64Model);
+		$pkg.NRGBAModel = ModelFunc(nrgbaModel);
+		$pkg.NRGBA64Model = ModelFunc(nrgba64Model);
+		$pkg.AlphaModel = ModelFunc(alphaModel);
+		$pkg.Alpha16Model = ModelFunc(alpha16Model);
+		$pkg.GrayModel = ModelFunc(grayModel);
+		$pkg.Gray16Model = ModelFunc(gray16Model);
+		$pkg.Black = new Gray16.ptr(0);
+		$pkg.White = new Gray16.ptr(65535);
+		$pkg.Transparent = new Alpha16.ptr(0);
+		$pkg.Opaque = new Alpha16.ptr(65535);
+		$pkg.YCbCrModel = ModelFunc(yCbCrModel);
+		$pkg.NYCbCrAModel = ModelFunc(nYCbCrAModel);
+		$pkg.CMYKModel = ModelFunc(cmykModel);
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["image"] = (function() {
+	var $pkg = {}, $init, bufio, errors, color, io, strconv, Point, Rectangle, Image, RGBA, Paletted, Uniform, sliceType$1, arrayType, ptrType, ptrType$9, ptrType$10, x, x$1, x$2, x$3, Rect, NewRGBA, NewPaletted, NewUniform;
+	bufio = $packages["bufio"];
+	errors = $packages["errors"];
+	color = $packages["image/color"];
+	io = $packages["io"];
+	strconv = $packages["strconv"];
+	Point = $pkg.Point = $newType(0, $kindStruct, "image.Point", "Point", "image", function(X_, Y_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.X = 0;
+			this.Y = 0;
+			return;
+		}
+		this.X = X_;
+		this.Y = Y_;
+	});
+	Rectangle = $pkg.Rectangle = $newType(0, $kindStruct, "image.Rectangle", "Rectangle", "image", function(Min_, Max_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.Min = new Point.ptr(0, 0);
+			this.Max = new Point.ptr(0, 0);
+			return;
+		}
+		this.Min = Min_;
+		this.Max = Max_;
+	});
+	Image = $pkg.Image = $newType(8, $kindInterface, "image.Image", "Image", "image", null);
+	RGBA = $pkg.RGBA = $newType(0, $kindStruct, "image.RGBA", "RGBA", "image", function(Pix_, Stride_, Rect_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.Pix = sliceType$1.nil;
+			this.Stride = 0;
+			this.Rect = new Rectangle.ptr(new Point.ptr(0, 0), new Point.ptr(0, 0));
+			return;
+		}
+		this.Pix = Pix_;
+		this.Stride = Stride_;
+		this.Rect = Rect_;
+	});
+	Paletted = $pkg.Paletted = $newType(0, $kindStruct, "image.Paletted", "Paletted", "image", function(Pix_, Stride_, Rect_, Palette_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.Pix = sliceType$1.nil;
+			this.Stride = 0;
+			this.Rect = new Rectangle.ptr(new Point.ptr(0, 0), new Point.ptr(0, 0));
+			this.Palette = color.Palette.nil;
+			return;
+		}
+		this.Pix = Pix_;
+		this.Stride = Stride_;
+		this.Rect = Rect_;
+		this.Palette = Palette_;
+	});
+	Uniform = $pkg.Uniform = $newType(0, $kindStruct, "image.Uniform", "Uniform", "image", function(C_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.C = $ifaceNil;
+			return;
+		}
+		this.C = C_;
+	});
+	sliceType$1 = $sliceType($Uint8);
+	arrayType = $arrayType($Bool, 256);
+	ptrType = $ptrType(RGBA);
+	ptrType$9 = $ptrType(Paletted);
+	ptrType$10 = $ptrType(Uniform);
+	Point.ptr.prototype.String = function() {
+		var $ptr, p;
+		p = $clone(this, Point);
+		return "(" + strconv.Itoa(p.X) + "," + strconv.Itoa(p.Y) + ")";
+	};
+	Point.prototype.String = function() { return this.$val.String(); };
+	Point.ptr.prototype.Add = function(q) {
+		var $ptr, p, q;
+		q = $clone(q, Point);
+		p = $clone(this, Point);
+		return new Point.ptr(p.X + q.X >> 0, p.Y + q.Y >> 0);
+	};
+	Point.prototype.Add = function(q) { return this.$val.Add(q); };
+	Point.ptr.prototype.Sub = function(q) {
+		var $ptr, p, q;
+		q = $clone(q, Point);
+		p = $clone(this, Point);
+		return new Point.ptr(p.X - q.X >> 0, p.Y - q.Y >> 0);
+	};
+	Point.prototype.Sub = function(q) { return this.$val.Sub(q); };
+	Point.ptr.prototype.Mul = function(k) {
+		var $ptr, k, p;
+		p = $clone(this, Point);
+		return new Point.ptr($imul(p.X, k), $imul(p.Y, k));
+	};
+	Point.prototype.Mul = function(k) { return this.$val.Mul(k); };
+	Point.ptr.prototype.Div = function(k) {
+		var $ptr, _q, _q$1, k, p;
+		p = $clone(this, Point);
+		return new Point.ptr((_q = p.X / k, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >> 0 : $throwRuntimeError("integer divide by zero")), (_q$1 = p.Y / k, (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >> 0 : $throwRuntimeError("integer divide by zero")));
+	};
+	Point.prototype.Div = function(k) { return this.$val.Div(k); };
+	Point.ptr.prototype.In = function(r) {
+		var $ptr, p, r;
+		r = $clone(r, Rectangle);
+		p = $clone(this, Point);
+		return r.Min.X <= p.X && p.X < r.Max.X && r.Min.Y <= p.Y && p.Y < r.Max.Y;
+	};
+	Point.prototype.In = function(r) { return this.$val.In(r); };
+	Point.ptr.prototype.Mod = function(r) {
+		var $ptr, _r, _r$1, _tmp, _tmp$1, h, p, r, w;
+		r = $clone(r, Rectangle);
+		p = $clone(this, Point);
+		_tmp = r.Dx();
+		_tmp$1 = r.Dy();
+		w = _tmp;
+		h = _tmp$1;
+		Point.copy(p, p.Sub(r.Min));
+		p.X = (_r = p.X % w, _r === _r ? _r : $throwRuntimeError("integer divide by zero"));
+		if (p.X < 0) {
+			p.X = p.X + (w) >> 0;
+		}
+		p.Y = (_r$1 = p.Y % h, _r$1 === _r$1 ? _r$1 : $throwRuntimeError("integer divide by zero"));
+		if (p.Y < 0) {
+			p.Y = p.Y + (h) >> 0;
+		}
+		return p.Add(r.Min);
+	};
+	Point.prototype.Mod = function(r) { return this.$val.Mod(r); };
+	Point.ptr.prototype.Eq = function(q) {
+		var $ptr, p, q;
+		q = $clone(q, Point);
+		p = $clone(this, Point);
+		return $equal(p, q, Point);
+	};
+	Point.prototype.Eq = function(q) { return this.$val.Eq(q); };
+	Rectangle.ptr.prototype.String = function() {
+		var $ptr, r;
+		r = $clone(this, Rectangle);
+		return r.Min.String() + "-" + r.Max.String();
+	};
+	Rectangle.prototype.String = function() { return this.$val.String(); };
+	Rectangle.ptr.prototype.Dx = function() {
+		var $ptr, r;
+		r = $clone(this, Rectangle);
+		return r.Max.X - r.Min.X >> 0;
+	};
+	Rectangle.prototype.Dx = function() { return this.$val.Dx(); };
+	Rectangle.ptr.prototype.Dy = function() {
+		var $ptr, r;
+		r = $clone(this, Rectangle);
+		return r.Max.Y - r.Min.Y >> 0;
+	};
+	Rectangle.prototype.Dy = function() { return this.$val.Dy(); };
+	Rectangle.ptr.prototype.Size = function() {
+		var $ptr, r;
+		r = $clone(this, Rectangle);
+		return new Point.ptr(r.Max.X - r.Min.X >> 0, r.Max.Y - r.Min.Y >> 0);
+	};
+	Rectangle.prototype.Size = function() { return this.$val.Size(); };
+	Rectangle.ptr.prototype.Add = function(p) {
+		var $ptr, p, r;
+		p = $clone(p, Point);
+		r = $clone(this, Rectangle);
+		return new Rectangle.ptr(new Point.ptr(r.Min.X + p.X >> 0, r.Min.Y + p.Y >> 0), new Point.ptr(r.Max.X + p.X >> 0, r.Max.Y + p.Y >> 0));
+	};
+	Rectangle.prototype.Add = function(p) { return this.$val.Add(p); };
+	Rectangle.ptr.prototype.Sub = function(p) {
+		var $ptr, p, r;
+		p = $clone(p, Point);
+		r = $clone(this, Rectangle);
+		return new Rectangle.ptr(new Point.ptr(r.Min.X - p.X >> 0, r.Min.Y - p.Y >> 0), new Point.ptr(r.Max.X - p.X >> 0, r.Max.Y - p.Y >> 0));
+	};
+	Rectangle.prototype.Sub = function(p) { return this.$val.Sub(p); };
+	Rectangle.ptr.prototype.Inset = function(n) {
+		var $ptr, _q, _q$1, n, r;
+		r = $clone(this, Rectangle);
+		if (r.Dx() < ($imul(2, n))) {
+			r.Min.X = (_q = ((r.Min.X + r.Max.X >> 0)) / 2, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >> 0 : $throwRuntimeError("integer divide by zero"));
+			r.Max.X = r.Min.X;
+		} else {
+			r.Min.X = r.Min.X + (n) >> 0;
+			r.Max.X = r.Max.X - (n) >> 0;
+		}
+		if (r.Dy() < ($imul(2, n))) {
+			r.Min.Y = (_q$1 = ((r.Min.Y + r.Max.Y >> 0)) / 2, (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >> 0 : $throwRuntimeError("integer divide by zero"));
+			r.Max.Y = r.Min.Y;
+		} else {
+			r.Min.Y = r.Min.Y + (n) >> 0;
+			r.Max.Y = r.Max.Y - (n) >> 0;
+		}
+		return r;
+	};
+	Rectangle.prototype.Inset = function(n) { return this.$val.Inset(n); };
+	Rectangle.ptr.prototype.Intersect = function(s) {
+		var $ptr, r, s;
+		s = $clone(s, Rectangle);
+		r = $clone(this, Rectangle);
+		if (r.Min.X < s.Min.X) {
+			r.Min.X = s.Min.X;
+		}
+		if (r.Min.Y < s.Min.Y) {
+			r.Min.Y = s.Min.Y;
+		}
+		if (r.Max.X > s.Max.X) {
+			r.Max.X = s.Max.X;
+		}
+		if (r.Max.Y > s.Max.Y) {
+			r.Max.Y = s.Max.Y;
+		}
+		if (r.Min.X > r.Max.X || r.Min.Y > r.Max.Y) {
+			return $pkg.ZR;
+		}
+		return r;
+	};
+	Rectangle.prototype.Intersect = function(s) { return this.$val.Intersect(s); };
+	Rectangle.ptr.prototype.Union = function(s) {
+		var $ptr, r, s;
+		s = $clone(s, Rectangle);
+		r = $clone(this, Rectangle);
+		if (r.Empty()) {
+			return s;
+		}
+		if (s.Empty()) {
+			return r;
+		}
+		if (r.Min.X > s.Min.X) {
+			r.Min.X = s.Min.X;
+		}
+		if (r.Min.Y > s.Min.Y) {
+			r.Min.Y = s.Min.Y;
+		}
+		if (r.Max.X < s.Max.X) {
+			r.Max.X = s.Max.X;
+		}
+		if (r.Max.Y < s.Max.Y) {
+			r.Max.Y = s.Max.Y;
+		}
+		return r;
+	};
+	Rectangle.prototype.Union = function(s) { return this.$val.Union(s); };
+	Rectangle.ptr.prototype.Empty = function() {
+		var $ptr, r;
+		r = $clone(this, Rectangle);
+		return r.Min.X >= r.Max.X || r.Min.Y >= r.Max.Y;
+	};
+	Rectangle.prototype.Empty = function() { return this.$val.Empty(); };
+	Rectangle.ptr.prototype.Eq = function(s) {
+		var $ptr, r, s;
+		s = $clone(s, Rectangle);
+		r = $clone(this, Rectangle);
+		return $equal(r, s, Rectangle) || r.Empty() && s.Empty();
+	};
+	Rectangle.prototype.Eq = function(s) { return this.$val.Eq(s); };
+	Rectangle.ptr.prototype.Overlaps = function(s) {
+		var $ptr, r, s;
+		s = $clone(s, Rectangle);
+		r = $clone(this, Rectangle);
+		return !r.Empty() && !s.Empty() && r.Min.X < s.Max.X && s.Min.X < r.Max.X && r.Min.Y < s.Max.Y && s.Min.Y < r.Max.Y;
+	};
+	Rectangle.prototype.Overlaps = function(s) { return this.$val.Overlaps(s); };
+	Rectangle.ptr.prototype.In = function(s) {
+		var $ptr, r, s;
+		s = $clone(s, Rectangle);
+		r = $clone(this, Rectangle);
+		if (r.Empty()) {
+			return true;
+		}
+		return s.Min.X <= r.Min.X && r.Max.X <= s.Max.X && s.Min.Y <= r.Min.Y && r.Max.Y <= s.Max.Y;
+	};
+	Rectangle.prototype.In = function(s) { return this.$val.In(s); };
+	Rectangle.ptr.prototype.Canon = function() {
+		var $ptr, _tmp, _tmp$1, _tmp$2, _tmp$3, r;
+		r = $clone(this, Rectangle);
+		if (r.Max.X < r.Min.X) {
+			_tmp = r.Max.X;
+			_tmp$1 = r.Min.X;
+			r.Min.X = _tmp;
+			r.Max.X = _tmp$1;
+		}
+		if (r.Max.Y < r.Min.Y) {
+			_tmp$2 = r.Max.Y;
+			_tmp$3 = r.Min.Y;
+			r.Min.Y = _tmp$2;
+			r.Max.Y = _tmp$3;
+		}
+		return r;
+	};
+	Rectangle.prototype.Canon = function() { return this.$val.Canon(); };
+	Rectangle.ptr.prototype.At = function(x$4, y) {
+		var $ptr, r, x$4, x$5, x$6, y;
+		r = $clone(this, Rectangle);
+		if ((new Point.ptr(x$4, y)).In(r)) {
+			return (x$5 = color.Opaque, new x$5.constructor.elem(x$5));
+		}
+		return (x$6 = color.Transparent, new x$6.constructor.elem(x$6));
+	};
+	Rectangle.prototype.At = function(x$4, y) { return this.$val.At(x$4, y); };
+	Rectangle.ptr.prototype.Bounds = function() {
+		var $ptr, r;
+		r = $clone(this, Rectangle);
+		return r;
+	};
+	Rectangle.prototype.Bounds = function() { return this.$val.Bounds(); };
+	Rectangle.ptr.prototype.ColorModel = function() {
+		var $ptr, r;
+		r = $clone(this, Rectangle);
+		return color.Alpha16Model;
+	};
+	Rectangle.prototype.ColorModel = function() { return this.$val.ColorModel(); };
+	Rect = function(x0, y0, x1, y1) {
+		var $ptr, _tmp, _tmp$1, _tmp$2, _tmp$3, x0, x1, y0, y1;
+		if (x0 > x1) {
+			_tmp = x1;
+			_tmp$1 = x0;
+			x0 = _tmp;
+			x1 = _tmp$1;
+		}
+		if (y0 > y1) {
+			_tmp$2 = y1;
+			_tmp$3 = y0;
+			y0 = _tmp$2;
+			y1 = _tmp$3;
+		}
+		return new Rectangle.ptr(new Point.ptr(x0, y0), new Point.ptr(x1, y1));
+	};
+	$pkg.Rect = Rect;
+	RGBA.ptr.prototype.ColorModel = function() {
+		var $ptr, p;
+		p = this;
+		return color.RGBAModel;
+	};
+	RGBA.prototype.ColorModel = function() { return this.$val.ColorModel(); };
+	RGBA.ptr.prototype.Bounds = function() {
+		var $ptr, p;
+		p = this;
+		return p.Rect;
+	};
+	RGBA.prototype.Bounds = function() { return this.$val.Bounds(); };
+	RGBA.ptr.prototype.At = function(x$4, y) {
+		var $ptr, p, x$4, x$5, y;
+		p = this;
+		return (x$5 = p.RGBAAt(x$4, y), new x$5.constructor.elem(x$5));
+	};
+	RGBA.prototype.At = function(x$4, y) { return this.$val.At(x$4, y); };
+	RGBA.ptr.prototype.RGBAAt = function(x$4, y) {
+		var $ptr, i, p, x$10, x$11, x$12, x$4, x$5, x$6, x$7, x$8, x$9, y;
+		p = this;
+		if (!(new Point.ptr(x$4, y).In(p.Rect))) {
+			return new color.RGBA.ptr(0, 0, 0, 0);
+		}
+		i = p.PixOffset(x$4, y);
+		return new color.RGBA.ptr((x$5 = p.Pix, x$6 = i + 0 >> 0, ((x$6 < 0 || x$6 >= x$5.$length) ? $throwRuntimeError("index out of range") : x$5.$array[x$5.$offset + x$6])), (x$7 = p.Pix, x$8 = i + 1 >> 0, ((x$8 < 0 || x$8 >= x$7.$length) ? $throwRuntimeError("index out of range") : x$7.$array[x$7.$offset + x$8])), (x$9 = p.Pix, x$10 = i + 2 >> 0, ((x$10 < 0 || x$10 >= x$9.$length) ? $throwRuntimeError("index out of range") : x$9.$array[x$9.$offset + x$10])), (x$11 = p.Pix, x$12 = i + 3 >> 0, ((x$12 < 0 || x$12 >= x$11.$length) ? $throwRuntimeError("index out of range") : x$11.$array[x$11.$offset + x$12])));
+	};
+	RGBA.prototype.RGBAAt = function(x$4, y) { return this.$val.RGBAAt(x$4, y); };
+	RGBA.ptr.prototype.PixOffset = function(x$4, y) {
+		var $ptr, p, x$4, y;
+		p = this;
+		return ($imul(((y - p.Rect.Min.Y >> 0)), p.Stride)) + ($imul(((x$4 - p.Rect.Min.X >> 0)), 4)) >> 0;
+	};
+	RGBA.prototype.PixOffset = function(x$4, y) { return this.$val.PixOffset(x$4, y); };
+	RGBA.ptr.prototype.Set = function(x$4, y, c) {
+		var $ptr, _r, c, c1, i, p, x$10, x$11, x$12, x$4, x$5, x$6, x$7, x$8, x$9, y, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; c = $f.c; c1 = $f.c1; i = $f.i; p = $f.p; x$10 = $f.x$10; x$11 = $f.x$11; x$12 = $f.x$12; x$4 = $f.x$4; x$5 = $f.x$5; x$6 = $f.x$6; x$7 = $f.x$7; x$8 = $f.x$8; x$9 = $f.x$9; y = $f.y; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		p = this;
+		if (!(new Point.ptr(x$4, y).In(p.Rect))) {
+			return;
+		}
+		i = p.PixOffset(x$4, y);
+		_r = color.RGBAModel.Convert(c); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		c1 = $clone($assertType(_r, color.RGBA), color.RGBA);
+		(x$5 = p.Pix, x$6 = i + 0 >> 0, ((x$6 < 0 || x$6 >= x$5.$length) ? $throwRuntimeError("index out of range") : x$5.$array[x$5.$offset + x$6] = c1.R));
+		(x$7 = p.Pix, x$8 = i + 1 >> 0, ((x$8 < 0 || x$8 >= x$7.$length) ? $throwRuntimeError("index out of range") : x$7.$array[x$7.$offset + x$8] = c1.G));
+		(x$9 = p.Pix, x$10 = i + 2 >> 0, ((x$10 < 0 || x$10 >= x$9.$length) ? $throwRuntimeError("index out of range") : x$9.$array[x$9.$offset + x$10] = c1.B));
+		(x$11 = p.Pix, x$12 = i + 3 >> 0, ((x$12 < 0 || x$12 >= x$11.$length) ? $throwRuntimeError("index out of range") : x$11.$array[x$11.$offset + x$12] = c1.A));
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: RGBA.ptr.prototype.Set }; } $f.$ptr = $ptr; $f._r = _r; $f.c = c; $f.c1 = c1; $f.i = i; $f.p = p; $f.x$10 = x$10; $f.x$11 = x$11; $f.x$12 = x$12; $f.x$4 = x$4; $f.x$5 = x$5; $f.x$6 = x$6; $f.x$7 = x$7; $f.x$8 = x$8; $f.x$9 = x$9; $f.y = y; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	RGBA.prototype.Set = function(x$4, y, c) { return this.$val.Set(x$4, y, c); };
+	RGBA.ptr.prototype.SetRGBA = function(x$4, y, c) {
+		var $ptr, c, i, p, x$10, x$11, x$12, x$4, x$5, x$6, x$7, x$8, x$9, y;
+		c = $clone(c, color.RGBA);
+		p = this;
+		if (!(new Point.ptr(x$4, y).In(p.Rect))) {
+			return;
+		}
+		i = p.PixOffset(x$4, y);
+		(x$5 = p.Pix, x$6 = i + 0 >> 0, ((x$6 < 0 || x$6 >= x$5.$length) ? $throwRuntimeError("index out of range") : x$5.$array[x$5.$offset + x$6] = c.R));
+		(x$7 = p.Pix, x$8 = i + 1 >> 0, ((x$8 < 0 || x$8 >= x$7.$length) ? $throwRuntimeError("index out of range") : x$7.$array[x$7.$offset + x$8] = c.G));
+		(x$9 = p.Pix, x$10 = i + 2 >> 0, ((x$10 < 0 || x$10 >= x$9.$length) ? $throwRuntimeError("index out of range") : x$9.$array[x$9.$offset + x$10] = c.B));
+		(x$11 = p.Pix, x$12 = i + 3 >> 0, ((x$12 < 0 || x$12 >= x$11.$length) ? $throwRuntimeError("index out of range") : x$11.$array[x$11.$offset + x$12] = c.A));
+	};
+	RGBA.prototype.SetRGBA = function(x$4, y, c) { return this.$val.SetRGBA(x$4, y, c); };
+	RGBA.ptr.prototype.SubImage = function(r) {
+		var $ptr, i, p, r;
+		r = $clone(r, Rectangle);
+		p = this;
+		Rectangle.copy(r, r.Intersect(p.Rect));
+		if (r.Empty()) {
+			return new RGBA.ptr(sliceType$1.nil, 0, new Rectangle.ptr(new Point.ptr(0, 0), new Point.ptr(0, 0)));
+		}
+		i = p.PixOffset(r.Min.X, r.Min.Y);
+		return new RGBA.ptr($subslice(p.Pix, i), p.Stride, $clone(r, Rectangle));
+	};
+	RGBA.prototype.SubImage = function(r) { return this.$val.SubImage(r); };
+	RGBA.ptr.prototype.Opaque = function() {
+		var $ptr, _tmp, _tmp$1, i, i0, i1, p, x$4, y;
+		p = this;
+		if (p.Rect.Empty()) {
+			return true;
+		}
+		_tmp = 3;
+		_tmp$1 = $imul(p.Rect.Dx(), 4);
+		i0 = _tmp;
+		i1 = _tmp$1;
+		y = p.Rect.Min.Y;
+		while (true) {
+			if (!(y < p.Rect.Max.Y)) { break; }
+			i = i0;
+			while (true) {
+				if (!(i < i1)) { break; }
+				if (!(((x$4 = p.Pix, ((i < 0 || i >= x$4.$length) ? $throwRuntimeError("index out of range") : x$4.$array[x$4.$offset + i])) === 255))) {
+					return false;
+				}
+				i = i + (4) >> 0;
+			}
+			i0 = i0 + (p.Stride) >> 0;
+			i1 = i1 + (p.Stride) >> 0;
+			y = y + (1) >> 0;
+		}
+		return true;
+	};
+	RGBA.prototype.Opaque = function() { return this.$val.Opaque(); };
+	NewRGBA = function(r) {
+		var $ptr, _tmp, _tmp$1, buf, h, r, w;
+		r = $clone(r, Rectangle);
+		_tmp = r.Dx();
+		_tmp$1 = r.Dy();
+		w = _tmp;
+		h = _tmp$1;
+		buf = $makeSlice(sliceType$1, ($imul(($imul(4, w)), h)));
+		return new RGBA.ptr(buf, $imul(4, w), $clone(r, Rectangle));
+	};
+	$pkg.NewRGBA = NewRGBA;
+	Paletted.ptr.prototype.ColorModel = function() {
+		var $ptr, p;
+		p = this;
+		return p.Palette;
+	};
+	Paletted.prototype.ColorModel = function() { return this.$val.ColorModel(); };
+	Paletted.ptr.prototype.Bounds = function() {
+		var $ptr, p;
+		p = this;
+		return p.Rect;
+	};
+	Paletted.prototype.Bounds = function() { return this.$val.Bounds(); };
+	Paletted.ptr.prototype.At = function(x$4, y) {
+		var $ptr, i, p, x$4, x$5, x$6, x$7, x$8, y;
+		p = this;
+		if (p.Palette.$length === 0) {
+			return $ifaceNil;
+		}
+		if (!(new Point.ptr(x$4, y).In(p.Rect))) {
+			return (x$5 = p.Palette, (0 >= x$5.$length ? $throwRuntimeError("index out of range") : x$5.$array[x$5.$offset + 0]));
+		}
+		i = p.PixOffset(x$4, y);
+		return (x$6 = p.Palette, x$7 = (x$8 = p.Pix, ((i < 0 || i >= x$8.$length) ? $throwRuntimeError("index out of range") : x$8.$array[x$8.$offset + i])), ((x$7 < 0 || x$7 >= x$6.$length) ? $throwRuntimeError("index out of range") : x$6.$array[x$6.$offset + x$7]));
+	};
+	Paletted.prototype.At = function(x$4, y) { return this.$val.At(x$4, y); };
+	Paletted.ptr.prototype.PixOffset = function(x$4, y) {
+		var $ptr, p, x$4, y;
+		p = this;
+		return ($imul(((y - p.Rect.Min.Y >> 0)), p.Stride)) + ($imul(((x$4 - p.Rect.Min.X >> 0)), 1)) >> 0;
+	};
+	Paletted.prototype.PixOffset = function(x$4, y) { return this.$val.PixOffset(x$4, y); };
+	Paletted.ptr.prototype.Set = function(x$4, y, c) {
+		var $ptr, _r, c, i, p, x$4, x$5, y, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; c = $f.c; i = $f.i; p = $f.p; x$4 = $f.x$4; x$5 = $f.x$5; y = $f.y; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		p = this;
+		if (!(new Point.ptr(x$4, y).In(p.Rect))) {
+			return;
+		}
+		i = p.PixOffset(x$4, y);
+		_r = p.Palette.Index(c); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		(x$5 = p.Pix, ((i < 0 || i >= x$5.$length) ? $throwRuntimeError("index out of range") : x$5.$array[x$5.$offset + i] = (_r << 24 >>> 24)));
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: Paletted.ptr.prototype.Set }; } $f.$ptr = $ptr; $f._r = _r; $f.c = c; $f.i = i; $f.p = p; $f.x$4 = x$4; $f.x$5 = x$5; $f.y = y; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	Paletted.prototype.Set = function(x$4, y, c) { return this.$val.Set(x$4, y, c); };
+	Paletted.ptr.prototype.ColorIndexAt = function(x$4, y) {
+		var $ptr, i, p, x$4, x$5, y;
+		p = this;
+		if (!(new Point.ptr(x$4, y).In(p.Rect))) {
+			return 0;
+		}
+		i = p.PixOffset(x$4, y);
+		return (x$5 = p.Pix, ((i < 0 || i >= x$5.$length) ? $throwRuntimeError("index out of range") : x$5.$array[x$5.$offset + i]));
+	};
+	Paletted.prototype.ColorIndexAt = function(x$4, y) { return this.$val.ColorIndexAt(x$4, y); };
+	Paletted.ptr.prototype.SetColorIndex = function(x$4, y, index) {
+		var $ptr, i, index, p, x$4, x$5, y;
+		p = this;
+		if (!(new Point.ptr(x$4, y).In(p.Rect))) {
+			return;
+		}
+		i = p.PixOffset(x$4, y);
+		(x$5 = p.Pix, ((i < 0 || i >= x$5.$length) ? $throwRuntimeError("index out of range") : x$5.$array[x$5.$offset + i] = index));
+	};
+	Paletted.prototype.SetColorIndex = function(x$4, y, index) { return this.$val.SetColorIndex(x$4, y, index); };
+	Paletted.ptr.prototype.SubImage = function(r) {
+		var $ptr, i, p, r;
+		r = $clone(r, Rectangle);
+		p = this;
+		Rectangle.copy(r, r.Intersect(p.Rect));
+		if (r.Empty()) {
+			return new Paletted.ptr(sliceType$1.nil, 0, new Rectangle.ptr(new Point.ptr(0, 0), new Point.ptr(0, 0)), p.Palette);
+		}
+		i = p.PixOffset(r.Min.X, r.Min.Y);
+		return new Paletted.ptr($subslice(p.Pix, i), p.Stride, $clone(p.Rect.Intersect(r), Rectangle), p.Palette);
+	};
+	Paletted.prototype.SubImage = function(r) { return this.$val.SubImage(r); };
+	Paletted.ptr.prototype.Opaque = function() {
+		var $ptr, _i, _i$1, _r, _ref, _ref$1, _tmp, _tmp$1, _tuple, a, c, c$1, i, i0, i1, p, present, y, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _i = $f._i; _i$1 = $f._i$1; _r = $f._r; _ref = $f._ref; _ref$1 = $f._ref$1; _tmp = $f._tmp; _tmp$1 = $f._tmp$1; _tuple = $f._tuple; a = $f.a; c = $f.c; c$1 = $f.c$1; i = $f.i; i0 = $f.i0; i1 = $f.i1; p = $f.p; present = $f.present; y = $f.y; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		p = this;
+		present = arrayType.zero();
+		_tmp = 0;
+		_tmp$1 = p.Rect.Dx();
+		i0 = _tmp;
+		i1 = _tmp$1;
+		y = p.Rect.Min.Y;
+		while (true) {
+			if (!(y < p.Rect.Max.Y)) { break; }
+			_ref = $subslice(p.Pix, i0, i1);
+			_i = 0;
+			while (true) {
+				if (!(_i < _ref.$length)) { break; }
+				c = ((_i < 0 || _i >= _ref.$length) ? $throwRuntimeError("index out of range") : _ref.$array[_ref.$offset + _i]);
+				((c < 0 || c >= present.length) ? $throwRuntimeError("index out of range") : present[c] = true);
+				_i++;
+			}
+			i0 = i0 + (p.Stride) >> 0;
+			i1 = i1 + (p.Stride) >> 0;
+			y = y + (1) >> 0;
+		}
+		_ref$1 = p.Palette;
+		_i$1 = 0;
+		/* while (true) { */ case 1:
+			/* if (!(_i$1 < _ref$1.$length)) { break; } */ if(!(_i$1 < _ref$1.$length)) { $s = 2; continue; }
+			i = _i$1;
+			c$1 = ((_i$1 < 0 || _i$1 >= _ref$1.$length) ? $throwRuntimeError("index out of range") : _ref$1.$array[_ref$1.$offset + _i$1]);
+			/* */ if (!((i < 0 || i >= present.length) ? $throwRuntimeError("index out of range") : present[i])) { $s = 3; continue; }
+			/* */ $s = 4; continue;
+			/* if (!((i < 0 || i >= present.length) ? $throwRuntimeError("index out of range") : present[i])) { */ case 3:
+				_i$1++;
+				/* continue; */ $s = 1; continue;
+			/* } */ case 4:
+			_r = c$1.RGBA(); /* */ $s = 5; case 5: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+			_tuple = _r;
+			a = _tuple[3];
+			if (!((a === 65535))) {
+				return false;
+			}
+			_i$1++;
+		/* } */ $s = 1; continue; case 2:
+		return true;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Paletted.ptr.prototype.Opaque }; } $f.$ptr = $ptr; $f._i = _i; $f._i$1 = _i$1; $f._r = _r; $f._ref = _ref; $f._ref$1 = _ref$1; $f._tmp = _tmp; $f._tmp$1 = _tmp$1; $f._tuple = _tuple; $f.a = a; $f.c = c; $f.c$1 = c$1; $f.i = i; $f.i0 = i0; $f.i1 = i1; $f.p = p; $f.present = present; $f.y = y; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	Paletted.prototype.Opaque = function() { return this.$val.Opaque(); };
+	NewPaletted = function(r, p) {
+		var $ptr, _tmp, _tmp$1, h, p, pix, r, w;
+		r = $clone(r, Rectangle);
+		_tmp = r.Dx();
+		_tmp$1 = r.Dy();
+		w = _tmp;
+		h = _tmp$1;
+		pix = $makeSlice(sliceType$1, ($imul(($imul(1, w)), h)));
+		return new Paletted.ptr(pix, $imul(1, w), $clone(r, Rectangle), p);
+	};
+	$pkg.NewPaletted = NewPaletted;
+	Uniform.ptr.prototype.RGBA = function() {
+		var $ptr, _r, _tuple, a, b, c, g, r, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; a = $f.a; b = $f.b; c = $f.c; g = $f.g; r = $f.r; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		r = 0;
+		g = 0;
+		b = 0;
+		a = 0;
+		c = this;
+		_r = c.C.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple = _r;
+		r = _tuple[0];
+		g = _tuple[1];
+		b = _tuple[2];
+		a = _tuple[3];
+		/* */ $s = 2; case 2:
+		return [r, g, b, a];
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Uniform.ptr.prototype.RGBA }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f.a = a; $f.b = b; $f.c = c; $f.g = g; $f.r = r; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	Uniform.prototype.RGBA = function() { return this.$val.RGBA(); };
+	Uniform.ptr.prototype.ColorModel = function() {
+		var $ptr, c;
+		c = this;
+		return c;
+	};
+	Uniform.prototype.ColorModel = function() { return this.$val.ColorModel(); };
+	Uniform.ptr.prototype.Convert = function(param) {
+		var $ptr, c, param;
+		c = this;
+		return c.C;
+	};
+	Uniform.prototype.Convert = function(param) { return this.$val.Convert(param); };
+	Uniform.ptr.prototype.Bounds = function() {
+		var $ptr, c;
+		c = this;
+		return new Rectangle.ptr(new Point.ptr(-1000000000, -1000000000), new Point.ptr(1000000000, 1000000000));
+	};
+	Uniform.prototype.Bounds = function() { return this.$val.Bounds(); };
+	Uniform.ptr.prototype.At = function(x$4, y) {
+		var $ptr, c, x$4, y;
+		c = this;
+		return c.C;
+	};
+	Uniform.prototype.At = function(x$4, y) { return this.$val.At(x$4, y); };
+	Uniform.ptr.prototype.Opaque = function() {
+		var $ptr, _r, _tuple, a, c, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; a = $f.a; c = $f.c; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		c = this;
+		_r = c.C.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple = _r;
+		a = _tuple[3];
+		return a === 65535;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Uniform.ptr.prototype.Opaque }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f.a = a; $f.c = c; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	Uniform.prototype.Opaque = function() { return this.$val.Opaque(); };
+	NewUniform = function(c) {
+		var $ptr, c;
+		return new Uniform.ptr(c);
+	};
+	$pkg.NewUniform = NewUniform;
+	Point.methods = [{prop: "String", name: "String", pkg: "", typ: $funcType([], [$String], false)}, {prop: "Add", name: "Add", pkg: "", typ: $funcType([Point], [Point], false)}, {prop: "Sub", name: "Sub", pkg: "", typ: $funcType([Point], [Point], false)}, {prop: "Mul", name: "Mul", pkg: "", typ: $funcType([$Int], [Point], false)}, {prop: "Div", name: "Div", pkg: "", typ: $funcType([$Int], [Point], false)}, {prop: "In", name: "In", pkg: "", typ: $funcType([Rectangle], [$Bool], false)}, {prop: "Mod", name: "Mod", pkg: "", typ: $funcType([Rectangle], [Point], false)}, {prop: "Eq", name: "Eq", pkg: "", typ: $funcType([Point], [$Bool], false)}];
+	Rectangle.methods = [{prop: "String", name: "String", pkg: "", typ: $funcType([], [$String], false)}, {prop: "Dx", name: "Dx", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "Dy", name: "Dy", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "Size", name: "Size", pkg: "", typ: $funcType([], [Point], false)}, {prop: "Add", name: "Add", pkg: "", typ: $funcType([Point], [Rectangle], false)}, {prop: "Sub", name: "Sub", pkg: "", typ: $funcType([Point], [Rectangle], false)}, {prop: "Inset", name: "Inset", pkg: "", typ: $funcType([$Int], [Rectangle], false)}, {prop: "Intersect", name: "Intersect", pkg: "", typ: $funcType([Rectangle], [Rectangle], false)}, {prop: "Union", name: "Union", pkg: "", typ: $funcType([Rectangle], [Rectangle], false)}, {prop: "Empty", name: "Empty", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "Eq", name: "Eq", pkg: "", typ: $funcType([Rectangle], [$Bool], false)}, {prop: "Overlaps", name: "Overlaps", pkg: "", typ: $funcType([Rectangle], [$Bool], false)}, {prop: "In", name: "In", pkg: "", typ: $funcType([Rectangle], [$Bool], false)}, {prop: "Canon", name: "Canon", pkg: "", typ: $funcType([], [Rectangle], false)}, {prop: "At", name: "At", pkg: "", typ: $funcType([$Int, $Int], [color.Color], false)}, {prop: "Bounds", name: "Bounds", pkg: "", typ: $funcType([], [Rectangle], false)}, {prop: "ColorModel", name: "ColorModel", pkg: "", typ: $funcType([], [color.Model], false)}];
+	ptrType.methods = [{prop: "ColorModel", name: "ColorModel", pkg: "", typ: $funcType([], [color.Model], false)}, {prop: "Bounds", name: "Bounds", pkg: "", typ: $funcType([], [Rectangle], false)}, {prop: "At", name: "At", pkg: "", typ: $funcType([$Int, $Int], [color.Color], false)}, {prop: "RGBAAt", name: "RGBAAt", pkg: "", typ: $funcType([$Int, $Int], [color.RGBA], false)}, {prop: "PixOffset", name: "PixOffset", pkg: "", typ: $funcType([$Int, $Int], [$Int], false)}, {prop: "Set", name: "Set", pkg: "", typ: $funcType([$Int, $Int, color.Color], [], false)}, {prop: "SetRGBA", name: "SetRGBA", pkg: "", typ: $funcType([$Int, $Int, color.RGBA], [], false)}, {prop: "SubImage", name: "SubImage", pkg: "", typ: $funcType([Rectangle], [Image], false)}, {prop: "Opaque", name: "Opaque", pkg: "", typ: $funcType([], [$Bool], false)}];
+	ptrType$9.methods = [{prop: "ColorModel", name: "ColorModel", pkg: "", typ: $funcType([], [color.Model], false)}, {prop: "Bounds", name: "Bounds", pkg: "", typ: $funcType([], [Rectangle], false)}, {prop: "At", name: "At", pkg: "", typ: $funcType([$Int, $Int], [color.Color], false)}, {prop: "PixOffset", name: "PixOffset", pkg: "", typ: $funcType([$Int, $Int], [$Int], false)}, {prop: "Set", name: "Set", pkg: "", typ: $funcType([$Int, $Int, color.Color], [], false)}, {prop: "ColorIndexAt", name: "ColorIndexAt", pkg: "", typ: $funcType([$Int, $Int], [$Uint8], false)}, {prop: "SetColorIndex", name: "SetColorIndex", pkg: "", typ: $funcType([$Int, $Int, $Uint8], [], false)}, {prop: "SubImage", name: "SubImage", pkg: "", typ: $funcType([Rectangle], [Image], false)}, {prop: "Opaque", name: "Opaque", pkg: "", typ: $funcType([], [$Bool], false)}];
+	ptrType$10.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}, {prop: "ColorModel", name: "ColorModel", pkg: "", typ: $funcType([], [color.Model], false)}, {prop: "Convert", name: "Convert", pkg: "", typ: $funcType([color.Color], [color.Color], false)}, {prop: "Bounds", name: "Bounds", pkg: "", typ: $funcType([], [Rectangle], false)}, {prop: "At", name: "At", pkg: "", typ: $funcType([$Int, $Int], [color.Color], false)}, {prop: "Opaque", name: "Opaque", pkg: "", typ: $funcType([], [$Bool], false)}];
+	Point.init([{prop: "X", name: "X", pkg: "", typ: $Int, tag: ""}, {prop: "Y", name: "Y", pkg: "", typ: $Int, tag: ""}]);
+	Rectangle.init([{prop: "Min", name: "Min", pkg: "", typ: Point, tag: ""}, {prop: "Max", name: "Max", pkg: "", typ: Point, tag: ""}]);
+	Image.init([{prop: "At", name: "At", pkg: "", typ: $funcType([$Int, $Int], [color.Color], false)}, {prop: "Bounds", name: "Bounds", pkg: "", typ: $funcType([], [Rectangle], false)}, {prop: "ColorModel", name: "ColorModel", pkg: "", typ: $funcType([], [color.Model], false)}]);
+	RGBA.init([{prop: "Pix", name: "Pix", pkg: "", typ: sliceType$1, tag: ""}, {prop: "Stride", name: "Stride", pkg: "", typ: $Int, tag: ""}, {prop: "Rect", name: "Rect", pkg: "", typ: Rectangle, tag: ""}]);
+	Paletted.init([{prop: "Pix", name: "Pix", pkg: "", typ: sliceType$1, tag: ""}, {prop: "Stride", name: "Stride", pkg: "", typ: $Int, tag: ""}, {prop: "Rect", name: "Rect", pkg: "", typ: Rectangle, tag: ""}, {prop: "Palette", name: "Palette", pkg: "", typ: color.Palette, tag: ""}]);
+	Uniform.init([{prop: "C", name: "C", pkg: "", typ: color.Color, tag: ""}]);
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = bufio.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = errors.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = color.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = io.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = strconv.$init(); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$pkg.ZR = new Rectangle.ptr(new Point.ptr(0, 0), new Point.ptr(0, 0));
+		$pkg.ErrFormat = errors.New("image: unknown format");
+		$pkg.Black = NewUniform((x = color.Black, new x.constructor.elem(x)));
+		$pkg.White = NewUniform((x$1 = color.White, new x$1.constructor.elem(x$1)));
+		$pkg.Transparent = NewUniform((x$2 = color.Transparent, new x$2.constructor.elem(x$2)));
+		$pkg.Opaque = NewUniform((x$3 = color.Opaque, new x$3.constructor.elem(x$3)));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["image/internal/imageutil"] = (function() {
+	var $pkg = {}, $init, image;
+	image = $packages["image"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = image.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["image/draw"] = (function() {
+	var $pkg = {}, $init, image, color, imageutil;
+	image = $packages["image"];
+	color = $packages["image/color"];
+	imageutil = $packages["image/internal/imageutil"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = image.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = color.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = imageutil.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["github.com/andreas-jonsson/octatron/trace"] = (function() {
+	var $pkg = {}, $init, errors, pack, quaternion, vec3, image, color, draw, io, math, runtime, sync, atomic, Reconstruct;
+	errors = $packages["errors"];
+	pack = $packages["github.com/andreas-jonsson/octatron/pack"];
+	quaternion = $packages["github.com/ungerik/go3d/quaternion"];
+	vec3 = $packages["github.com/ungerik/go3d/vec3"];
+	image = $packages["image"];
+	color = $packages["image/color"];
+	draw = $packages["image/draw"];
+	io = $packages["io"];
+	math = $packages["math"];
+	runtime = $packages["runtime"];
+	sync = $packages["sync"];
+	atomic = $packages["sync/atomic"];
+	Reconstruct = function(a, b, out) {
+		var $ptr, _arg, _arg$1, _arg$2, _arg$3, _arg$4, _arg$5, _q, _r, _r$1, _r$2, _r$3, _r$4, _r$5, _r$6, _tmp, _tmp$1, a, b, img, inputSize, left, out, outputSize, right, x, x$1, x$2, y, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _arg = $f._arg; _arg$1 = $f._arg$1; _arg$2 = $f._arg$2; _arg$3 = $f._arg$3; _arg$4 = $f._arg$4; _arg$5 = $f._arg$5; _q = $f._q; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; _r$4 = $f._r$4; _r$5 = $f._r$5; _r$6 = $f._r$6; _tmp = $f._tmp; _tmp$1 = $f._tmp$1; a = $f.a; b = $f.b; img = $f.img; inputSize = $f.inputSize; left = $f.left; out = $f.out; outputSize = $f.outputSize; right = $f.right; x = $f.x; x$1 = $f.x$1; x$2 = $f.x$2; y = $f.y; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_r = out.Bounds(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		outputSize = $clone(_r.Max, image.Point);
+		_r$1 = a.Bounds(); /* */ $s = 2; case 2: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+		inputSize = $clone(_r$1.Max, image.Point);
+		_r$2 = b.Bounds(); /* */ $s = 5; case 5: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
+		/* */ if (!($equal(inputSize, _r$2.Max, image.Point))) { $s = 3; continue; }
+		/* */ $s = 4; continue;
+		/* if (!($equal(inputSize, _r$2.Max, image.Point))) { */ case 3:
+			return $pkg.InvalidSizeError;
+		/* } */ case 4:
+		if (!((inputSize.X === (_q = outputSize.X / 2, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >> 0 : $throwRuntimeError("integer divide by zero")))) || !((inputSize.Y === outputSize.Y))) {
+			return $pkg.InvalidSizeError;
+		}
+		img = $toNativeArray($kindInterface, [a, b]);
+		y = 0;
+		/* while (true) { */ case 6:
+			/* if (!(y < inputSize.Y)) { break; } */ if(!(y < inputSize.Y)) { $s = 7; continue; }
+			x = 0;
+			/* while (true) { */ case 8:
+				/* if (!(x < inputSize.X)) { break; } */ if(!(x < inputSize.X)) { $s = 9; continue; }
+				_tmp = (x$1 = (_r$3 = y % 2, _r$3 === _r$3 ? _r$3 : $throwRuntimeError("integer divide by zero")), ((x$1 < 0 || x$1 >= img.length) ? $throwRuntimeError("index out of range") : img[x$1]));
+				_tmp$1 = (x$2 = (_r$4 = ((y + 1 >> 0)) % 2, _r$4 === _r$4 ? _r$4 : $throwRuntimeError("integer divide by zero")), ((x$2 < 0 || x$2 >= img.length) ? $throwRuntimeError("index out of range") : img[x$2]));
+				left = _tmp;
+				right = _tmp$1;
+				_arg = $imul(x, 2);
+				_arg$1 = y;
+				_r$5 = left.At(x, y); /* */ $s = 10; case 10: if($c) { $c = false; _r$5 = _r$5.$blk(); } if (_r$5 && _r$5.$blk !== undefined) { break s; }
+				_arg$2 = _r$5;
+				$r = out.Set(_arg, _arg$1, _arg$2); /* */ $s = 11; case 11: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+				_arg$3 = ($imul(x, 2)) + 1 >> 0;
+				_arg$4 = y;
+				_r$6 = right.At(x, y); /* */ $s = 12; case 12: if($c) { $c = false; _r$6 = _r$6.$blk(); } if (_r$6 && _r$6.$blk !== undefined) { break s; }
+				_arg$5 = _r$6;
+				$r = out.Set(_arg$3, _arg$4, _arg$5); /* */ $s = 13; case 13: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+				x = x + (1) >> 0;
+			/* } */ $s = 8; continue; case 9:
+			y = y + (1) >> 0;
+		/* } */ $s = 6; continue; case 7:
+		return $ifaceNil;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Reconstruct }; } $f.$ptr = $ptr; $f._arg = _arg; $f._arg$1 = _arg$1; $f._arg$2 = _arg$2; $f._arg$3 = _arg$3; $f._arg$4 = _arg$4; $f._arg$5 = _arg$5; $f._q = _q; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._r$5 = _r$5; $f._r$6 = _r$6; $f._tmp = _tmp; $f._tmp$1 = _tmp$1; $f.a = a; $f.b = b; $f.img = img; $f.inputSize = inputSize; $f.left = left; $f.out = out; $f.outputSize = outputSize; $f.right = right; $f.x = x; $f.x$1 = x$1; $f.x$2 = x$2; $f.y = y; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.Reconstruct = Reconstruct;
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = errors.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = pack.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = quaternion.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = vec3.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = image.$init(); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = color.$init(); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = draw.$init(); /* */ $s = 7; case 7: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = io.$init(); /* */ $s = 8; case 8: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = math.$init(); /* */ $s = 9; case 9: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = runtime.$init(); /* */ $s = 10; case 10: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = sync.$init(); /* */ $s = 11; case 11: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = atomic.$init(); /* */ $s = 12; case 12: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$pkg.InvalidSizeError = errors.New("invalid size");
+		$pkg.Uint28OverflowError = errors.New("uint28 overflow");
 		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
 	};
 	$pkg.$init = $init;
@@ -25341,135 +27115,151 @@ $packages["github.com/gopherjs/websocket"] = (function() {
 	$pkg.$init = $init;
 	return $pkg;
 })();
+$packages["image/color/palette"] = (function() {
+	var $pkg = {}, $init, color, sliceType, x, x$1, x$2, x$3, x$4, x$5, x$6, x$7, x$8, x$9, x$10, x$11, x$12, x$13, x$14, x$15, x$16, x$17, x$18, x$19, x$20, x$21, x$22, x$23, x$24, x$25, x$26, x$27, x$28, x$29, x$30, x$31, x$32, x$33, x$34, x$35, x$36, x$37, x$38, x$39, x$40, x$41, x$42, x$43, x$44, x$45, x$46, x$47, x$48, x$49, x$50, x$51, x$52, x$53, x$54, x$55, x$56, x$57, x$58, x$59, x$60, x$61, x$62, x$63, x$64, x$65, x$66, x$67, x$68, x$69, x$70, x$71, x$72, x$73, x$74, x$75, x$76, x$77, x$78, x$79, x$80, x$81, x$82, x$83, x$84, x$85, x$86, x$87, x$88, x$89, x$90, x$91, x$92, x$93, x$94, x$95, x$96, x$97, x$98, x$99, x$100, x$101, x$102, x$103, x$104, x$105, x$106, x$107, x$108, x$109, x$110, x$111, x$112, x$113, x$114, x$115, x$116, x$117, x$118, x$119, x$120, x$121, x$122, x$123, x$124, x$125, x$126, x$127, x$128, x$129, x$130, x$131, x$132, x$133, x$134, x$135, x$136, x$137, x$138, x$139, x$140, x$141, x$142, x$143, x$144, x$145, x$146, x$147, x$148, x$149, x$150, x$151, x$152, x$153, x$154, x$155, x$156, x$157, x$158, x$159, x$160, x$161, x$162, x$163, x$164, x$165, x$166, x$167, x$168, x$169, x$170, x$171, x$172, x$173, x$174, x$175, x$176, x$177, x$178, x$179, x$180, x$181, x$182, x$183, x$184, x$185, x$186, x$187, x$188, x$189, x$190, x$191, x$192, x$193, x$194, x$195, x$196, x$197, x$198, x$199, x$200, x$201, x$202, x$203, x$204, x$205, x$206, x$207, x$208, x$209, x$210, x$211, x$212, x$213, x$214, x$215, x$216, x$217, x$218, x$219, x$220, x$221, x$222, x$223, x$224, x$225, x$226, x$227, x$228, x$229, x$230, x$231, x$232, x$233, x$234, x$235, x$236, x$237, x$238, x$239, x$240, x$241, x$242, x$243, x$244, x$245, x$246, x$247, x$248, x$249, x$250, x$251, x$252, x$253, x$254, x$255;
+	color = $packages["image/color"];
+	sliceType = $sliceType(color.Color);
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = color.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$pkg.Plan9 = new sliceType([(x = new color.RGBA.ptr(0, 0, 0, 255), new x.constructor.elem(x)), (x$1 = new color.RGBA.ptr(0, 0, 68, 255), new x$1.constructor.elem(x$1)), (x$2 = new color.RGBA.ptr(0, 0, 136, 255), new x$2.constructor.elem(x$2)), (x$3 = new color.RGBA.ptr(0, 0, 204, 255), new x$3.constructor.elem(x$3)), (x$4 = new color.RGBA.ptr(0, 68, 0, 255), new x$4.constructor.elem(x$4)), (x$5 = new color.RGBA.ptr(0, 68, 68, 255), new x$5.constructor.elem(x$5)), (x$6 = new color.RGBA.ptr(0, 68, 136, 255), new x$6.constructor.elem(x$6)), (x$7 = new color.RGBA.ptr(0, 68, 204, 255), new x$7.constructor.elem(x$7)), (x$8 = new color.RGBA.ptr(0, 136, 0, 255), new x$8.constructor.elem(x$8)), (x$9 = new color.RGBA.ptr(0, 136, 68, 255), new x$9.constructor.elem(x$9)), (x$10 = new color.RGBA.ptr(0, 136, 136, 255), new x$10.constructor.elem(x$10)), (x$11 = new color.RGBA.ptr(0, 136, 204, 255), new x$11.constructor.elem(x$11)), (x$12 = new color.RGBA.ptr(0, 204, 0, 255), new x$12.constructor.elem(x$12)), (x$13 = new color.RGBA.ptr(0, 204, 68, 255), new x$13.constructor.elem(x$13)), (x$14 = new color.RGBA.ptr(0, 204, 136, 255), new x$14.constructor.elem(x$14)), (x$15 = new color.RGBA.ptr(0, 204, 204, 255), new x$15.constructor.elem(x$15)), (x$16 = new color.RGBA.ptr(0, 221, 221, 255), new x$16.constructor.elem(x$16)), (x$17 = new color.RGBA.ptr(17, 17, 17, 255), new x$17.constructor.elem(x$17)), (x$18 = new color.RGBA.ptr(0, 0, 85, 255), new x$18.constructor.elem(x$18)), (x$19 = new color.RGBA.ptr(0, 0, 153, 255), new x$19.constructor.elem(x$19)), (x$20 = new color.RGBA.ptr(0, 0, 221, 255), new x$20.constructor.elem(x$20)), (x$21 = new color.RGBA.ptr(0, 85, 0, 255), new x$21.constructor.elem(x$21)), (x$22 = new color.RGBA.ptr(0, 85, 85, 255), new x$22.constructor.elem(x$22)), (x$23 = new color.RGBA.ptr(0, 76, 153, 255), new x$23.constructor.elem(x$23)), (x$24 = new color.RGBA.ptr(0, 73, 221, 255), new x$24.constructor.elem(x$24)), (x$25 = new color.RGBA.ptr(0, 153, 0, 255), new x$25.constructor.elem(x$25)), (x$26 = new color.RGBA.ptr(0, 153, 76, 255), new x$26.constructor.elem(x$26)), (x$27 = new color.RGBA.ptr(0, 153, 153, 255), new x$27.constructor.elem(x$27)), (x$28 = new color.RGBA.ptr(0, 147, 221, 255), new x$28.constructor.elem(x$28)), (x$29 = new color.RGBA.ptr(0, 221, 0, 255), new x$29.constructor.elem(x$29)), (x$30 = new color.RGBA.ptr(0, 221, 73, 255), new x$30.constructor.elem(x$30)), (x$31 = new color.RGBA.ptr(0, 221, 147, 255), new x$31.constructor.elem(x$31)), (x$32 = new color.RGBA.ptr(0, 238, 158, 255), new x$32.constructor.elem(x$32)), (x$33 = new color.RGBA.ptr(0, 238, 238, 255), new x$33.constructor.elem(x$33)), (x$34 = new color.RGBA.ptr(34, 34, 34, 255), new x$34.constructor.elem(x$34)), (x$35 = new color.RGBA.ptr(0, 0, 102, 255), new x$35.constructor.elem(x$35)), (x$36 = new color.RGBA.ptr(0, 0, 170, 255), new x$36.constructor.elem(x$36)), (x$37 = new color.RGBA.ptr(0, 0, 238, 255), new x$37.constructor.elem(x$37)), (x$38 = new color.RGBA.ptr(0, 102, 0, 255), new x$38.constructor.elem(x$38)), (x$39 = new color.RGBA.ptr(0, 102, 102, 255), new x$39.constructor.elem(x$39)), (x$40 = new color.RGBA.ptr(0, 85, 170, 255), new x$40.constructor.elem(x$40)), (x$41 = new color.RGBA.ptr(0, 79, 238, 255), new x$41.constructor.elem(x$41)), (x$42 = new color.RGBA.ptr(0, 170, 0, 255), new x$42.constructor.elem(x$42)), (x$43 = new color.RGBA.ptr(0, 170, 85, 255), new x$43.constructor.elem(x$43)), (x$44 = new color.RGBA.ptr(0, 170, 170, 255), new x$44.constructor.elem(x$44)), (x$45 = new color.RGBA.ptr(0, 158, 238, 255), new x$45.constructor.elem(x$45)), (x$46 = new color.RGBA.ptr(0, 238, 0, 255), new x$46.constructor.elem(x$46)), (x$47 = new color.RGBA.ptr(0, 238, 79, 255), new x$47.constructor.elem(x$47)), (x$48 = new color.RGBA.ptr(0, 255, 85, 255), new x$48.constructor.elem(x$48)), (x$49 = new color.RGBA.ptr(0, 255, 170, 255), new x$49.constructor.elem(x$49)), (x$50 = new color.RGBA.ptr(0, 255, 255, 255), new x$50.constructor.elem(x$50)), (x$51 = new color.RGBA.ptr(51, 51, 51, 255), new x$51.constructor.elem(x$51)), (x$52 = new color.RGBA.ptr(0, 0, 119, 255), new x$52.constructor.elem(x$52)), (x$53 = new color.RGBA.ptr(0, 0, 187, 255), new x$53.constructor.elem(x$53)), (x$54 = new color.RGBA.ptr(0, 0, 255, 255), new x$54.constructor.elem(x$54)), (x$55 = new color.RGBA.ptr(0, 119, 0, 255), new x$55.constructor.elem(x$55)), (x$56 = new color.RGBA.ptr(0, 119, 119, 255), new x$56.constructor.elem(x$56)), (x$57 = new color.RGBA.ptr(0, 93, 187, 255), new x$57.constructor.elem(x$57)), (x$58 = new color.RGBA.ptr(0, 85, 255, 255), new x$58.constructor.elem(x$58)), (x$59 = new color.RGBA.ptr(0, 187, 0, 255), new x$59.constructor.elem(x$59)), (x$60 = new color.RGBA.ptr(0, 187, 93, 255), new x$60.constructor.elem(x$60)), (x$61 = new color.RGBA.ptr(0, 187, 187, 255), new x$61.constructor.elem(x$61)), (x$62 = new color.RGBA.ptr(0, 170, 255, 255), new x$62.constructor.elem(x$62)), (x$63 = new color.RGBA.ptr(0, 255, 0, 255), new x$63.constructor.elem(x$63)), (x$64 = new color.RGBA.ptr(68, 0, 68, 255), new x$64.constructor.elem(x$64)), (x$65 = new color.RGBA.ptr(68, 0, 136, 255), new x$65.constructor.elem(x$65)), (x$66 = new color.RGBA.ptr(68, 0, 204, 255), new x$66.constructor.elem(x$66)), (x$67 = new color.RGBA.ptr(68, 68, 0, 255), new x$67.constructor.elem(x$67)), (x$68 = new color.RGBA.ptr(68, 68, 68, 255), new x$68.constructor.elem(x$68)), (x$69 = new color.RGBA.ptr(68, 68, 136, 255), new x$69.constructor.elem(x$69)), (x$70 = new color.RGBA.ptr(68, 68, 204, 255), new x$70.constructor.elem(x$70)), (x$71 = new color.RGBA.ptr(68, 136, 0, 255), new x$71.constructor.elem(x$71)), (x$72 = new color.RGBA.ptr(68, 136, 68, 255), new x$72.constructor.elem(x$72)), (x$73 = new color.RGBA.ptr(68, 136, 136, 255), new x$73.constructor.elem(x$73)), (x$74 = new color.RGBA.ptr(68, 136, 204, 255), new x$74.constructor.elem(x$74)), (x$75 = new color.RGBA.ptr(68, 204, 0, 255), new x$75.constructor.elem(x$75)), (x$76 = new color.RGBA.ptr(68, 204, 68, 255), new x$76.constructor.elem(x$76)), (x$77 = new color.RGBA.ptr(68, 204, 136, 255), new x$77.constructor.elem(x$77)), (x$78 = new color.RGBA.ptr(68, 204, 204, 255), new x$78.constructor.elem(x$78)), (x$79 = new color.RGBA.ptr(68, 0, 0, 255), new x$79.constructor.elem(x$79)), (x$80 = new color.RGBA.ptr(85, 0, 0, 255), new x$80.constructor.elem(x$80)), (x$81 = new color.RGBA.ptr(85, 0, 85, 255), new x$81.constructor.elem(x$81)), (x$82 = new color.RGBA.ptr(76, 0, 153, 255), new x$82.constructor.elem(x$82)), (x$83 = new color.RGBA.ptr(73, 0, 221, 255), new x$83.constructor.elem(x$83)), (x$84 = new color.RGBA.ptr(85, 85, 0, 255), new x$84.constructor.elem(x$84)), (x$85 = new color.RGBA.ptr(85, 85, 85, 255), new x$85.constructor.elem(x$85)), (x$86 = new color.RGBA.ptr(76, 76, 153, 255), new x$86.constructor.elem(x$86)), (x$87 = new color.RGBA.ptr(73, 73, 221, 255), new x$87.constructor.elem(x$87)), (x$88 = new color.RGBA.ptr(76, 153, 0, 255), new x$88.constructor.elem(x$88)), (x$89 = new color.RGBA.ptr(76, 153, 76, 255), new x$89.constructor.elem(x$89)), (x$90 = new color.RGBA.ptr(76, 153, 153, 255), new x$90.constructor.elem(x$90)), (x$91 = new color.RGBA.ptr(73, 147, 221, 255), new x$91.constructor.elem(x$91)), (x$92 = new color.RGBA.ptr(73, 221, 0, 255), new x$92.constructor.elem(x$92)), (x$93 = new color.RGBA.ptr(73, 221, 73, 255), new x$93.constructor.elem(x$93)), (x$94 = new color.RGBA.ptr(73, 221, 147, 255), new x$94.constructor.elem(x$94)), (x$95 = new color.RGBA.ptr(73, 221, 221, 255), new x$95.constructor.elem(x$95)), (x$96 = new color.RGBA.ptr(79, 238, 238, 255), new x$96.constructor.elem(x$96)), (x$97 = new color.RGBA.ptr(102, 0, 0, 255), new x$97.constructor.elem(x$97)), (x$98 = new color.RGBA.ptr(102, 0, 102, 255), new x$98.constructor.elem(x$98)), (x$99 = new color.RGBA.ptr(85, 0, 170, 255), new x$99.constructor.elem(x$99)), (x$100 = new color.RGBA.ptr(79, 0, 238, 255), new x$100.constructor.elem(x$100)), (x$101 = new color.RGBA.ptr(102, 102, 0, 255), new x$101.constructor.elem(x$101)), (x$102 = new color.RGBA.ptr(102, 102, 102, 255), new x$102.constructor.elem(x$102)), (x$103 = new color.RGBA.ptr(85, 85, 170, 255), new x$103.constructor.elem(x$103)), (x$104 = new color.RGBA.ptr(79, 79, 238, 255), new x$104.constructor.elem(x$104)), (x$105 = new color.RGBA.ptr(85, 170, 0, 255), new x$105.constructor.elem(x$105)), (x$106 = new color.RGBA.ptr(85, 170, 85, 255), new x$106.constructor.elem(x$106)), (x$107 = new color.RGBA.ptr(85, 170, 170, 255), new x$107.constructor.elem(x$107)), (x$108 = new color.RGBA.ptr(79, 158, 238, 255), new x$108.constructor.elem(x$108)), (x$109 = new color.RGBA.ptr(79, 238, 0, 255), new x$109.constructor.elem(x$109)), (x$110 = new color.RGBA.ptr(79, 238, 79, 255), new x$110.constructor.elem(x$110)), (x$111 = new color.RGBA.ptr(79, 238, 158, 255), new x$111.constructor.elem(x$111)), (x$112 = new color.RGBA.ptr(85, 255, 170, 255), new x$112.constructor.elem(x$112)), (x$113 = new color.RGBA.ptr(85, 255, 255, 255), new x$113.constructor.elem(x$113)), (x$114 = new color.RGBA.ptr(119, 0, 0, 255), new x$114.constructor.elem(x$114)), (x$115 = new color.RGBA.ptr(119, 0, 119, 255), new x$115.constructor.elem(x$115)), (x$116 = new color.RGBA.ptr(93, 0, 187, 255), new x$116.constructor.elem(x$116)), (x$117 = new color.RGBA.ptr(85, 0, 255, 255), new x$117.constructor.elem(x$117)), (x$118 = new color.RGBA.ptr(119, 119, 0, 255), new x$118.constructor.elem(x$118)), (x$119 = new color.RGBA.ptr(119, 119, 119, 255), new x$119.constructor.elem(x$119)), (x$120 = new color.RGBA.ptr(93, 93, 187, 255), new x$120.constructor.elem(x$120)), (x$121 = new color.RGBA.ptr(85, 85, 255, 255), new x$121.constructor.elem(x$121)), (x$122 = new color.RGBA.ptr(93, 187, 0, 255), new x$122.constructor.elem(x$122)), (x$123 = new color.RGBA.ptr(93, 187, 93, 255), new x$123.constructor.elem(x$123)), (x$124 = new color.RGBA.ptr(93, 187, 187, 255), new x$124.constructor.elem(x$124)), (x$125 = new color.RGBA.ptr(85, 170, 255, 255), new x$125.constructor.elem(x$125)), (x$126 = new color.RGBA.ptr(85, 255, 0, 255), new x$126.constructor.elem(x$126)), (x$127 = new color.RGBA.ptr(85, 255, 85, 255), new x$127.constructor.elem(x$127)), (x$128 = new color.RGBA.ptr(136, 0, 136, 255), new x$128.constructor.elem(x$128)), (x$129 = new color.RGBA.ptr(136, 0, 204, 255), new x$129.constructor.elem(x$129)), (x$130 = new color.RGBA.ptr(136, 68, 0, 255), new x$130.constructor.elem(x$130)), (x$131 = new color.RGBA.ptr(136, 68, 68, 255), new x$131.constructor.elem(x$131)), (x$132 = new color.RGBA.ptr(136, 68, 136, 255), new x$132.constructor.elem(x$132)), (x$133 = new color.RGBA.ptr(136, 68, 204, 255), new x$133.constructor.elem(x$133)), (x$134 = new color.RGBA.ptr(136, 136, 0, 255), new x$134.constructor.elem(x$134)), (x$135 = new color.RGBA.ptr(136, 136, 68, 255), new x$135.constructor.elem(x$135)), (x$136 = new color.RGBA.ptr(136, 136, 136, 255), new x$136.constructor.elem(x$136)), (x$137 = new color.RGBA.ptr(136, 136, 204, 255), new x$137.constructor.elem(x$137)), (x$138 = new color.RGBA.ptr(136, 204, 0, 255), new x$138.constructor.elem(x$138)), (x$139 = new color.RGBA.ptr(136, 204, 68, 255), new x$139.constructor.elem(x$139)), (x$140 = new color.RGBA.ptr(136, 204, 136, 255), new x$140.constructor.elem(x$140)), (x$141 = new color.RGBA.ptr(136, 204, 204, 255), new x$141.constructor.elem(x$141)), (x$142 = new color.RGBA.ptr(136, 0, 0, 255), new x$142.constructor.elem(x$142)), (x$143 = new color.RGBA.ptr(136, 0, 68, 255), new x$143.constructor.elem(x$143)), (x$144 = new color.RGBA.ptr(153, 0, 76, 255), new x$144.constructor.elem(x$144)), (x$145 = new color.RGBA.ptr(153, 0, 153, 255), new x$145.constructor.elem(x$145)), (x$146 = new color.RGBA.ptr(147, 0, 221, 255), new x$146.constructor.elem(x$146)), (x$147 = new color.RGBA.ptr(153, 76, 0, 255), new x$147.constructor.elem(x$147)), (x$148 = new color.RGBA.ptr(153, 76, 76, 255), new x$148.constructor.elem(x$148)), (x$149 = new color.RGBA.ptr(153, 76, 153, 255), new x$149.constructor.elem(x$149)), (x$150 = new color.RGBA.ptr(147, 73, 221, 255), new x$150.constructor.elem(x$150)), (x$151 = new color.RGBA.ptr(153, 153, 0, 255), new x$151.constructor.elem(x$151)), (x$152 = new color.RGBA.ptr(153, 153, 76, 255), new x$152.constructor.elem(x$152)), (x$153 = new color.RGBA.ptr(153, 153, 153, 255), new x$153.constructor.elem(x$153)), (x$154 = new color.RGBA.ptr(147, 147, 221, 255), new x$154.constructor.elem(x$154)), (x$155 = new color.RGBA.ptr(147, 221, 0, 255), new x$155.constructor.elem(x$155)), (x$156 = new color.RGBA.ptr(147, 221, 73, 255), new x$156.constructor.elem(x$156)), (x$157 = new color.RGBA.ptr(147, 221, 147, 255), new x$157.constructor.elem(x$157)), (x$158 = new color.RGBA.ptr(147, 221, 221, 255), new x$158.constructor.elem(x$158)), (x$159 = new color.RGBA.ptr(153, 0, 0, 255), new x$159.constructor.elem(x$159)), (x$160 = new color.RGBA.ptr(170, 0, 0, 255), new x$160.constructor.elem(x$160)), (x$161 = new color.RGBA.ptr(170, 0, 85, 255), new x$161.constructor.elem(x$161)), (x$162 = new color.RGBA.ptr(170, 0, 170, 255), new x$162.constructor.elem(x$162)), (x$163 = new color.RGBA.ptr(158, 0, 238, 255), new x$163.constructor.elem(x$163)), (x$164 = new color.RGBA.ptr(170, 85, 0, 255), new x$164.constructor.elem(x$164)), (x$165 = new color.RGBA.ptr(170, 85, 85, 255), new x$165.constructor.elem(x$165)), (x$166 = new color.RGBA.ptr(170, 85, 170, 255), new x$166.constructor.elem(x$166)), (x$167 = new color.RGBA.ptr(158, 79, 238, 255), new x$167.constructor.elem(x$167)), (x$168 = new color.RGBA.ptr(170, 170, 0, 255), new x$168.constructor.elem(x$168)), (x$169 = new color.RGBA.ptr(170, 170, 85, 255), new x$169.constructor.elem(x$169)), (x$170 = new color.RGBA.ptr(170, 170, 170, 255), new x$170.constructor.elem(x$170)), (x$171 = new color.RGBA.ptr(158, 158, 238, 255), new x$171.constructor.elem(x$171)), (x$172 = new color.RGBA.ptr(158, 238, 0, 255), new x$172.constructor.elem(x$172)), (x$173 = new color.RGBA.ptr(158, 238, 79, 255), new x$173.constructor.elem(x$173)), (x$174 = new color.RGBA.ptr(158, 238, 158, 255), new x$174.constructor.elem(x$174)), (x$175 = new color.RGBA.ptr(158, 238, 238, 255), new x$175.constructor.elem(x$175)), (x$176 = new color.RGBA.ptr(170, 255, 255, 255), new x$176.constructor.elem(x$176)), (x$177 = new color.RGBA.ptr(187, 0, 0, 255), new x$177.constructor.elem(x$177)), (x$178 = new color.RGBA.ptr(187, 0, 93, 255), new x$178.constructor.elem(x$178)), (x$179 = new color.RGBA.ptr(187, 0, 187, 255), new x$179.constructor.elem(x$179)), (x$180 = new color.RGBA.ptr(170, 0, 255, 255), new x$180.constructor.elem(x$180)), (x$181 = new color.RGBA.ptr(187, 93, 0, 255), new x$181.constructor.elem(x$181)), (x$182 = new color.RGBA.ptr(187, 93, 93, 255), new x$182.constructor.elem(x$182)), (x$183 = new color.RGBA.ptr(187, 93, 187, 255), new x$183.constructor.elem(x$183)), (x$184 = new color.RGBA.ptr(170, 85, 255, 255), new x$184.constructor.elem(x$184)), (x$185 = new color.RGBA.ptr(187, 187, 0, 255), new x$185.constructor.elem(x$185)), (x$186 = new color.RGBA.ptr(187, 187, 93, 255), new x$186.constructor.elem(x$186)), (x$187 = new color.RGBA.ptr(187, 187, 187, 255), new x$187.constructor.elem(x$187)), (x$188 = new color.RGBA.ptr(170, 170, 255, 255), new x$188.constructor.elem(x$188)), (x$189 = new color.RGBA.ptr(170, 255, 0, 255), new x$189.constructor.elem(x$189)), (x$190 = new color.RGBA.ptr(170, 255, 85, 255), new x$190.constructor.elem(x$190)), (x$191 = new color.RGBA.ptr(170, 255, 170, 255), new x$191.constructor.elem(x$191)), (x$192 = new color.RGBA.ptr(204, 0, 204, 255), new x$192.constructor.elem(x$192)), (x$193 = new color.RGBA.ptr(204, 68, 0, 255), new x$193.constructor.elem(x$193)), (x$194 = new color.RGBA.ptr(204, 68, 68, 255), new x$194.constructor.elem(x$194)), (x$195 = new color.RGBA.ptr(204, 68, 136, 255), new x$195.constructor.elem(x$195)), (x$196 = new color.RGBA.ptr(204, 68, 204, 255), new x$196.constructor.elem(x$196)), (x$197 = new color.RGBA.ptr(204, 136, 0, 255), new x$197.constructor.elem(x$197)), (x$198 = new color.RGBA.ptr(204, 136, 68, 255), new x$198.constructor.elem(x$198)), (x$199 = new color.RGBA.ptr(204, 136, 136, 255), new x$199.constructor.elem(x$199)), (x$200 = new color.RGBA.ptr(204, 136, 204, 255), new x$200.constructor.elem(x$200)), (x$201 = new color.RGBA.ptr(204, 204, 0, 255), new x$201.constructor.elem(x$201)), (x$202 = new color.RGBA.ptr(204, 204, 68, 255), new x$202.constructor.elem(x$202)), (x$203 = new color.RGBA.ptr(204, 204, 136, 255), new x$203.constructor.elem(x$203)), (x$204 = new color.RGBA.ptr(204, 204, 204, 255), new x$204.constructor.elem(x$204)), (x$205 = new color.RGBA.ptr(204, 0, 0, 255), new x$205.constructor.elem(x$205)), (x$206 = new color.RGBA.ptr(204, 0, 68, 255), new x$206.constructor.elem(x$206)), (x$207 = new color.RGBA.ptr(204, 0, 136, 255), new x$207.constructor.elem(x$207)), (x$208 = new color.RGBA.ptr(221, 0, 147, 255), new x$208.constructor.elem(x$208)), (x$209 = new color.RGBA.ptr(221, 0, 221, 255), new x$209.constructor.elem(x$209)), (x$210 = new color.RGBA.ptr(221, 73, 0, 255), new x$210.constructor.elem(x$210)), (x$211 = new color.RGBA.ptr(221, 73, 73, 255), new x$211.constructor.elem(x$211)), (x$212 = new color.RGBA.ptr(221, 73, 147, 255), new x$212.constructor.elem(x$212)), (x$213 = new color.RGBA.ptr(221, 73, 221, 255), new x$213.constructor.elem(x$213)), (x$214 = new color.RGBA.ptr(221, 147, 0, 255), new x$214.constructor.elem(x$214)), (x$215 = new color.RGBA.ptr(221, 147, 73, 255), new x$215.constructor.elem(x$215)), (x$216 = new color.RGBA.ptr(221, 147, 147, 255), new x$216.constructor.elem(x$216)), (x$217 = new color.RGBA.ptr(221, 147, 221, 255), new x$217.constructor.elem(x$217)), (x$218 = new color.RGBA.ptr(221, 221, 0, 255), new x$218.constructor.elem(x$218)), (x$219 = new color.RGBA.ptr(221, 221, 73, 255), new x$219.constructor.elem(x$219)), (x$220 = new color.RGBA.ptr(221, 221, 147, 255), new x$220.constructor.elem(x$220)), (x$221 = new color.RGBA.ptr(221, 221, 221, 255), new x$221.constructor.elem(x$221)), (x$222 = new color.RGBA.ptr(221, 0, 0, 255), new x$222.constructor.elem(x$222)), (x$223 = new color.RGBA.ptr(221, 0, 73, 255), new x$223.constructor.elem(x$223)), (x$224 = new color.RGBA.ptr(238, 0, 79, 255), new x$224.constructor.elem(x$224)), (x$225 = new color.RGBA.ptr(238, 0, 158, 255), new x$225.constructor.elem(x$225)), (x$226 = new color.RGBA.ptr(238, 0, 238, 255), new x$226.constructor.elem(x$226)), (x$227 = new color.RGBA.ptr(238, 79, 0, 255), new x$227.constructor.elem(x$227)), (x$228 = new color.RGBA.ptr(238, 79, 79, 255), new x$228.constructor.elem(x$228)), (x$229 = new color.RGBA.ptr(238, 79, 158, 255), new x$229.constructor.elem(x$229)), (x$230 = new color.RGBA.ptr(238, 79, 238, 255), new x$230.constructor.elem(x$230)), (x$231 = new color.RGBA.ptr(238, 158, 0, 255), new x$231.constructor.elem(x$231)), (x$232 = new color.RGBA.ptr(238, 158, 79, 255), new x$232.constructor.elem(x$232)), (x$233 = new color.RGBA.ptr(238, 158, 158, 255), new x$233.constructor.elem(x$233)), (x$234 = new color.RGBA.ptr(238, 158, 238, 255), new x$234.constructor.elem(x$234)), (x$235 = new color.RGBA.ptr(238, 238, 0, 255), new x$235.constructor.elem(x$235)), (x$236 = new color.RGBA.ptr(238, 238, 79, 255), new x$236.constructor.elem(x$236)), (x$237 = new color.RGBA.ptr(238, 238, 158, 255), new x$237.constructor.elem(x$237)), (x$238 = new color.RGBA.ptr(238, 238, 238, 255), new x$238.constructor.elem(x$238)), (x$239 = new color.RGBA.ptr(238, 0, 0, 255), new x$239.constructor.elem(x$239)), (x$240 = new color.RGBA.ptr(255, 0, 0, 255), new x$240.constructor.elem(x$240)), (x$241 = new color.RGBA.ptr(255, 0, 85, 255), new x$241.constructor.elem(x$241)), (x$242 = new color.RGBA.ptr(255, 0, 170, 255), new x$242.constructor.elem(x$242)), (x$243 = new color.RGBA.ptr(255, 0, 255, 255), new x$243.constructor.elem(x$243)), (x$244 = new color.RGBA.ptr(255, 85, 0, 255), new x$244.constructor.elem(x$244)), (x$245 = new color.RGBA.ptr(255, 85, 85, 255), new x$245.constructor.elem(x$245)), (x$246 = new color.RGBA.ptr(255, 85, 170, 255), new x$246.constructor.elem(x$246)), (x$247 = new color.RGBA.ptr(255, 85, 255, 255), new x$247.constructor.elem(x$247)), (x$248 = new color.RGBA.ptr(255, 170, 0, 255), new x$248.constructor.elem(x$248)), (x$249 = new color.RGBA.ptr(255, 170, 85, 255), new x$249.constructor.elem(x$249)), (x$250 = new color.RGBA.ptr(255, 170, 170, 255), new x$250.constructor.elem(x$250)), (x$251 = new color.RGBA.ptr(255, 170, 255, 255), new x$251.constructor.elem(x$251)), (x$252 = new color.RGBA.ptr(255, 255, 0, 255), new x$252.constructor.elem(x$252)), (x$253 = new color.RGBA.ptr(255, 255, 85, 255), new x$253.constructor.elem(x$253)), (x$254 = new color.RGBA.ptr(255, 255, 170, 255), new x$254.constructor.elem(x$254)), (x$255 = new color.RGBA.ptr(255, 255, 255, 255), new x$255.constructor.elem(x$255))]);
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
 $packages["main"] = (function() {
-	var $pkg = {}, $init, json, fmt, jsblob, js, websocket, strconv, time, setupMessage, updateMessage, sliceType, structType, arrayType, structType$1, ptrType, funcType, sliceType$1, funcType$1, numFrames, keys, handleError, updateScreen, startConnection, updateCamera, updateTitle, start, main;
+	var $pkg = {}, $init, json, errors, fmt, trace, js, websocket, image, palette, strconv, time, setupMessage, updateMessage, ptrType, ptrType$1, sliceType, sliceType$1, arrayType, structType, ptrType$2, funcType, funcType$1, keys, imgRect, palImages, rgbaImages, finalImage, frameId, numFrames, x, x$1, throw$1, assert, setupConnection, updateCamera, updateTitle, load, main;
 	json = $packages["encoding/json"];
+	errors = $packages["errors"];
 	fmt = $packages["fmt"];
-	jsblob = $packages["github.com/flimzy/jsblob"];
+	trace = $packages["github.com/andreas-jonsson/octatron/trace"];
 	js = $packages["github.com/gopherjs/gopherjs/js"];
 	websocket = $packages["github.com/gopherjs/websocket"];
+	image = $packages["image"];
+	palette = $packages["image/color/palette"];
 	strconv = $packages["strconv"];
 	time = $packages["time"];
-	setupMessage = $pkg.setupMessage = $newType(0, $kindStruct, "main.setupMessage", "setupMessage", "main", function(Width_, Height_, FieldOfView_, Tree_) {
+	setupMessage = $pkg.setupMessage = $newType(0, $kindStruct, "main.setupMessage", "setupMessage", "main", function(Width_, Height_, FieldOfView_, ViewDist_, ColorFormat_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Width = 0;
 			this.Height = 0;
 			this.FieldOfView = 0;
-			this.Tree = "";
+			this.ViewDist = 0;
+			this.ColorFormat = "";
 			return;
 		}
 		this.Width = Width_;
 		this.Height = Height_;
 		this.FieldOfView = FieldOfView_;
-		this.Tree = Tree_;
+		this.ViewDist = ViewDist_;
+		this.ColorFormat = ColorFormat_;
 	});
 	updateMessage = $pkg.updateMessage = $newType(0, $kindStruct, "main.updateMessage", "updateMessage", "main", function(Camera_) {
 		this.$val = this;
 		if (arguments.length === 0) {
-			this.Camera = new structType$1.ptr(arrayType.zero(), arrayType.zero());
+			this.Camera = new structType.ptr(arrayType.zero(), 0, 0);
 			return;
 		}
 		this.Camera = Camera_;
 	});
+	ptrType = $ptrType(image.Paletted);
+	ptrType$1 = $ptrType(image.RGBA);
 	sliceType = $sliceType($emptyInterface);
-	structType = $structType([]);
-	arrayType = $arrayType($Float32, 3);
-	structType$1 = $structType([{prop: "Position", name: "Position", pkg: "", typ: arrayType, tag: "position"}, {prop: "LookAt", name: "LookAt", pkg: "", typ: arrayType, tag: "look_at"}]);
-	ptrType = $ptrType(js.Object);
-	funcType = $funcType([ptrType], [], false);
 	sliceType$1 = $sliceType($Uint8);
+	arrayType = $arrayType($Float32, 3);
+	structType = $structType([{prop: "Position", name: "Position", pkg: "", typ: arrayType, tag: "position"}, {prop: "XRot", name: "XRot", pkg: "", typ: $Float32, tag: "x_rot"}, {prop: "YRot", name: "YRot", pkg: "", typ: $Float32, tag: "y_rot"}]);
+	ptrType$2 = $ptrType(js.Object);
+	funcType = $funcType([ptrType$2], [], false);
 	funcType$1 = $funcType([], [], false);
-	handleError = function(err) {
+	throw$1 = function(err) {
 		var $ptr, _r, err, $s, $r;
 		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; err = $f.err; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		_r = err.Error(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
 		$global.alert($externalize(_r, $String));
-		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: handleError }; } $f.$ptr = $ptr; $f._r = _r; $f.err = err; $f.$s = $s; $f.$r = $r; return $f;
+		$panic(err);
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: throw$1 }; } $f.$ptr = $ptr; $f._r = _r; $f.err = err; $f.$s = $s; $f.$r = $r; return $f;
 	};
-	updateScreen = function(ctx, buf, img, dest, src) {
-		var $ptr, _i, _ref, b, buf, ctx, dest, i, img, src;
-		_ref = src;
-		_i = 0;
-		while (true) {
-			if (!(_i < _ref.$length)) { break; }
-			i = _i;
-			b = ((_i < 0 || _i >= _ref.$length) ? $throwRuntimeError("index out of range") : _ref.$array[_ref.$offset + _i]);
-			((i < 0 || i >= dest.$length) ? $throwRuntimeError("index out of range") : dest.$array[dest.$offset + i] = b);
-			_i++;
-		}
-		img.data.set(buf);
-		ctx.putImageData(img, 0, 0);
-		numFrames = numFrames + (1) >> 0;
+	assert = function(err) {
+		var $ptr, err, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; err = $f.err; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		/* */ if (!($interfaceIsEqual(err, $ifaceNil))) { $s = 1; continue; }
+		/* */ $s = 2; continue;
+		/* if (!($interfaceIsEqual(err, $ifaceNil))) { */ case 1:
+			$r = throw$1(err); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* } */ case 2:
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: assert }; } $f.$ptr = $ptr; $f.err = err; $f.$s = $s; $f.$r = $r; return $f;
 	};
-	startConnection = function(ctx, buf, img, dest, renderChan) {
-		var $ptr, _r, _r$1, _tuple, buf, ctx, dest, err, img, onMessage, onOpen, renderChan, ws, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _tuple = $f._tuple; buf = $f.buf; ctx = $f.ctx; dest = $f.dest; err = $f.err; img = $f.img; onMessage = $f.onMessage; onOpen = $f.onOpen; renderChan = $f.renderChan; ws = $f.ws; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		buf = [buf];
+	setupConnection = function(canvas) {
+		var $ptr, _r, _r$1, _tuple, canvas, ctx, err, img, onMessage, onOpen, ws, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _tuple = $f._tuple; canvas = $f.canvas; ctx = $f.ctx; err = $f.err; img = $f.img; onMessage = $f.onMessage; onOpen = $f.onOpen; ws = $f.ws; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		ctx = [ctx];
-		dest = [dest];
 		img = [img];
-		renderChan = [renderChan];
 		ws = [ws];
-		_r = fmt.Sprintf("ws://%s:8080/render", new sliceType([new $String("server.andreasjonsson.se")])); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-		_r$1 = websocket.New(_r); /* */ $s = 2; case 2: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+		ctx[0] = canvas.getContext($externalize("2d", $String));
+		img[0] = ctx[0].getImageData(0, 0, 320, 180);
+		/* */ if (!(($parseInt(img[0].data.length) === finalImage.Pix.$length))) { $s = 1; continue; }
+		/* */ $s = 2; continue;
+		/* if (!(($parseInt(img[0].data.length) === finalImage.Pix.$length))) { */ case 1:
+			$r = throw$1(errors.New("data size of images do not match")); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* } */ case 2:
+		_r = fmt.Sprintf("ws://%s:8080/render", new sliceType([new $String("localhost")])); /* */ $s = 4; case 4: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_r$1 = websocket.New(_r); /* */ $s = 5; case 5: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
 		_tuple = _r$1;
 		ws[0] = _tuple[0];
 		err = _tuple[1];
-		/* */ if (!($interfaceIsEqual(err, $ifaceNil))) { $s = 3; continue; }
-		/* */ $s = 4; continue;
-		/* if (!($interfaceIsEqual(err, $ifaceNil))) { */ case 3:
-			$r = handleError(err); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		/* } */ case 4:
-		onOpen = (function(buf, ctx, dest, img, renderChan, ws) { return function $b(ev) {
-			var $ptr, _r$2, _tuple$1, err$1, err$2, ev, msg, setup, $s, $r;
-			/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r$2 = $f._r$2; _tuple$1 = $f._tuple$1; err$1 = $f.err$1; err$2 = $f.err$2; ev = $f.ev; msg = $f.msg; setup = $f.setup; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-			setup = new setupMessage.ptr(640, 360, 45, "test.oct");
+		$r = assert(err); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		onOpen = (function(ctx, img, ws) { return function $b(ev) {
+			var $ptr, _r$2, _tuple$1, err$1, ev, msg, setup, $s, $r;
+			/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r$2 = $f._r$2; _tuple$1 = $f._tuple$1; err$1 = $f.err$1; ev = $f.ev; msg = $f.msg; setup = $f.setup; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+			setup = new setupMessage.ptr(320, 180, 45, 20, "PALETTE");
 			_r$2 = json.Marshal(new setup.constructor.elem(setup)); /* */ $s = 1; case 1: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
 			_tuple$1 = _r$2;
 			msg = _tuple$1[0];
 			err$1 = _tuple$1[1];
-			/* */ if (!($interfaceIsEqual(err$1, $ifaceNil))) { $s = 2; continue; }
-			/* */ $s = 3; continue;
-			/* if (!($interfaceIsEqual(err$1, $ifaceNil))) { */ case 2:
-				$r = handleError(err$1); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-			/* } */ case 3:
-			err$2 = ws[0].Send(new $String($bytesToString(msg)));
-			/* */ if (!($interfaceIsEqual(err$2, $ifaceNil))) { $s = 5; continue; }
-			/* */ $s = 6; continue;
-			/* if (!($interfaceIsEqual(err$2, $ifaceNil))) { */ case 5:
-				$r = handleError(err$2); /* */ $s = 7; case 7: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-			/* } */ case 6:
-			$go(updateCamera, [ws[0], renderChan[0]]);
-			/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._r$2 = _r$2; $f._tuple$1 = _tuple$1; $f.err$1 = err$1; $f.err$2 = err$2; $f.ev = ev; $f.msg = msg; $f.setup = setup; $f.$s = $s; $f.$r = $r; return $f;
-		}; })(buf, ctx, dest, img, renderChan, ws);
-		onMessage = (function(buf, ctx, dest, img, renderChan, ws) { return function(ev) {
-			var $ptr, blob, ev;
-			blob = new jsblob.Blob.ptr($clone(new $jsObjectPtr(ev.data), js.Object));
-			$go((function(buf, ctx, dest, img, renderChan, ws) { return function $b() {
-				var $ptr, _arg, _arg$1, _arg$2, _arg$3, _arg$4, _r$2, $s, $r;
-				/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _arg = $f._arg; _arg$1 = $f._arg$1; _arg$2 = $f._arg$2; _arg$3 = $f._arg$3; _arg$4 = $f._arg$4; _r$2 = $f._r$2; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-				_arg = ctx[0];
-				_arg$1 = buf[0];
-				_arg$2 = img[0];
-				_arg$3 = dest[0];
-				_r$2 = blob.Bytes(); /* */ $s = 1; case 1: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
-				_arg$4 = _r$2;
-				$r = updateScreen(_arg, _arg$1, _arg$2, _arg$3, _arg$4); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-				$r = $send(renderChan[0], new structType.ptr()); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-				/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._arg = _arg; $f._arg$1 = _arg$1; $f._arg$2 = _arg$2; $f._arg$3 = _arg$3; $f._arg$4 = _arg$4; $f._r$2 = _r$2; $f.$s = $s; $f.$r = $r; return $f;
-			}; })(buf, ctx, dest, img, renderChan, ws), []);
-		}; })(buf, ctx, dest, img, renderChan, ws);
+			$r = assert(err$1); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+			$r = assert(ws[0].Send(new $String($bytesToString(msg)))); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+			$go(updateCamera, [ws[0]]);
+			/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._r$2 = _r$2; $f._tuple$1 = _tuple$1; $f.err$1 = err$1; $f.ev = ev; $f.msg = msg; $f.setup = setup; $f.$s = $s; $f.$r = $r; return $f;
+		}; })(ctx, img, ws);
+		onMessage = (function(ctx, img, ws) { return function $b(ev) {
+			var $ptr, _r$2, _r$3, _tmp, _tmp$1, arrBuf, buf, data, ev, idx, imageA, imageB, $s, $r;
+			/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r$2 = $f._r$2; _r$3 = $f._r$3; _tmp = $f._tmp; _tmp$1 = $f._tmp$1; arrBuf = $f.arrBuf; buf = $f.buf; data = $f.data; ev = $f.ev; idx = $f.idx; imageA = $f.imageA; imageB = $f.imageB; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+			idx = (_r$2 = frameId % 2, _r$2 === _r$2 ? _r$2 : $throwRuntimeError("integer divide by zero"));
+			data = $assertType($internalize(new ($global.Uint8Array)(ev.data), $emptyInterface), sliceType$1);
+			_tmp = $ifaceNil;
+			_tmp$1 = $ifaceNil;
+			imageA = _tmp;
+			imageB = _tmp$1;
+			{
+				((idx < 0 || idx >= palImages.length) ? $throwRuntimeError("index out of range") : palImages[idx]).Pix = data;
+				imageA = palImages[0];
+				imageB = palImages[1];
+			}
+			_r$3 = trace.Reconstruct(imageA, imageB, finalImage); /* */ $s = 1; case 1: if($c) { $c = false; _r$3 = _r$3.$blk(); } if (_r$3 && _r$3.$blk !== undefined) { break s; }
+			$r = assert(_r$3); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+			arrBuf = js.NewArrayBuffer(finalImage.Pix);
+			buf = new ($global.Uint8ClampedArray)(arrBuf);
+			img[0].data.set(buf);
+			ctx[0].putImageData(img[0], 0, 0);
+			numFrames = numFrames + (1) >> 0;
+			frameId = frameId + (1) >> 0;
+			/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._tmp = _tmp; $f._tmp$1 = _tmp$1; $f.arrBuf = arrBuf; $f.buf = buf; $f.data = data; $f.ev = ev; $f.idx = idx; $f.imageA = imageA; $f.imageB = imageB; $f.$s = $s; $f.$r = $r; return $f;
+		}; })(ctx, img, ws);
+		ws[0].Object.binaryType = $externalize("arraybuffer", $String);
 		ws[0].EventTarget.AddEventListener("open", false, onOpen);
 		ws[0].EventTarget.AddEventListener("message", false, onMessage);
-		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: startConnection }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._tuple = _tuple; $f.buf = buf; $f.ctx = ctx; $f.dest = dest; $f.err = err; $f.img = img; $f.onMessage = onMessage; $f.onOpen = onOpen; $f.renderChan = renderChan; $f.ws = ws; $f.$s = $s; $f.$r = $r; return $f;
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: setupConnection }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._tuple = _tuple; $f.canvas = canvas; $f.ctx = ctx; $f.err = err; $f.img = img; $f.onMessage = onMessage; $f.onOpen = onOpen; $f.ws = ws; $f.$s = $s; $f.$r = $r; return $f;
 	};
-	updateCamera = function(ws, renderChan) {
-		var $ptr, _entry, _entry$1, _entry$2, _entry$3, _ok, _r, _r$1, _r$2, _ref, _tuple, _tuple$1, err, err$1, msg, msg$1, pressed, renderChan, ws, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _entry = $f._entry; _entry$1 = $f._entry$1; _entry$2 = $f._entry$2; _entry$3 = $f._entry$3; _ok = $f._ok; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _ref = $f._ref; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; err = $f.err; err$1 = $f.err$1; msg = $f.msg; msg$1 = $f.msg$1; pressed = $f.pressed; renderChan = $f.renderChan; ws = $f.ws; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		pressed = true;
-		msg = new updateMessage.ptr(new structType$1.ptr(arrayType.zero(), arrayType.zero()));
-		arrayType.copy(msg.Camera.LookAt, $toNativeArray($kindFloat32, [0, 0, -1]));
+	updateCamera = function(ws) {
+		var $ptr, _entry, _entry$1, _entry$2, _entry$3, _ok, _r, _r$1, _ref, _tuple, _tuple$1, err, msg, msg$1, ws, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _entry = $f._entry; _entry$1 = $f._entry$1; _entry$2 = $f._entry$2; _entry$3 = $f._entry$3; _ok = $f._ok; _r = $f._r; _r$1 = $f._r$1; _ref = $f._ref; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; err = $f.err; msg = $f.msg; msg$1 = $f.msg$1; ws = $f.ws; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		msg = new updateMessage.ptr(new structType.ptr(arrayType.zero(), 0, 0));
+		arrayType.copy(msg.Camera.Position, $toNativeArray($kindFloat32, [0.6660000085830688, 0, 1.13100004196167]));
+		msg.Camera.XRot = 0.46938997507095337;
+		msg.Camera.YRot = 0.26761001348495483;
 		_ref = time.Tick(new time.Duration(0, 33000000));
 		/* while (true) { */ case 1:
 			_r = $recv(_ref); /* */ $s = 3; case 3: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
@@ -25480,45 +27270,22 @@ $packages["main"] = (function() {
 			}
 			if ((_entry = keys[$Int.keyFor(38)], _entry !== undefined ? _entry.v : false)) {
 				msg.Camera.Position[2] = $fround(msg.Camera.Position[2] - (0.10000000149011612));
-				msg.Camera.LookAt[2] = $fround(msg.Camera.LookAt[2] - (0.10000000149011612));
-				pressed = true;
 			} else if ((_entry$1 = keys[$Int.keyFor(40)], _entry$1 !== undefined ? _entry$1.v : false)) {
 				msg.Camera.Position[2] = $fround(msg.Camera.Position[2] + (0.10000000149011612));
-				msg.Camera.LookAt[2] = $fround(msg.Camera.LookAt[2] + (0.10000000149011612));
-				pressed = true;
 			} else if ((_entry$2 = keys[$Int.keyFor(37)], _entry$2 !== undefined ? _entry$2.v : false)) {
 				msg.Camera.Position[0] = $fround(msg.Camera.Position[0] + (0.10000000149011612));
-				msg.Camera.LookAt[0] = $fround(msg.Camera.LookAt[0] + (0.10000000149011612));
-				pressed = true;
 			} else if ((_entry$3 = keys[$Int.keyFor(39)], _entry$3 !== undefined ? _entry$3.v : false)) {
 				msg.Camera.Position[0] = $fround(msg.Camera.Position[0] - (0.10000000149011612));
-				msg.Camera.LookAt[0] = $fround(msg.Camera.LookAt[0] - (0.10000000149011612));
-				pressed = true;
+			} else {
 			}
-			/* */ if (pressed) { $s = 4; continue; }
-			/* */ $s = 5; continue;
-			/* if (pressed) { */ case 4:
-				_r$1 = json.Marshal(new msg.constructor.elem(msg)); /* */ $s = 6; case 6: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
-				_tuple$1 = _r$1;
-				msg$1 = _tuple$1[0];
-				err = _tuple$1[1];
-				/* */ if (!($interfaceIsEqual(err, $ifaceNil))) { $s = 7; continue; }
-				/* */ $s = 8; continue;
-				/* if (!($interfaceIsEqual(err, $ifaceNil))) { */ case 7:
-					$r = handleError(err); /* */ $s = 9; case 9: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-				/* } */ case 8:
-				err$1 = ws.Send(new $String($bytesToString(msg$1)));
-				/* */ if (!($interfaceIsEqual(err$1, $ifaceNil))) { $s = 10; continue; }
-				/* */ $s = 11; continue;
-				/* if (!($interfaceIsEqual(err$1, $ifaceNil))) { */ case 10:
-					$r = handleError(err$1); /* */ $s = 12; case 12: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-				/* } */ case 11:
-				pressed = false;
-				_r$2 = $recv(renderChan); /* */ $s = 13; case 13: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
-				_r$2[0];
-			/* } */ case 5:
+			_r$1 = json.Marshal(new msg.constructor.elem(msg)); /* */ $s = 4; case 4: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+			_tuple$1 = _r$1;
+			msg$1 = _tuple$1[0];
+			err = _tuple$1[1];
+			$r = assert(err); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+			$r = assert(ws.Send(new $String($bytesToString(msg$1)))); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		/* } */ $s = 1; continue; case 2:
-		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: updateCamera }; } $f.$ptr = $ptr; $f._entry = _entry; $f._entry$1 = _entry$1; $f._entry$2 = _entry$2; $f._entry$3 = _entry$3; $f._ok = _ok; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._ref = _ref; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.err = err; $f.err$1 = err$1; $f.msg = msg; $f.msg$1 = msg$1; $f.pressed = pressed; $f.renderChan = renderChan; $f.ws = ws; $f.$s = $s; $f.$r = $r; return $f;
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: updateCamera }; } $f.$ptr = $ptr; $f._entry = _entry; $f._entry$1 = _entry$1; $f._entry$2 = _entry$2; $f._entry$3 = _entry$3; $f._ok = _ok; $f._r = _r; $f._r$1 = _r$1; $f._ref = _ref; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.err = err; $f.msg = msg; $f.msg$1 = msg$1; $f.ws = ws; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	updateTitle = function() {
 		var $ptr, _r, title, $s, $r;
@@ -25528,24 +27295,10 @@ $packages["main"] = (function() {
 		$global.document.title = $externalize(title, $String);
 		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: updateTitle }; } $f.$ptr = $ptr; $f._r = _r; $f.title = title; $f.$s = $s; $f.$r = $r; return $f;
 	};
-	start = function() {
-		var $ptr, arrBuf, buf, canvas, ctx, data, dest, document, img, renderChan, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; arrBuf = $f.arrBuf; buf = $f.buf; canvas = $f.canvas; ctx = $f.ctx; data = $f.data; dest = $f.dest; document = $f.document; img = $f.img; renderChan = $f.renderChan; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+	load = function() {
+		var $ptr, canvas, document, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; canvas = $f.canvas; document = $f.document; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		document = $global.document;
-		document.onkeydown = $externalize((function(e) {
-			var $ptr, _key, e;
-			_key = $parseInt(e.keyCode) >> 0; (keys || $throwRuntimeError("assignment to entry in nil map"))[$Int.keyFor(_key)] = { k: _key, v: true };
-		}), funcType);
-		document.onkeyup = $externalize((function(e) {
-			var $ptr, _key, e;
-			_key = $parseInt(e.keyCode) >> 0; (keys || $throwRuntimeError("assignment to entry in nil map"))[$Int.keyFor(_key)] = { k: _key, v: false };
-		}), funcType);
-		canvas = document.createElement($externalize("canvas", $String));
-		canvas.setAttribute($externalize("width", $String), $externalize(strconv.Itoa(640), $String));
-		canvas.setAttribute($externalize("height", $String), $externalize(strconv.Itoa(360), $String));
-		canvas.style.width = $externalize(strconv.Itoa(640) + "px", $String);
-		canvas.style.height = $externalize(strconv.Itoa(360) + "px", $String);
-		document.body.appendChild(canvas);
 		$go((function $b() {
 			var $ptr, _ok, _r, _ref, _tuple, $s, $r;
 			/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _ok = $f._ok; _r = $f._r; _ref = $f._ref; _tuple = $f._tuple; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
@@ -25562,38 +27315,52 @@ $packages["main"] = (function() {
 			/* } */ $s = 1; continue; case 2:
 			/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._ok = _ok; $f._r = _r; $f._ref = _ref; $f._tuple = _tuple; $f.$s = $s; $f.$r = $r; return $f;
 		}), []);
-		ctx = canvas.getContext($externalize("2d", $String));
-		img = ctx.getImageData(0, 0, 640, 360);
-		data = img.data;
-		arrBuf = new ($global.ArrayBuffer)($parseInt(data.length));
-		buf = new ($global.Uint8ClampedArray)(arrBuf);
-		dest = $assertType($internalize(new ($global.Uint8Array)(arrBuf), $emptyInterface), sliceType$1);
-		renderChan = new $Chan(structType, 1);
-		$r = $send(renderChan, new structType.ptr()); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		$r = startConnection(ctx, buf, img, dest, renderChan); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: start }; } $f.$ptr = $ptr; $f.arrBuf = arrBuf; $f.buf = buf; $f.canvas = canvas; $f.ctx = ctx; $f.data = data; $f.dest = dest; $f.document = document; $f.img = img; $f.renderChan = renderChan; $f.$s = $s; $f.$r = $r; return $f;
+		document.onkeydown = $externalize((function(e) {
+			var $ptr, _key, e;
+			_key = $parseInt(e.keyCode) >> 0; (keys || $throwRuntimeError("assignment to entry in nil map"))[$Int.keyFor(_key)] = { k: _key, v: true };
+		}), funcType);
+		document.onkeyup = $externalize((function(e) {
+			var $ptr, _key, e;
+			_key = $parseInt(e.keyCode) >> 0; (keys || $throwRuntimeError("assignment to entry in nil map"))[$Int.keyFor(_key)] = { k: _key, v: false };
+		}), funcType);
+		canvas = document.createElement($externalize("canvas", $String));
+		canvas.setAttribute($externalize("width", $String), $externalize(strconv.Itoa(320), $String));
+		canvas.setAttribute($externalize("height", $String), $externalize(strconv.Itoa(180), $String));
+		canvas.style.width = $externalize(strconv.Itoa(640) + "px", $String);
+		canvas.style.height = $externalize(strconv.Itoa(360) + "px", $String);
+		document.body.appendChild(canvas);
+		$r = setupConnection(canvas); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: load }; } $f.$ptr = $ptr; $f.canvas = canvas; $f.document = document; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	main = function() {
 		var $ptr;
 		$global.addEventListener($externalize("load", $String), $externalize((function() {
 			var $ptr;
-			$go(start, []);
+			$go(load, []);
 		}), funcType$1));
 	};
-	setupMessage.init([{prop: "Width", name: "Width", pkg: "", typ: $Int, tag: "width"}, {prop: "Height", name: "Height", pkg: "", typ: $Int, tag: "height"}, {prop: "FieldOfView", name: "FieldOfView", pkg: "", typ: $Float32, tag: "field_of_view"}, {prop: "Tree", name: "Tree", pkg: "", typ: $String, tag: "tree"}]);
-	updateMessage.init([{prop: "Camera", name: "Camera", pkg: "", typ: structType$1, tag: "camera"}]);
+	setupMessage.init([{prop: "Width", name: "Width", pkg: "", typ: $Int, tag: "width"}, {prop: "Height", name: "Height", pkg: "", typ: $Int, tag: "height"}, {prop: "FieldOfView", name: "FieldOfView", pkg: "", typ: $Float32, tag: "field_of_view"}, {prop: "ViewDist", name: "ViewDist", pkg: "", typ: $Float32, tag: "view_dist"}, {prop: "ColorFormat", name: "ColorFormat", pkg: "", typ: $String, tag: "color_format"}]);
+	updateMessage.init([{prop: "Camera", name: "Camera", pkg: "", typ: structType, tag: "camera"}]);
 	$init = function() {
 		$pkg.$init = function() {};
 		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		$r = json.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		$r = fmt.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		$r = jsblob.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		$r = js.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		$r = websocket.$init(); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		$r = strconv.$init(); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		$r = time.$init(); /* */ $s = 7; case 7: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = errors.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = fmt.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = trace.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = js.$init(); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = websocket.$init(); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = image.$init(); /* */ $s = 7; case 7: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = palette.$init(); /* */ $s = 8; case 8: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = strconv.$init(); /* */ $s = 9; case 9: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = time.$init(); /* */ $s = 10; case 10: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		frameId = 0;
 		numFrames = 0;
 		keys = {};
+		imgRect = $clone(image.Rect(0, 0, 160, 180), image.Rectangle);
+		palImages = $toNativeArray($kindPtr, [image.NewPaletted(imgRect, (x = palette.Plan9, $subslice(new $packages["image/color"].Palette(x.$array), x.$offset, x.$offset + x.$length))), image.NewPaletted(imgRect, (x$1 = palette.Plan9, $subslice(new $packages["image/color"].Palette(x$1.$array), x$1.$offset, x$1.$offset + x$1.$length)))]);
+		rgbaImages = $toNativeArray($kindPtr, [image.NewRGBA(imgRect), image.NewRGBA(imgRect)]);
+		finalImage = image.NewRGBA(image.Rect(0, 0, 320, 180));
 		if ($pkg === $mainPkg) {
 			main();
 			$mainFinished = true;

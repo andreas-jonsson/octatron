@@ -52,17 +52,18 @@ var loadedTree struct {
 
 type (
 	setupMessage struct {
-		Width       int     "width"
-		Height      int     "height"
-		FieldOfView float32 "field_of_view"
-		ViewDist    float32 "view_dist"
+		Width       int     `width`
+		Height      int     `height`
+		FieldOfView float32 `field_of_view`
+		ViewDist    float32 `view_dist`
+		ColorFormat string  `color_format`
 	}
 
 	updateMessage struct {
 		Camera struct {
-			Position [3]float32 "position"
-			XRot     float32    "x_rot"
-			YRot     float32    "y_rot"
+			Position [3]float32 `position`
+			XRot     float32    `x_rot`
+			YRot     float32    `y_rot`
 		} "camera"
 	}
 )
@@ -133,8 +134,8 @@ func renderServer(ws *websocket.Conn) {
 		return
 	}
 
-	backBuffer := image.NewPaletted(image.Rect(0, 0, setup.Width/2, setup.Height), palette.Plan9)
-	rect := image.Rect(0, 0, setup.Width, setup.Height)
+	rect := image.Rect(0, 0, setup.Width/2, setup.Height)
+	backBuffer := image.NewPaletted(rect, palette.Plan9)
 	surfaces := [2]*image.RGBA{
 		image.NewRGBA(rect),
 		image.NewRGBA(rect),
@@ -175,14 +176,20 @@ func renderServer(ws *websocket.Conn) {
 			YRot: update.Camera.YRot,
 		}
 
-		frame := raytracer.Trace(&camera, loadedTree.tree, loadedTree.maxDepth)
+		frame := 1 + raytracer.Trace(&camera, loadedTree.tree, loadedTree.maxDepth)
 		idx := frame % 2
 
-		draw.Draw(backBuffer, backBuffer.Bounds(), raytracer.Image(idx), image.ZP, draw.Src)
-
-		if err := streamCodec.Send(ws, backBuffer.Pix); err != nil {
-			log.Println(err)
-			return
+		if setup.ColorFormat == "PALETTE" {
+			draw.Draw(backBuffer, rect, raytracer.Image(idx), image.ZP, draw.Src)
+			if err := streamCodec.Send(ws, backBuffer.Pix); err != nil {
+				log.Println(err)
+				return
+			}
+		} else {
+			if err := streamCodec.Send(ws, raytracer.Image(idx).Pix); err != nil {
+				log.Println(err)
+				return
+			}
 		}
 	}
 }

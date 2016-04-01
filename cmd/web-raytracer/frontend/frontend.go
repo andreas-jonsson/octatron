@@ -21,19 +21,24 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"image"
+	"image/color/palette"
 	"strconv"
 	"time"
 
-	"github.com/flimzy/jsblob"
+	"github.com/andreas-jonsson/octatron/trace"
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/gopherjs/websocket"
 )
 
 const (
-	imgWidth  = 640
-	imgHeight = 360
-	imgScale  = 1
+	imgWidth  = 320
+	imgHeight = 180
+	imgScale  = 2
+	//colorFormat = "RGBA"
+	colorFormat = "PALETTE"
 
 	//hostAddress = "localhost"
 	hostAddress = "server.andreasjonsson.se"
@@ -41,123 +46,143 @@ const (
 
 type (
 	setupMessage struct {
-		Width       int     "width"
-		Height      int     "height"
-		FieldOfView float32 "field_of_view"
-		Tree        string  "tree"
+		Width       int     `width`
+		Height      int     `height`
+		FieldOfView float32 `field_of_view`
+		ViewDist    float32 `view_dist`
+		ColorFormat string  `color_format`
 	}
 
 	updateMessage struct {
 		Camera struct {
-			Position [3]float32 "position"
-			LookAt   [3]float32 "look_at"
+			Position [3]float32 `position`
+			XRot     float32    `x_rot`
+			YRot     float32    `y_rot`
 		} "camera"
 	}
 )
 
 var (
-	numFrames = 0
-	keys      = make(map[int]bool)
+	keys       = make(map[int]bool)
+	imgRect    = image.Rect(0, 0, imgWidth/2, imgHeight)
+	palImages  = [2]*image.Paletted{image.NewPaletted(imgRect, palette.Plan9), image.NewPaletted(imgRect, palette.Plan9)}
+	rgbaImages = [2]*image.RGBA{image.NewRGBA(imgRect), image.NewRGBA(imgRect)}
+	finalImage = image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
+
+	frameId, numFrames int
 )
 
-func handleError(err error) {
+func throw(err error) {
 	js.Global.Call("alert", err.Error())
+	panic(err)
 }
 
-func updateScreen(ctx, buf, img *js.Object, dest, src []byte) {
-	for i, b := range src {
-		dest[i] = b
-	}
-
-	img.Get("data").Call("set", buf)
-	ctx.Call("putImageData", img, 0, 0)
-	numFrames++
-}
-
-func startConnection(ctx, buf, img *js.Object, dest []byte, renderChan chan struct{}) {
-	ws, err := websocket.New(fmt.Sprintf("ws://%s:8080/render", hostAddress))
+func assert(err error) {
 	if err != nil {
-		handleError(err)
+		throw(err)
 	}
+}
+
+func setupConnection(canvas *js.Object) {
+	ctx := canvas.Call("getContext", "2d")
+	img := ctx.Call("getImageData", 0, 0, imgWidth, imgHeight)
+
+	if img.Get("data").Length() != len(finalImage.Pix) {
+		throw(errors.New("data size of images do not match"))
+	}
+
+	ws, err := websocket.New(fmt.Sprintf("ws://%s:8080/render", hostAddress))
+	assert(err)
 
 	onOpen := func(ev *js.Object) {
 		setup := setupMessage{
 			Width:       imgWidth,
 			Height:      imgHeight,
 			FieldOfView: 45,
-			Tree:        "test.oct",
+			ViewDist:    20,
+			ColorFormat: colorFormat,
 		}
 
 		msg, err := json.Marshal(setup)
-		if err != nil {
-			handleError(err)
-		}
+		assert(err)
 
-		if err := ws.Send(string(msg)); err != nil {
-			handleError(err)
-		}
+		assert(ws.Send(string(msg)))
 
-		go updateCamera(ws, renderChan)
+		go updateCamera(ws)
 	}
 
 	onMessage := func(ev *js.Object) {
-		blob := jsblob.Blob{*ev.Get("data")}
-		go func() {
-			updateScreen(ctx, buf, img, dest, blob.Bytes())
-			renderChan <- struct{}{}
-		}()
+		idx := frameId % 2
+		data := js.Global.Get("Uint8Array").New(ev.Get("data")).Interface().([]uint8)
+
+		var (
+			imageA, imageB image.Image
+		)
+
+		if colorFormat == "RGBA" {
+			rgbaImages[idx].Pix = data
+			imageA = rgbaImages[0]
+			imageB = rgbaImages[1]
+		} else {
+			palImages[idx].Pix = data
+			imageA = palImages[0]
+			imageB = palImages[1]
+		}
+
+		// This function could be optimized for this specific senario.
+		assert(trace.Reconstruct(imageA, imageB, finalImage))
+
+		arrBuf := js.NewArrayBuffer(finalImage.Pix)
+		buf := js.Global.Get("Uint8ClampedArray").New(arrBuf)
+		img.Get("data").Call("set", buf)
+		ctx.Call("putImageData", img, 0, 0)
+
+		numFrames++
+		frameId++
 	}
 
+	ws.BinaryType = "arraybuffer"
 	ws.AddEventListener("open", false, onOpen)
 	ws.AddEventListener("message", false, onMessage)
 }
 
-func updateCamera(ws *websocket.WebSocket, renderChan <-chan struct{}) {
+func updateCamera(ws *websocket.WebSocket) {
 	const (
 		cameraSpeed = 0.1
 		tick30hz    = (1000 / 30) * time.Millisecond
 	)
 
 	var (
-		pressed = true
-		msg     updateMessage
+		//pressed bool
+		msg updateMessage
 	)
 
-	msg.Camera.LookAt = [3]float32{0, 0, -1}
+	msg.Camera.Position = [3]float32{0.666, 0, 1.131}
+	msg.Camera.XRot = 0.46938998
+	msg.Camera.YRot = 0.26761
 
 	for _ = range time.Tick(tick30hz) {
+		//pressed = true
+
 		switch {
 		case keys[38]: // Up
 			msg.Camera.Position[2] -= cameraSpeed
-			msg.Camera.LookAt[2] -= cameraSpeed
-			pressed = true
 		case keys[40]: // Down
 			msg.Camera.Position[2] += cameraSpeed
-			msg.Camera.LookAt[2] += cameraSpeed
-			pressed = true
 		case keys[37]: // Left
 			msg.Camera.Position[0] += cameraSpeed
-			msg.Camera.LookAt[0] += cameraSpeed
-			pressed = true
 		case keys[39]: // Right
 			msg.Camera.Position[0] -= cameraSpeed
-			msg.Camera.LookAt[0] -= cameraSpeed
-			pressed = true
+		default:
+			//pressed = false
 		}
 
-		if pressed {
-			msg, err := json.Marshal(msg)
-			if err != nil {
-				handleError(err)
-			}
+		//if pressed {
+		msg, err := json.Marshal(msg)
+		assert(err)
 
-			if err := ws.Send(string(msg)); err != nil {
-				handleError(err)
-			}
-
-			pressed = false
-			<-renderChan
-		}
+		assert(ws.Send(string(msg)))
+		//}
 	}
 }
 
@@ -166,8 +191,15 @@ func updateTitle() {
 	js.Global.Get("document").Set("title", title)
 }
 
-func start() {
+func load() {
 	document := js.Global.Get("document")
+
+	go func() {
+		for _ = range time.Tick(time.Second) {
+			updateTitle()
+			numFrames = 0
+		}
+	}()
 
 	document.Set("onkeydown", func(e *js.Object) {
 		keys[e.Get("keyCode").Int()] = true
@@ -184,26 +216,9 @@ func start() {
 	canvas.Get("style").Set("height", strconv.Itoa(imgHeight*imgScale)+"px")
 	document.Get("body").Call("appendChild", canvas)
 
-	go func() {
-		for _ = range time.Tick(time.Second) {
-			updateTitle()
-			numFrames = 0
-		}
-	}()
-
-	ctx := canvas.Call("getContext", "2d")
-	img := ctx.Call("getImageData", 0, 0, imgWidth, imgHeight)
-	data := img.Get("data")
-	arrBuf := js.Global.Get("ArrayBuffer").New(data.Length())
-	buf := js.Global.Get("Uint8ClampedArray").New(arrBuf)
-	dest := js.Global.Get("Uint8Array").New(arrBuf).Interface().([]byte)
-
-	renderChan := make(chan struct{}, 1) // Ensure that we have at moast N frames in-flight.
-	renderChan <- struct{}{}
-
-	startConnection(ctx, buf, img, dest, renderChan)
+	setupConnection(canvas)
 }
 
 func main() {
-	js.Global.Call("addEventListener", "load", func() { go start() })
+	js.Global.Call("addEventListener", "load", func() { go load() })
 }
