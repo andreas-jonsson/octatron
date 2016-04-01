@@ -22779,1336 +22779,1905 @@ $packages["encoding/json"] = (function() {
 	$pkg.$init = $init;
 	return $pkg;
 })();
-$packages["github.com/gopherjs/webgl"] = (function() {
-	var $pkg = {}, $init, errors, js, ContextAttributes, Context, ptrType, ptrType$1, mapType, ptrType$2, sliceType, sliceType$1, sliceType$2, DefaultAttributes, NewContext;
+$packages["bufio"] = (function() {
+	var $pkg = {}, $init, bytes, errors, io, utf8, errNegativeRead, errNegativeWrite;
+	bytes = $packages["bytes"];
 	errors = $packages["errors"];
-	js = $packages["github.com/gopherjs/gopherjs/js"];
-	ContextAttributes = $pkg.ContextAttributes = $newType(0, $kindStruct, "webgl.ContextAttributes", "ContextAttributes", "github.com/gopherjs/webgl", function(Alpha_, Depth_, Stencil_, Antialias_, PremultipliedAlpha_, PreserveDrawingBuffer_) {
+	io = $packages["io"];
+	utf8 = $packages["unicode/utf8"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = bytes.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = errors.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = io.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = utf8.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$pkg.ErrInvalidUnreadByte = errors.New("bufio: invalid use of UnreadByte");
+		$pkg.ErrInvalidUnreadRune = errors.New("bufio: invalid use of UnreadRune");
+		$pkg.ErrBufferFull = errors.New("bufio: buffer full");
+		$pkg.ErrNegativeCount = errors.New("bufio: negative count");
+		errNegativeRead = errors.New("bufio: reader returned negative count from Read");
+		errNegativeWrite = errors.New("bufio: writer returned negative count from Write");
+		$pkg.ErrTooLong = errors.New("bufio.Scanner: token too long");
+		$pkg.ErrNegativeAdvance = errors.New("bufio.Scanner: SplitFunc returns negative advance count");
+		$pkg.ErrAdvanceTooFar = errors.New("bufio.Scanner: SplitFunc returns advance count beyond input");
+		$pkg.ErrFinalToken = errors.New("final token");
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["compress/flate"] = (function() {
+	var $pkg = {}, $init, bufio, fmt, io, math, sort, strconv, sync, huffmanEncoder, literalNode, sliceType$4, sliceType$8, ptrType$4, sliceType$9, sliceType$10, fixedLiteralEncoding, fixedOffsetEncoding, reverseByte, newHuffmanEncoder, generateFixedLiteralEncoding, generateFixedOffsetEncoding, reverseUint16, reverseBits;
+	bufio = $packages["bufio"];
+	fmt = $packages["fmt"];
+	io = $packages["io"];
+	math = $packages["math"];
+	sort = $packages["sort"];
+	strconv = $packages["strconv"];
+	sync = $packages["sync"];
+	huffmanEncoder = $pkg.huffmanEncoder = $newType(0, $kindStruct, "flate.huffmanEncoder", "huffmanEncoder", "compress/flate", function(codeBits_, code_) {
 		this.$val = this;
 		if (arguments.length === 0) {
-			this.Alpha = false;
-			this.Depth = false;
-			this.Stencil = false;
-			this.Antialias = false;
-			this.PremultipliedAlpha = false;
-			this.PreserveDrawingBuffer = false;
+			this.codeBits = sliceType$4.nil;
+			this.code = sliceType$9.nil;
 			return;
 		}
-		this.Alpha = Alpha_;
-		this.Depth = Depth_;
-		this.Stencil = Stencil_;
-		this.Antialias = Antialias_;
-		this.PremultipliedAlpha = PremultipliedAlpha_;
-		this.PreserveDrawingBuffer = PreserveDrawingBuffer_;
+		this.codeBits = codeBits_;
+		this.code = code_;
 	});
-	Context = $pkg.Context = $newType(0, $kindStruct, "webgl.Context", "Context", "github.com/gopherjs/webgl", function(Object_, ARRAY_BUFFER_, ARRAY_BUFFER_BINDING_, ATTACHED_SHADERS_, BACK_, BLEND_, BLEND_COLOR_, BLEND_DST_ALPHA_, BLEND_DST_RGB_, BLEND_EQUATION_, BLEND_EQUATION_ALPHA_, BLEND_EQUATION_RGB_, BLEND_SRC_ALPHA_, BLEND_SRC_RGB_, BLUE_BITS_, BOOL_, BOOL_VEC2_, BOOL_VEC3_, BOOL_VEC4_, BROWSER_DEFAULT_WEBGL_, BUFFER_SIZE_, BUFFER_USAGE_, BYTE_, CCW_, CLAMP_TO_EDGE_, COLOR_ATTACHMENT0_, COLOR_BUFFER_BIT_, COLOR_CLEAR_VALUE_, COLOR_WRITEMASK_, COMPILE_STATUS_, COMPRESSED_TEXTURE_FORMATS_, CONSTANT_ALPHA_, CONSTANT_COLOR_, CONTEXT_LOST_WEBGL_, CULL_FACE_, CULL_FACE_MODE_, CURRENT_PROGRAM_, CURRENT_VERTEX_ATTRIB_, CW_, DECR_, DECR_WRAP_, DELETE_STATUS_, DEPTH_ATTACHMENT_, DEPTH_BITS_, DEPTH_BUFFER_BIT_, DEPTH_CLEAR_VALUE_, DEPTH_COMPONENT_, DEPTH_COMPONENT16_, DEPTH_FUNC_, DEPTH_RANGE_, DEPTH_STENCIL_, DEPTH_STENCIL_ATTACHMENT_, DEPTH_TEST_, DEPTH_WRITEMASK_, DITHER_, DONT_CARE_, DST_ALPHA_, DST_COLOR_, DYNAMIC_DRAW_, ELEMENT_ARRAY_BUFFER_, ELEMENT_ARRAY_BUFFER_BINDING_, EQUAL_, FASTEST_, FLOAT_, FLOAT_MAT2_, FLOAT_MAT3_, FLOAT_MAT4_, FLOAT_VEC2_, FLOAT_VEC3_, FLOAT_VEC4_, FRAGMENT_SHADER_, FRAMEBUFFER_, FRAMEBUFFER_ATTACHMENT_OBJECT_NAME_, FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE_, FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE_, FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL_, FRAMEBUFFER_BINDING_, FRAMEBUFFER_COMPLETE_, FRAMEBUFFER_INCOMPLETE_ATTACHMENT_, FRAMEBUFFER_INCOMPLETE_DIMENSIONS_, FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_, FRAMEBUFFER_UNSUPPORTED_, FRONT_, FRONT_AND_BACK_, FRONT_FACE_, FUNC_ADD_, FUNC_REVERSE_SUBTRACT_, FUNC_SUBTRACT_, GENERATE_MIPMAP_HINT_, GEQUAL_, GREATER_, GREEN_BITS_, HIGH_FLOAT_, HIGH_INT_, INCR_, INCR_WRAP_, INFO_LOG_LENGTH_, INT_, INT_VEC2_, INT_VEC3_, INT_VEC4_, INVALID_ENUM_, INVALID_FRAMEBUFFER_OPERATION_, INVALID_OPERATION_, INVALID_VALUE_, INVERT_, KEEP_, LEQUAL_, LESS_, LINEAR_, LINEAR_MIPMAP_LINEAR_, LINEAR_MIPMAP_NEAREST_, LINES_, LINE_LOOP_, LINE_STRIP_, LINE_WIDTH_, LINK_STATUS_, LOW_FLOAT_, LOW_INT_, LUMINANCE_, LUMINANCE_ALPHA_, MAX_COMBINED_TEXTURE_IMAGE_UNITS_, MAX_CUBE_MAP_TEXTURE_SIZE_, MAX_FRAGMENT_UNIFORM_VECTORS_, MAX_RENDERBUFFER_SIZE_, MAX_TEXTURE_IMAGE_UNITS_, MAX_TEXTURE_SIZE_, MAX_VARYING_VECTORS_, MAX_VERTEX_ATTRIBS_, MAX_VERTEX_TEXTURE_IMAGE_UNITS_, MAX_VERTEX_UNIFORM_VECTORS_, MAX_VIEWPORT_DIMS_, MEDIUM_FLOAT_, MEDIUM_INT_, MIRRORED_REPEAT_, NEAREST_, NEAREST_MIPMAP_LINEAR_, NEAREST_MIPMAP_NEAREST_, NEVER_, NICEST_, NONE_, NOTEQUAL_, NO_ERROR_, NUM_COMPRESSED_TEXTURE_FORMATS_, ONE_, ONE_MINUS_CONSTANT_ALPHA_, ONE_MINUS_CONSTANT_COLOR_, ONE_MINUS_DST_ALPHA_, ONE_MINUS_DST_COLOR_, ONE_MINUS_SRC_ALPHA_, ONE_MINUS_SRC_COLOR_, OUT_OF_MEMORY_, PACK_ALIGNMENT_, POINTS_, POLYGON_OFFSET_FACTOR_, POLYGON_OFFSET_FILL_, POLYGON_OFFSET_UNITS_, RED_BITS_, RENDERBUFFER_, RENDERBUFFER_ALPHA_SIZE_, RENDERBUFFER_BINDING_, RENDERBUFFER_BLUE_SIZE_, RENDERBUFFER_DEPTH_SIZE_, RENDERBUFFER_GREEN_SIZE_, RENDERBUFFER_HEIGHT_, RENDERBUFFER_INTERNAL_FORMAT_, RENDERBUFFER_RED_SIZE_, RENDERBUFFER_STENCIL_SIZE_, RENDERBUFFER_WIDTH_, RENDERER_, REPEAT_, REPLACE_, RGB_, RGB5_A1_, RGB565_, RGBA_, RGBA4_, SAMPLER_2D_, SAMPLER_CUBE_, SAMPLES_, SAMPLE_ALPHA_TO_COVERAGE_, SAMPLE_BUFFERS_, SAMPLE_COVERAGE_, SAMPLE_COVERAGE_INVERT_, SAMPLE_COVERAGE_VALUE_, SCISSOR_BOX_, SCISSOR_TEST_, SHADER_COMPILER_, SHADER_SOURCE_LENGTH_, SHADER_TYPE_, SHADING_LANGUAGE_VERSION_, SHORT_, SRC_ALPHA_, SRC_ALPHA_SATURATE_, SRC_COLOR_, STATIC_DRAW_, STENCIL_ATTACHMENT_, STENCIL_BACK_FAIL_, STENCIL_BACK_FUNC_, STENCIL_BACK_PASS_DEPTH_FAIL_, STENCIL_BACK_PASS_DEPTH_PASS_, STENCIL_BACK_REF_, STENCIL_BACK_VALUE_MASK_, STENCIL_BACK_WRITEMASK_, STENCIL_BITS_, STENCIL_BUFFER_BIT_, STENCIL_CLEAR_VALUE_, STENCIL_FAIL_, STENCIL_FUNC_, STENCIL_INDEX_, STENCIL_INDEX8_, STENCIL_PASS_DEPTH_FAIL_, STENCIL_PASS_DEPTH_PASS_, STENCIL_REF_, STENCIL_TEST_, STENCIL_VALUE_MASK_, STENCIL_WRITEMASK_, STREAM_DRAW_, SUBPIXEL_BITS_, TEXTURE_, TEXTURE0_, TEXTURE1_, TEXTURE2_, TEXTURE3_, TEXTURE4_, TEXTURE5_, TEXTURE6_, TEXTURE7_, TEXTURE8_, TEXTURE9_, TEXTURE10_, TEXTURE11_, TEXTURE12_, TEXTURE13_, TEXTURE14_, TEXTURE15_, TEXTURE16_, TEXTURE17_, TEXTURE18_, TEXTURE19_, TEXTURE20_, TEXTURE21_, TEXTURE22_, TEXTURE23_, TEXTURE24_, TEXTURE25_, TEXTURE26_, TEXTURE27_, TEXTURE28_, TEXTURE29_, TEXTURE30_, TEXTURE31_, TEXTURE_2D_, TEXTURE_BINDING_2D_, TEXTURE_BINDING_CUBE_MAP_, TEXTURE_CUBE_MAP_, TEXTURE_CUBE_MAP_NEGATIVE_X_, TEXTURE_CUBE_MAP_NEGATIVE_Y_, TEXTURE_CUBE_MAP_NEGATIVE_Z_, TEXTURE_CUBE_MAP_POSITIVE_X_, TEXTURE_CUBE_MAP_POSITIVE_Y_, TEXTURE_CUBE_MAP_POSITIVE_Z_, TEXTURE_MAG_FILTER_, TEXTURE_MIN_FILTER_, TEXTURE_WRAP_S_, TEXTURE_WRAP_T_, TRIANGLES_, TRIANGLE_FAN_, TRIANGLE_STRIP_, UNPACK_ALIGNMENT_, UNPACK_COLORSPACE_CONVERSION_WEBGL_, UNPACK_FLIP_Y_WEBGL_, UNPACK_PREMULTIPLY_ALPHA_WEBGL_, UNSIGNED_BYTE_, UNSIGNED_INT_, UNSIGNED_SHORT_, UNSIGNED_SHORT_4_4_4_4_, UNSIGNED_SHORT_5_5_5_1_, UNSIGNED_SHORT_5_6_5_, VALIDATE_STATUS_, VENDOR_, VERSION_, VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_, VERTEX_ATTRIB_ARRAY_ENABLED_, VERTEX_ATTRIB_ARRAY_NORMALIZED_, VERTEX_ATTRIB_ARRAY_POINTER_, VERTEX_ATTRIB_ARRAY_SIZE_, VERTEX_ATTRIB_ARRAY_STRIDE_, VERTEX_ATTRIB_ARRAY_TYPE_, VERTEX_SHADER_, VIEWPORT_, ZERO_) {
+	literalNode = $pkg.literalNode = $newType(0, $kindStruct, "flate.literalNode", "literalNode", "compress/flate", function(literal_, freq_) {
 		this.$val = this;
 		if (arguments.length === 0) {
-			this.Object = null;
-			this.ARRAY_BUFFER = 0;
-			this.ARRAY_BUFFER_BINDING = 0;
-			this.ATTACHED_SHADERS = 0;
-			this.BACK = 0;
-			this.BLEND = 0;
-			this.BLEND_COLOR = 0;
-			this.BLEND_DST_ALPHA = 0;
-			this.BLEND_DST_RGB = 0;
-			this.BLEND_EQUATION = 0;
-			this.BLEND_EQUATION_ALPHA = 0;
-			this.BLEND_EQUATION_RGB = 0;
-			this.BLEND_SRC_ALPHA = 0;
-			this.BLEND_SRC_RGB = 0;
-			this.BLUE_BITS = 0;
-			this.BOOL = 0;
-			this.BOOL_VEC2 = 0;
-			this.BOOL_VEC3 = 0;
-			this.BOOL_VEC4 = 0;
-			this.BROWSER_DEFAULT_WEBGL = 0;
-			this.BUFFER_SIZE = 0;
-			this.BUFFER_USAGE = 0;
-			this.BYTE = 0;
-			this.CCW = 0;
-			this.CLAMP_TO_EDGE = 0;
-			this.COLOR_ATTACHMENT0 = 0;
-			this.COLOR_BUFFER_BIT = 0;
-			this.COLOR_CLEAR_VALUE = 0;
-			this.COLOR_WRITEMASK = 0;
-			this.COMPILE_STATUS = 0;
-			this.COMPRESSED_TEXTURE_FORMATS = 0;
-			this.CONSTANT_ALPHA = 0;
-			this.CONSTANT_COLOR = 0;
-			this.CONTEXT_LOST_WEBGL = 0;
-			this.CULL_FACE = 0;
-			this.CULL_FACE_MODE = 0;
-			this.CURRENT_PROGRAM = 0;
-			this.CURRENT_VERTEX_ATTRIB = 0;
-			this.CW = 0;
-			this.DECR = 0;
-			this.DECR_WRAP = 0;
-			this.DELETE_STATUS = 0;
-			this.DEPTH_ATTACHMENT = 0;
-			this.DEPTH_BITS = 0;
-			this.DEPTH_BUFFER_BIT = 0;
-			this.DEPTH_CLEAR_VALUE = 0;
-			this.DEPTH_COMPONENT = 0;
-			this.DEPTH_COMPONENT16 = 0;
-			this.DEPTH_FUNC = 0;
-			this.DEPTH_RANGE = 0;
-			this.DEPTH_STENCIL = 0;
-			this.DEPTH_STENCIL_ATTACHMENT = 0;
-			this.DEPTH_TEST = 0;
-			this.DEPTH_WRITEMASK = 0;
-			this.DITHER = 0;
-			this.DONT_CARE = 0;
-			this.DST_ALPHA = 0;
-			this.DST_COLOR = 0;
-			this.DYNAMIC_DRAW = 0;
-			this.ELEMENT_ARRAY_BUFFER = 0;
-			this.ELEMENT_ARRAY_BUFFER_BINDING = 0;
-			this.EQUAL = 0;
-			this.FASTEST = 0;
-			this.FLOAT = 0;
-			this.FLOAT_MAT2 = 0;
-			this.FLOAT_MAT3 = 0;
-			this.FLOAT_MAT4 = 0;
-			this.FLOAT_VEC2 = 0;
-			this.FLOAT_VEC3 = 0;
-			this.FLOAT_VEC4 = 0;
-			this.FRAGMENT_SHADER = 0;
-			this.FRAMEBUFFER = 0;
-			this.FRAMEBUFFER_ATTACHMENT_OBJECT_NAME = 0;
-			this.FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE = 0;
-			this.FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE = 0;
-			this.FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL = 0;
-			this.FRAMEBUFFER_BINDING = 0;
-			this.FRAMEBUFFER_COMPLETE = 0;
-			this.FRAMEBUFFER_INCOMPLETE_ATTACHMENT = 0;
-			this.FRAMEBUFFER_INCOMPLETE_DIMENSIONS = 0;
-			this.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT = 0;
-			this.FRAMEBUFFER_UNSUPPORTED = 0;
-			this.FRONT = 0;
-			this.FRONT_AND_BACK = 0;
-			this.FRONT_FACE = 0;
-			this.FUNC_ADD = 0;
-			this.FUNC_REVERSE_SUBTRACT = 0;
-			this.FUNC_SUBTRACT = 0;
-			this.GENERATE_MIPMAP_HINT = 0;
-			this.GEQUAL = 0;
-			this.GREATER = 0;
-			this.GREEN_BITS = 0;
-			this.HIGH_FLOAT = 0;
-			this.HIGH_INT = 0;
-			this.INCR = 0;
-			this.INCR_WRAP = 0;
-			this.INFO_LOG_LENGTH = 0;
-			this.INT = 0;
-			this.INT_VEC2 = 0;
-			this.INT_VEC3 = 0;
-			this.INT_VEC4 = 0;
-			this.INVALID_ENUM = 0;
-			this.INVALID_FRAMEBUFFER_OPERATION = 0;
-			this.INVALID_OPERATION = 0;
-			this.INVALID_VALUE = 0;
-			this.INVERT = 0;
-			this.KEEP = 0;
-			this.LEQUAL = 0;
-			this.LESS = 0;
-			this.LINEAR = 0;
-			this.LINEAR_MIPMAP_LINEAR = 0;
-			this.LINEAR_MIPMAP_NEAREST = 0;
-			this.LINES = 0;
-			this.LINE_LOOP = 0;
-			this.LINE_STRIP = 0;
-			this.LINE_WIDTH = 0;
-			this.LINK_STATUS = 0;
-			this.LOW_FLOAT = 0;
-			this.LOW_INT = 0;
-			this.LUMINANCE = 0;
-			this.LUMINANCE_ALPHA = 0;
-			this.MAX_COMBINED_TEXTURE_IMAGE_UNITS = 0;
-			this.MAX_CUBE_MAP_TEXTURE_SIZE = 0;
-			this.MAX_FRAGMENT_UNIFORM_VECTORS = 0;
-			this.MAX_RENDERBUFFER_SIZE = 0;
-			this.MAX_TEXTURE_IMAGE_UNITS = 0;
-			this.MAX_TEXTURE_SIZE = 0;
-			this.MAX_VARYING_VECTORS = 0;
-			this.MAX_VERTEX_ATTRIBS = 0;
-			this.MAX_VERTEX_TEXTURE_IMAGE_UNITS = 0;
-			this.MAX_VERTEX_UNIFORM_VECTORS = 0;
-			this.MAX_VIEWPORT_DIMS = 0;
-			this.MEDIUM_FLOAT = 0;
-			this.MEDIUM_INT = 0;
-			this.MIRRORED_REPEAT = 0;
-			this.NEAREST = 0;
-			this.NEAREST_MIPMAP_LINEAR = 0;
-			this.NEAREST_MIPMAP_NEAREST = 0;
-			this.NEVER = 0;
-			this.NICEST = 0;
-			this.NONE = 0;
-			this.NOTEQUAL = 0;
-			this.NO_ERROR = 0;
-			this.NUM_COMPRESSED_TEXTURE_FORMATS = 0;
-			this.ONE = 0;
-			this.ONE_MINUS_CONSTANT_ALPHA = 0;
-			this.ONE_MINUS_CONSTANT_COLOR = 0;
-			this.ONE_MINUS_DST_ALPHA = 0;
-			this.ONE_MINUS_DST_COLOR = 0;
-			this.ONE_MINUS_SRC_ALPHA = 0;
-			this.ONE_MINUS_SRC_COLOR = 0;
-			this.OUT_OF_MEMORY = 0;
-			this.PACK_ALIGNMENT = 0;
-			this.POINTS = 0;
-			this.POLYGON_OFFSET_FACTOR = 0;
-			this.POLYGON_OFFSET_FILL = 0;
-			this.POLYGON_OFFSET_UNITS = 0;
-			this.RED_BITS = 0;
-			this.RENDERBUFFER = 0;
-			this.RENDERBUFFER_ALPHA_SIZE = 0;
-			this.RENDERBUFFER_BINDING = 0;
-			this.RENDERBUFFER_BLUE_SIZE = 0;
-			this.RENDERBUFFER_DEPTH_SIZE = 0;
-			this.RENDERBUFFER_GREEN_SIZE = 0;
-			this.RENDERBUFFER_HEIGHT = 0;
-			this.RENDERBUFFER_INTERNAL_FORMAT = 0;
-			this.RENDERBUFFER_RED_SIZE = 0;
-			this.RENDERBUFFER_STENCIL_SIZE = 0;
-			this.RENDERBUFFER_WIDTH = 0;
-			this.RENDERER = 0;
-			this.REPEAT = 0;
-			this.REPLACE = 0;
-			this.RGB = 0;
-			this.RGB5_A1 = 0;
-			this.RGB565 = 0;
-			this.RGBA = 0;
-			this.RGBA4 = 0;
-			this.SAMPLER_2D = 0;
-			this.SAMPLER_CUBE = 0;
-			this.SAMPLES = 0;
-			this.SAMPLE_ALPHA_TO_COVERAGE = 0;
-			this.SAMPLE_BUFFERS = 0;
-			this.SAMPLE_COVERAGE = 0;
-			this.SAMPLE_COVERAGE_INVERT = 0;
-			this.SAMPLE_COVERAGE_VALUE = 0;
-			this.SCISSOR_BOX = 0;
-			this.SCISSOR_TEST = 0;
-			this.SHADER_COMPILER = 0;
-			this.SHADER_SOURCE_LENGTH = 0;
-			this.SHADER_TYPE = 0;
-			this.SHADING_LANGUAGE_VERSION = 0;
-			this.SHORT = 0;
-			this.SRC_ALPHA = 0;
-			this.SRC_ALPHA_SATURATE = 0;
-			this.SRC_COLOR = 0;
-			this.STATIC_DRAW = 0;
-			this.STENCIL_ATTACHMENT = 0;
-			this.STENCIL_BACK_FAIL = 0;
-			this.STENCIL_BACK_FUNC = 0;
-			this.STENCIL_BACK_PASS_DEPTH_FAIL = 0;
-			this.STENCIL_BACK_PASS_DEPTH_PASS = 0;
-			this.STENCIL_BACK_REF = 0;
-			this.STENCIL_BACK_VALUE_MASK = 0;
-			this.STENCIL_BACK_WRITEMASK = 0;
-			this.STENCIL_BITS = 0;
-			this.STENCIL_BUFFER_BIT = 0;
-			this.STENCIL_CLEAR_VALUE = 0;
-			this.STENCIL_FAIL = 0;
-			this.STENCIL_FUNC = 0;
-			this.STENCIL_INDEX = 0;
-			this.STENCIL_INDEX8 = 0;
-			this.STENCIL_PASS_DEPTH_FAIL = 0;
-			this.STENCIL_PASS_DEPTH_PASS = 0;
-			this.STENCIL_REF = 0;
-			this.STENCIL_TEST = 0;
-			this.STENCIL_VALUE_MASK = 0;
-			this.STENCIL_WRITEMASK = 0;
-			this.STREAM_DRAW = 0;
-			this.SUBPIXEL_BITS = 0;
-			this.TEXTURE = 0;
-			this.TEXTURE0 = 0;
-			this.TEXTURE1 = 0;
-			this.TEXTURE2 = 0;
-			this.TEXTURE3 = 0;
-			this.TEXTURE4 = 0;
-			this.TEXTURE5 = 0;
-			this.TEXTURE6 = 0;
-			this.TEXTURE7 = 0;
-			this.TEXTURE8 = 0;
-			this.TEXTURE9 = 0;
-			this.TEXTURE10 = 0;
-			this.TEXTURE11 = 0;
-			this.TEXTURE12 = 0;
-			this.TEXTURE13 = 0;
-			this.TEXTURE14 = 0;
-			this.TEXTURE15 = 0;
-			this.TEXTURE16 = 0;
-			this.TEXTURE17 = 0;
-			this.TEXTURE18 = 0;
-			this.TEXTURE19 = 0;
-			this.TEXTURE20 = 0;
-			this.TEXTURE21 = 0;
-			this.TEXTURE22 = 0;
-			this.TEXTURE23 = 0;
-			this.TEXTURE24 = 0;
-			this.TEXTURE25 = 0;
-			this.TEXTURE26 = 0;
-			this.TEXTURE27 = 0;
-			this.TEXTURE28 = 0;
-			this.TEXTURE29 = 0;
-			this.TEXTURE30 = 0;
-			this.TEXTURE31 = 0;
-			this.TEXTURE_2D = 0;
-			this.TEXTURE_BINDING_2D = 0;
-			this.TEXTURE_BINDING_CUBE_MAP = 0;
-			this.TEXTURE_CUBE_MAP = 0;
-			this.TEXTURE_CUBE_MAP_NEGATIVE_X = 0;
-			this.TEXTURE_CUBE_MAP_NEGATIVE_Y = 0;
-			this.TEXTURE_CUBE_MAP_NEGATIVE_Z = 0;
-			this.TEXTURE_CUBE_MAP_POSITIVE_X = 0;
-			this.TEXTURE_CUBE_MAP_POSITIVE_Y = 0;
-			this.TEXTURE_CUBE_MAP_POSITIVE_Z = 0;
-			this.TEXTURE_MAG_FILTER = 0;
-			this.TEXTURE_MIN_FILTER = 0;
-			this.TEXTURE_WRAP_S = 0;
-			this.TEXTURE_WRAP_T = 0;
-			this.TRIANGLES = 0;
-			this.TRIANGLE_FAN = 0;
-			this.TRIANGLE_STRIP = 0;
-			this.UNPACK_ALIGNMENT = 0;
-			this.UNPACK_COLORSPACE_CONVERSION_WEBGL = 0;
-			this.UNPACK_FLIP_Y_WEBGL = 0;
-			this.UNPACK_PREMULTIPLY_ALPHA_WEBGL = 0;
-			this.UNSIGNED_BYTE = 0;
-			this.UNSIGNED_INT = 0;
-			this.UNSIGNED_SHORT = 0;
-			this.UNSIGNED_SHORT_4_4_4_4 = 0;
-			this.UNSIGNED_SHORT_5_5_5_1 = 0;
-			this.UNSIGNED_SHORT_5_6_5 = 0;
-			this.VALIDATE_STATUS = 0;
-			this.VENDOR = 0;
-			this.VERSION = 0;
-			this.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING = 0;
-			this.VERTEX_ATTRIB_ARRAY_ENABLED = 0;
-			this.VERTEX_ATTRIB_ARRAY_NORMALIZED = 0;
-			this.VERTEX_ATTRIB_ARRAY_POINTER = 0;
-			this.VERTEX_ATTRIB_ARRAY_SIZE = 0;
-			this.VERTEX_ATTRIB_ARRAY_STRIDE = 0;
-			this.VERTEX_ATTRIB_ARRAY_TYPE = 0;
-			this.VERTEX_SHADER = 0;
-			this.VIEWPORT = 0;
-			this.ZERO = 0;
+			this.literal = 0;
+			this.freq = 0;
 			return;
 		}
-		this.Object = Object_;
-		this.ARRAY_BUFFER = ARRAY_BUFFER_;
-		this.ARRAY_BUFFER_BINDING = ARRAY_BUFFER_BINDING_;
-		this.ATTACHED_SHADERS = ATTACHED_SHADERS_;
-		this.BACK = BACK_;
-		this.BLEND = BLEND_;
-		this.BLEND_COLOR = BLEND_COLOR_;
-		this.BLEND_DST_ALPHA = BLEND_DST_ALPHA_;
-		this.BLEND_DST_RGB = BLEND_DST_RGB_;
-		this.BLEND_EQUATION = BLEND_EQUATION_;
-		this.BLEND_EQUATION_ALPHA = BLEND_EQUATION_ALPHA_;
-		this.BLEND_EQUATION_RGB = BLEND_EQUATION_RGB_;
-		this.BLEND_SRC_ALPHA = BLEND_SRC_ALPHA_;
-		this.BLEND_SRC_RGB = BLEND_SRC_RGB_;
-		this.BLUE_BITS = BLUE_BITS_;
-		this.BOOL = BOOL_;
-		this.BOOL_VEC2 = BOOL_VEC2_;
-		this.BOOL_VEC3 = BOOL_VEC3_;
-		this.BOOL_VEC4 = BOOL_VEC4_;
-		this.BROWSER_DEFAULT_WEBGL = BROWSER_DEFAULT_WEBGL_;
-		this.BUFFER_SIZE = BUFFER_SIZE_;
-		this.BUFFER_USAGE = BUFFER_USAGE_;
-		this.BYTE = BYTE_;
-		this.CCW = CCW_;
-		this.CLAMP_TO_EDGE = CLAMP_TO_EDGE_;
-		this.COLOR_ATTACHMENT0 = COLOR_ATTACHMENT0_;
-		this.COLOR_BUFFER_BIT = COLOR_BUFFER_BIT_;
-		this.COLOR_CLEAR_VALUE = COLOR_CLEAR_VALUE_;
-		this.COLOR_WRITEMASK = COLOR_WRITEMASK_;
-		this.COMPILE_STATUS = COMPILE_STATUS_;
-		this.COMPRESSED_TEXTURE_FORMATS = COMPRESSED_TEXTURE_FORMATS_;
-		this.CONSTANT_ALPHA = CONSTANT_ALPHA_;
-		this.CONSTANT_COLOR = CONSTANT_COLOR_;
-		this.CONTEXT_LOST_WEBGL = CONTEXT_LOST_WEBGL_;
-		this.CULL_FACE = CULL_FACE_;
-		this.CULL_FACE_MODE = CULL_FACE_MODE_;
-		this.CURRENT_PROGRAM = CURRENT_PROGRAM_;
-		this.CURRENT_VERTEX_ATTRIB = CURRENT_VERTEX_ATTRIB_;
-		this.CW = CW_;
-		this.DECR = DECR_;
-		this.DECR_WRAP = DECR_WRAP_;
-		this.DELETE_STATUS = DELETE_STATUS_;
-		this.DEPTH_ATTACHMENT = DEPTH_ATTACHMENT_;
-		this.DEPTH_BITS = DEPTH_BITS_;
-		this.DEPTH_BUFFER_BIT = DEPTH_BUFFER_BIT_;
-		this.DEPTH_CLEAR_VALUE = DEPTH_CLEAR_VALUE_;
-		this.DEPTH_COMPONENT = DEPTH_COMPONENT_;
-		this.DEPTH_COMPONENT16 = DEPTH_COMPONENT16_;
-		this.DEPTH_FUNC = DEPTH_FUNC_;
-		this.DEPTH_RANGE = DEPTH_RANGE_;
-		this.DEPTH_STENCIL = DEPTH_STENCIL_;
-		this.DEPTH_STENCIL_ATTACHMENT = DEPTH_STENCIL_ATTACHMENT_;
-		this.DEPTH_TEST = DEPTH_TEST_;
-		this.DEPTH_WRITEMASK = DEPTH_WRITEMASK_;
-		this.DITHER = DITHER_;
-		this.DONT_CARE = DONT_CARE_;
-		this.DST_ALPHA = DST_ALPHA_;
-		this.DST_COLOR = DST_COLOR_;
-		this.DYNAMIC_DRAW = DYNAMIC_DRAW_;
-		this.ELEMENT_ARRAY_BUFFER = ELEMENT_ARRAY_BUFFER_;
-		this.ELEMENT_ARRAY_BUFFER_BINDING = ELEMENT_ARRAY_BUFFER_BINDING_;
-		this.EQUAL = EQUAL_;
-		this.FASTEST = FASTEST_;
-		this.FLOAT = FLOAT_;
-		this.FLOAT_MAT2 = FLOAT_MAT2_;
-		this.FLOAT_MAT3 = FLOAT_MAT3_;
-		this.FLOAT_MAT4 = FLOAT_MAT4_;
-		this.FLOAT_VEC2 = FLOAT_VEC2_;
-		this.FLOAT_VEC3 = FLOAT_VEC3_;
-		this.FLOAT_VEC4 = FLOAT_VEC4_;
-		this.FRAGMENT_SHADER = FRAGMENT_SHADER_;
-		this.FRAMEBUFFER = FRAMEBUFFER_;
-		this.FRAMEBUFFER_ATTACHMENT_OBJECT_NAME = FRAMEBUFFER_ATTACHMENT_OBJECT_NAME_;
-		this.FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE = FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE_;
-		this.FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE = FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE_;
-		this.FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL = FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL_;
-		this.FRAMEBUFFER_BINDING = FRAMEBUFFER_BINDING_;
-		this.FRAMEBUFFER_COMPLETE = FRAMEBUFFER_COMPLETE_;
-		this.FRAMEBUFFER_INCOMPLETE_ATTACHMENT = FRAMEBUFFER_INCOMPLETE_ATTACHMENT_;
-		this.FRAMEBUFFER_INCOMPLETE_DIMENSIONS = FRAMEBUFFER_INCOMPLETE_DIMENSIONS_;
-		this.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT = FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_;
-		this.FRAMEBUFFER_UNSUPPORTED = FRAMEBUFFER_UNSUPPORTED_;
-		this.FRONT = FRONT_;
-		this.FRONT_AND_BACK = FRONT_AND_BACK_;
-		this.FRONT_FACE = FRONT_FACE_;
-		this.FUNC_ADD = FUNC_ADD_;
-		this.FUNC_REVERSE_SUBTRACT = FUNC_REVERSE_SUBTRACT_;
-		this.FUNC_SUBTRACT = FUNC_SUBTRACT_;
-		this.GENERATE_MIPMAP_HINT = GENERATE_MIPMAP_HINT_;
-		this.GEQUAL = GEQUAL_;
-		this.GREATER = GREATER_;
-		this.GREEN_BITS = GREEN_BITS_;
-		this.HIGH_FLOAT = HIGH_FLOAT_;
-		this.HIGH_INT = HIGH_INT_;
-		this.INCR = INCR_;
-		this.INCR_WRAP = INCR_WRAP_;
-		this.INFO_LOG_LENGTH = INFO_LOG_LENGTH_;
-		this.INT = INT_;
-		this.INT_VEC2 = INT_VEC2_;
-		this.INT_VEC3 = INT_VEC3_;
-		this.INT_VEC4 = INT_VEC4_;
-		this.INVALID_ENUM = INVALID_ENUM_;
-		this.INVALID_FRAMEBUFFER_OPERATION = INVALID_FRAMEBUFFER_OPERATION_;
-		this.INVALID_OPERATION = INVALID_OPERATION_;
-		this.INVALID_VALUE = INVALID_VALUE_;
-		this.INVERT = INVERT_;
-		this.KEEP = KEEP_;
-		this.LEQUAL = LEQUAL_;
-		this.LESS = LESS_;
-		this.LINEAR = LINEAR_;
-		this.LINEAR_MIPMAP_LINEAR = LINEAR_MIPMAP_LINEAR_;
-		this.LINEAR_MIPMAP_NEAREST = LINEAR_MIPMAP_NEAREST_;
-		this.LINES = LINES_;
-		this.LINE_LOOP = LINE_LOOP_;
-		this.LINE_STRIP = LINE_STRIP_;
-		this.LINE_WIDTH = LINE_WIDTH_;
-		this.LINK_STATUS = LINK_STATUS_;
-		this.LOW_FLOAT = LOW_FLOAT_;
-		this.LOW_INT = LOW_INT_;
-		this.LUMINANCE = LUMINANCE_;
-		this.LUMINANCE_ALPHA = LUMINANCE_ALPHA_;
-		this.MAX_COMBINED_TEXTURE_IMAGE_UNITS = MAX_COMBINED_TEXTURE_IMAGE_UNITS_;
-		this.MAX_CUBE_MAP_TEXTURE_SIZE = MAX_CUBE_MAP_TEXTURE_SIZE_;
-		this.MAX_FRAGMENT_UNIFORM_VECTORS = MAX_FRAGMENT_UNIFORM_VECTORS_;
-		this.MAX_RENDERBUFFER_SIZE = MAX_RENDERBUFFER_SIZE_;
-		this.MAX_TEXTURE_IMAGE_UNITS = MAX_TEXTURE_IMAGE_UNITS_;
-		this.MAX_TEXTURE_SIZE = MAX_TEXTURE_SIZE_;
-		this.MAX_VARYING_VECTORS = MAX_VARYING_VECTORS_;
-		this.MAX_VERTEX_ATTRIBS = MAX_VERTEX_ATTRIBS_;
-		this.MAX_VERTEX_TEXTURE_IMAGE_UNITS = MAX_VERTEX_TEXTURE_IMAGE_UNITS_;
-		this.MAX_VERTEX_UNIFORM_VECTORS = MAX_VERTEX_UNIFORM_VECTORS_;
-		this.MAX_VIEWPORT_DIMS = MAX_VIEWPORT_DIMS_;
-		this.MEDIUM_FLOAT = MEDIUM_FLOAT_;
-		this.MEDIUM_INT = MEDIUM_INT_;
-		this.MIRRORED_REPEAT = MIRRORED_REPEAT_;
-		this.NEAREST = NEAREST_;
-		this.NEAREST_MIPMAP_LINEAR = NEAREST_MIPMAP_LINEAR_;
-		this.NEAREST_MIPMAP_NEAREST = NEAREST_MIPMAP_NEAREST_;
-		this.NEVER = NEVER_;
-		this.NICEST = NICEST_;
-		this.NONE = NONE_;
-		this.NOTEQUAL = NOTEQUAL_;
-		this.NO_ERROR = NO_ERROR_;
-		this.NUM_COMPRESSED_TEXTURE_FORMATS = NUM_COMPRESSED_TEXTURE_FORMATS_;
-		this.ONE = ONE_;
-		this.ONE_MINUS_CONSTANT_ALPHA = ONE_MINUS_CONSTANT_ALPHA_;
-		this.ONE_MINUS_CONSTANT_COLOR = ONE_MINUS_CONSTANT_COLOR_;
-		this.ONE_MINUS_DST_ALPHA = ONE_MINUS_DST_ALPHA_;
-		this.ONE_MINUS_DST_COLOR = ONE_MINUS_DST_COLOR_;
-		this.ONE_MINUS_SRC_ALPHA = ONE_MINUS_SRC_ALPHA_;
-		this.ONE_MINUS_SRC_COLOR = ONE_MINUS_SRC_COLOR_;
-		this.OUT_OF_MEMORY = OUT_OF_MEMORY_;
-		this.PACK_ALIGNMENT = PACK_ALIGNMENT_;
-		this.POINTS = POINTS_;
-		this.POLYGON_OFFSET_FACTOR = POLYGON_OFFSET_FACTOR_;
-		this.POLYGON_OFFSET_FILL = POLYGON_OFFSET_FILL_;
-		this.POLYGON_OFFSET_UNITS = POLYGON_OFFSET_UNITS_;
-		this.RED_BITS = RED_BITS_;
-		this.RENDERBUFFER = RENDERBUFFER_;
-		this.RENDERBUFFER_ALPHA_SIZE = RENDERBUFFER_ALPHA_SIZE_;
-		this.RENDERBUFFER_BINDING = RENDERBUFFER_BINDING_;
-		this.RENDERBUFFER_BLUE_SIZE = RENDERBUFFER_BLUE_SIZE_;
-		this.RENDERBUFFER_DEPTH_SIZE = RENDERBUFFER_DEPTH_SIZE_;
-		this.RENDERBUFFER_GREEN_SIZE = RENDERBUFFER_GREEN_SIZE_;
-		this.RENDERBUFFER_HEIGHT = RENDERBUFFER_HEIGHT_;
-		this.RENDERBUFFER_INTERNAL_FORMAT = RENDERBUFFER_INTERNAL_FORMAT_;
-		this.RENDERBUFFER_RED_SIZE = RENDERBUFFER_RED_SIZE_;
-		this.RENDERBUFFER_STENCIL_SIZE = RENDERBUFFER_STENCIL_SIZE_;
-		this.RENDERBUFFER_WIDTH = RENDERBUFFER_WIDTH_;
-		this.RENDERER = RENDERER_;
-		this.REPEAT = REPEAT_;
-		this.REPLACE = REPLACE_;
-		this.RGB = RGB_;
-		this.RGB5_A1 = RGB5_A1_;
-		this.RGB565 = RGB565_;
-		this.RGBA = RGBA_;
-		this.RGBA4 = RGBA4_;
-		this.SAMPLER_2D = SAMPLER_2D_;
-		this.SAMPLER_CUBE = SAMPLER_CUBE_;
-		this.SAMPLES = SAMPLES_;
-		this.SAMPLE_ALPHA_TO_COVERAGE = SAMPLE_ALPHA_TO_COVERAGE_;
-		this.SAMPLE_BUFFERS = SAMPLE_BUFFERS_;
-		this.SAMPLE_COVERAGE = SAMPLE_COVERAGE_;
-		this.SAMPLE_COVERAGE_INVERT = SAMPLE_COVERAGE_INVERT_;
-		this.SAMPLE_COVERAGE_VALUE = SAMPLE_COVERAGE_VALUE_;
-		this.SCISSOR_BOX = SCISSOR_BOX_;
-		this.SCISSOR_TEST = SCISSOR_TEST_;
-		this.SHADER_COMPILER = SHADER_COMPILER_;
-		this.SHADER_SOURCE_LENGTH = SHADER_SOURCE_LENGTH_;
-		this.SHADER_TYPE = SHADER_TYPE_;
-		this.SHADING_LANGUAGE_VERSION = SHADING_LANGUAGE_VERSION_;
-		this.SHORT = SHORT_;
-		this.SRC_ALPHA = SRC_ALPHA_;
-		this.SRC_ALPHA_SATURATE = SRC_ALPHA_SATURATE_;
-		this.SRC_COLOR = SRC_COLOR_;
-		this.STATIC_DRAW = STATIC_DRAW_;
-		this.STENCIL_ATTACHMENT = STENCIL_ATTACHMENT_;
-		this.STENCIL_BACK_FAIL = STENCIL_BACK_FAIL_;
-		this.STENCIL_BACK_FUNC = STENCIL_BACK_FUNC_;
-		this.STENCIL_BACK_PASS_DEPTH_FAIL = STENCIL_BACK_PASS_DEPTH_FAIL_;
-		this.STENCIL_BACK_PASS_DEPTH_PASS = STENCIL_BACK_PASS_DEPTH_PASS_;
-		this.STENCIL_BACK_REF = STENCIL_BACK_REF_;
-		this.STENCIL_BACK_VALUE_MASK = STENCIL_BACK_VALUE_MASK_;
-		this.STENCIL_BACK_WRITEMASK = STENCIL_BACK_WRITEMASK_;
-		this.STENCIL_BITS = STENCIL_BITS_;
-		this.STENCIL_BUFFER_BIT = STENCIL_BUFFER_BIT_;
-		this.STENCIL_CLEAR_VALUE = STENCIL_CLEAR_VALUE_;
-		this.STENCIL_FAIL = STENCIL_FAIL_;
-		this.STENCIL_FUNC = STENCIL_FUNC_;
-		this.STENCIL_INDEX = STENCIL_INDEX_;
-		this.STENCIL_INDEX8 = STENCIL_INDEX8_;
-		this.STENCIL_PASS_DEPTH_FAIL = STENCIL_PASS_DEPTH_FAIL_;
-		this.STENCIL_PASS_DEPTH_PASS = STENCIL_PASS_DEPTH_PASS_;
-		this.STENCIL_REF = STENCIL_REF_;
-		this.STENCIL_TEST = STENCIL_TEST_;
-		this.STENCIL_VALUE_MASK = STENCIL_VALUE_MASK_;
-		this.STENCIL_WRITEMASK = STENCIL_WRITEMASK_;
-		this.STREAM_DRAW = STREAM_DRAW_;
-		this.SUBPIXEL_BITS = SUBPIXEL_BITS_;
-		this.TEXTURE = TEXTURE_;
-		this.TEXTURE0 = TEXTURE0_;
-		this.TEXTURE1 = TEXTURE1_;
-		this.TEXTURE2 = TEXTURE2_;
-		this.TEXTURE3 = TEXTURE3_;
-		this.TEXTURE4 = TEXTURE4_;
-		this.TEXTURE5 = TEXTURE5_;
-		this.TEXTURE6 = TEXTURE6_;
-		this.TEXTURE7 = TEXTURE7_;
-		this.TEXTURE8 = TEXTURE8_;
-		this.TEXTURE9 = TEXTURE9_;
-		this.TEXTURE10 = TEXTURE10_;
-		this.TEXTURE11 = TEXTURE11_;
-		this.TEXTURE12 = TEXTURE12_;
-		this.TEXTURE13 = TEXTURE13_;
-		this.TEXTURE14 = TEXTURE14_;
-		this.TEXTURE15 = TEXTURE15_;
-		this.TEXTURE16 = TEXTURE16_;
-		this.TEXTURE17 = TEXTURE17_;
-		this.TEXTURE18 = TEXTURE18_;
-		this.TEXTURE19 = TEXTURE19_;
-		this.TEXTURE20 = TEXTURE20_;
-		this.TEXTURE21 = TEXTURE21_;
-		this.TEXTURE22 = TEXTURE22_;
-		this.TEXTURE23 = TEXTURE23_;
-		this.TEXTURE24 = TEXTURE24_;
-		this.TEXTURE25 = TEXTURE25_;
-		this.TEXTURE26 = TEXTURE26_;
-		this.TEXTURE27 = TEXTURE27_;
-		this.TEXTURE28 = TEXTURE28_;
-		this.TEXTURE29 = TEXTURE29_;
-		this.TEXTURE30 = TEXTURE30_;
-		this.TEXTURE31 = TEXTURE31_;
-		this.TEXTURE_2D = TEXTURE_2D_;
-		this.TEXTURE_BINDING_2D = TEXTURE_BINDING_2D_;
-		this.TEXTURE_BINDING_CUBE_MAP = TEXTURE_BINDING_CUBE_MAP_;
-		this.TEXTURE_CUBE_MAP = TEXTURE_CUBE_MAP_;
-		this.TEXTURE_CUBE_MAP_NEGATIVE_X = TEXTURE_CUBE_MAP_NEGATIVE_X_;
-		this.TEXTURE_CUBE_MAP_NEGATIVE_Y = TEXTURE_CUBE_MAP_NEGATIVE_Y_;
-		this.TEXTURE_CUBE_MAP_NEGATIVE_Z = TEXTURE_CUBE_MAP_NEGATIVE_Z_;
-		this.TEXTURE_CUBE_MAP_POSITIVE_X = TEXTURE_CUBE_MAP_POSITIVE_X_;
-		this.TEXTURE_CUBE_MAP_POSITIVE_Y = TEXTURE_CUBE_MAP_POSITIVE_Y_;
-		this.TEXTURE_CUBE_MAP_POSITIVE_Z = TEXTURE_CUBE_MAP_POSITIVE_Z_;
-		this.TEXTURE_MAG_FILTER = TEXTURE_MAG_FILTER_;
-		this.TEXTURE_MIN_FILTER = TEXTURE_MIN_FILTER_;
-		this.TEXTURE_WRAP_S = TEXTURE_WRAP_S_;
-		this.TEXTURE_WRAP_T = TEXTURE_WRAP_T_;
-		this.TRIANGLES = TRIANGLES_;
-		this.TRIANGLE_FAN = TRIANGLE_FAN_;
-		this.TRIANGLE_STRIP = TRIANGLE_STRIP_;
-		this.UNPACK_ALIGNMENT = UNPACK_ALIGNMENT_;
-		this.UNPACK_COLORSPACE_CONVERSION_WEBGL = UNPACK_COLORSPACE_CONVERSION_WEBGL_;
-		this.UNPACK_FLIP_Y_WEBGL = UNPACK_FLIP_Y_WEBGL_;
-		this.UNPACK_PREMULTIPLY_ALPHA_WEBGL = UNPACK_PREMULTIPLY_ALPHA_WEBGL_;
-		this.UNSIGNED_BYTE = UNSIGNED_BYTE_;
-		this.UNSIGNED_INT = UNSIGNED_INT_;
-		this.UNSIGNED_SHORT = UNSIGNED_SHORT_;
-		this.UNSIGNED_SHORT_4_4_4_4 = UNSIGNED_SHORT_4_4_4_4_;
-		this.UNSIGNED_SHORT_5_5_5_1 = UNSIGNED_SHORT_5_5_5_1_;
-		this.UNSIGNED_SHORT_5_6_5 = UNSIGNED_SHORT_5_6_5_;
-		this.VALIDATE_STATUS = VALIDATE_STATUS_;
-		this.VENDOR = VENDOR_;
-		this.VERSION = VERSION_;
-		this.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING = VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_;
-		this.VERTEX_ATTRIB_ARRAY_ENABLED = VERTEX_ATTRIB_ARRAY_ENABLED_;
-		this.VERTEX_ATTRIB_ARRAY_NORMALIZED = VERTEX_ATTRIB_ARRAY_NORMALIZED_;
-		this.VERTEX_ATTRIB_ARRAY_POINTER = VERTEX_ATTRIB_ARRAY_POINTER_;
-		this.VERTEX_ATTRIB_ARRAY_SIZE = VERTEX_ATTRIB_ARRAY_SIZE_;
-		this.VERTEX_ATTRIB_ARRAY_STRIDE = VERTEX_ATTRIB_ARRAY_STRIDE_;
-		this.VERTEX_ATTRIB_ARRAY_TYPE = VERTEX_ATTRIB_ARRAY_TYPE_;
-		this.VERTEX_SHADER = VERTEX_SHADER_;
-		this.VIEWPORT = VIEWPORT_;
-		this.ZERO = ZERO_;
+		this.literal = literal_;
+		this.freq = freq_;
 	});
-	ptrType = $ptrType(Context);
-	ptrType$1 = $ptrType(ContextAttributes);
-	mapType = $mapType($String, $Bool);
-	ptrType$2 = $ptrType(js.Object);
-	sliceType = $sliceType(ptrType$2);
-	sliceType$1 = $sliceType($String);
-	sliceType$2 = $sliceType($Float32);
-	DefaultAttributes = function() {
-		var $ptr;
-		return new ContextAttributes.ptr(true, true, false, true, true, false);
+	sliceType$4 = $sliceType($Uint8);
+	sliceType$8 = $sliceType($Int32);
+	ptrType$4 = $ptrType(huffmanEncoder);
+	sliceType$9 = $sliceType($Uint16);
+	sliceType$10 = $sliceType(literalNode);
+	newHuffmanEncoder = function(size) {
+		var $ptr, size;
+		return new huffmanEncoder.ptr($makeSlice(sliceType$4, size), $makeSlice(sliceType$9, size));
 	};
-	$pkg.DefaultAttributes = DefaultAttributes;
-	NewContext = function(canvas, ca) {
-		var $ptr, attrs, ca, canvas, ctx, gl;
-		if ($global.WebGLRenderingContext === undefined) {
-			return [ptrType.nil, errors.New("Your browser doesn't appear to support webgl.")];
-		}
-		if (ca === ptrType$1.nil) {
-			ca = DefaultAttributes();
-		}
-		attrs = $makeMap($String.keyFor, [{ k: "alpha", v: ca.Alpha }, { k: "depth", v: ca.Depth }, { k: "stencil", v: ca.Stencil }, { k: "antialias", v: ca.Antialias }, { k: "premultipliedAlpha", v: ca.PremultipliedAlpha }, { k: "preserveDrawingBuffer", v: ca.PreserveDrawingBuffer }]);
-		gl = canvas.getContext($externalize("webgl", $String), $externalize(attrs, mapType));
-		if (gl === null) {
-			gl = canvas.getContext($externalize("experimental-webgl", $String), $externalize(attrs, mapType));
-			if (gl === null) {
-				return [ptrType.nil, errors.New("Creating a webgl context has failed.")];
-			}
-		}
-		ctx = new Context.ptr(null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		ctx.Object = gl;
-		return [ctx, $ifaceNil];
-	};
-	$pkg.NewContext = NewContext;
-	Context.ptr.prototype.GetContextAttributes = function() {
-		var $ptr, c, ca;
-		c = this;
-		ca = c.Object.getContextAttributes();
-		return new ContextAttributes.ptr(!!(ca.alpha), !!(ca.depth), !!(ca.stencil), !!(ca.antialias), !!(ca.premultipliedAlpha), !!(ca.preservedDrawingBuffer));
-	};
-	Context.prototype.GetContextAttributes = function() { return this.$val.GetContextAttributes(); };
-	Context.ptr.prototype.ActiveTexture = function(texture) {
-		var $ptr, c, texture;
-		c = this;
-		c.Object.activeTexture(texture);
-	};
-	Context.prototype.ActiveTexture = function(texture) { return this.$val.ActiveTexture(texture); };
-	Context.ptr.prototype.AttachShader = function(program, shader) {
-		var $ptr, c, program, shader;
-		c = this;
-		c.Object.attachShader(program, shader);
-	};
-	Context.prototype.AttachShader = function(program, shader) { return this.$val.AttachShader(program, shader); };
-	Context.ptr.prototype.BindAttribLocation = function(program, index, name) {
-		var $ptr, c, index, name, program;
-		c = this;
-		c.Object.bindAttribLocation(program, index, $externalize(name, $String));
-	};
-	Context.prototype.BindAttribLocation = function(program, index, name) { return this.$val.BindAttribLocation(program, index, name); };
-	Context.ptr.prototype.BindBuffer = function(target, buffer) {
-		var $ptr, buffer, c, target;
-		c = this;
-		c.Object.bindBuffer(target, buffer);
-	};
-	Context.prototype.BindBuffer = function(target, buffer) { return this.$val.BindBuffer(target, buffer); };
-	Context.ptr.prototype.BindFramebuffer = function(target, framebuffer) {
-		var $ptr, c, framebuffer, target;
-		c = this;
-		c.Object.bindFramebuffer(target, framebuffer);
-	};
-	Context.prototype.BindFramebuffer = function(target, framebuffer) { return this.$val.BindFramebuffer(target, framebuffer); };
-	Context.ptr.prototype.BindRenderbuffer = function(target, renderbuffer) {
-		var $ptr, c, renderbuffer, target;
-		c = this;
-		c.Object.bindRenderbuffer(target, renderbuffer);
-	};
-	Context.prototype.BindRenderbuffer = function(target, renderbuffer) { return this.$val.BindRenderbuffer(target, renderbuffer); };
-	Context.ptr.prototype.BindTexture = function(target, texture) {
-		var $ptr, c, target, texture;
-		c = this;
-		c.Object.bindTexture(target, texture);
-	};
-	Context.prototype.BindTexture = function(target, texture) { return this.$val.BindTexture(target, texture); };
-	Context.ptr.prototype.BlendColor = function(r, g, b, a) {
-		var $ptr, a, b, c, g, r;
-		c = this;
-		c.Object.blendColor(r, g, b, a);
-	};
-	Context.prototype.BlendColor = function(r, g, b, a) { return this.$val.BlendColor(r, g, b, a); };
-	Context.ptr.prototype.BlendEquation = function(mode) {
-		var $ptr, c, mode;
-		c = this;
-		c.Object.blendEquation(mode);
-	};
-	Context.prototype.BlendEquation = function(mode) { return this.$val.BlendEquation(mode); };
-	Context.ptr.prototype.BlendEquationSeparate = function(modeRGB, modeAlpha) {
-		var $ptr, c, modeAlpha, modeRGB;
-		c = this;
-		c.Object.blendEquationSeparate(modeRGB, modeAlpha);
-	};
-	Context.prototype.BlendEquationSeparate = function(modeRGB, modeAlpha) { return this.$val.BlendEquationSeparate(modeRGB, modeAlpha); };
-	Context.ptr.prototype.BlendFunc = function(sfactor, dfactor) {
-		var $ptr, c, dfactor, sfactor;
-		c = this;
-		c.Object.blendFunc(sfactor, dfactor);
-	};
-	Context.prototype.BlendFunc = function(sfactor, dfactor) { return this.$val.BlendFunc(sfactor, dfactor); };
-	Context.ptr.prototype.BlendFuncSeparate = function(srcRGB, dstRGB, srcAlpha, dstAlpha) {
-		var $ptr, c, dstAlpha, dstRGB, srcAlpha, srcRGB;
-		c = this;
-		c.Object.blendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
-	};
-	Context.prototype.BlendFuncSeparate = function(srcRGB, dstRGB, srcAlpha, dstAlpha) { return this.$val.BlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha); };
-	Context.ptr.prototype.BufferData = function(target, data, usage) {
-		var $ptr, c, data, target, usage;
-		c = this;
-		c.Object.bufferData(target, $externalize(data, $emptyInterface), usage);
-	};
-	Context.prototype.BufferData = function(target, data, usage) { return this.$val.BufferData(target, data, usage); };
-	Context.ptr.prototype.BufferSubData = function(target, offset, data) {
-		var $ptr, c, data, offset, target;
-		c = this;
-		c.Object.bufferSubData(target, offset, $externalize(data, $emptyInterface));
-	};
-	Context.prototype.BufferSubData = function(target, offset, data) { return this.$val.BufferSubData(target, offset, data); };
-	Context.ptr.prototype.CheckFramebufferStatus = function(target) {
-		var $ptr, c, target;
-		c = this;
-		return $parseInt(c.Object.checkFramebufferStatus(target)) >> 0;
-	};
-	Context.prototype.CheckFramebufferStatus = function(target) { return this.$val.CheckFramebufferStatus(target); };
-	Context.ptr.prototype.Clear = function(flags) {
-		var $ptr, c, flags;
-		c = this;
-		c.Object.clear(flags);
-	};
-	Context.prototype.Clear = function(flags) { return this.$val.Clear(flags); };
-	Context.ptr.prototype.ClearColor = function(r, g, b, a) {
-		var $ptr, a, b, c, g, r;
-		c = this;
-		c.Object.clearColor(r, g, b, a);
-	};
-	Context.prototype.ClearColor = function(r, g, b, a) { return this.$val.ClearColor(r, g, b, a); };
-	Context.ptr.prototype.ClearDepth = function(depth) {
-		var $ptr, c, depth;
-		c = this;
-		c.Object.clearDepth(depth);
-	};
-	Context.prototype.ClearDepth = function(depth) { return this.$val.ClearDepth(depth); };
-	Context.ptr.prototype.ClearStencil = function(s) {
-		var $ptr, c, s;
-		c = this;
-		c.Object.clearStencil(s);
-	};
-	Context.prototype.ClearStencil = function(s) { return this.$val.ClearStencil(s); };
-	Context.ptr.prototype.ColorMask = function(r, g, b, a) {
-		var $ptr, a, b, c, g, r;
-		c = this;
-		c.Object.colorMask($externalize(r, $Bool), $externalize(g, $Bool), $externalize(b, $Bool), $externalize(a, $Bool));
-	};
-	Context.prototype.ColorMask = function(r, g, b, a) { return this.$val.ColorMask(r, g, b, a); };
-	Context.ptr.prototype.CompileShader = function(shader) {
-		var $ptr, c, shader;
-		c = this;
-		c.Object.compileShader(shader);
-	};
-	Context.prototype.CompileShader = function(shader) { return this.$val.CompileShader(shader); };
-	Context.ptr.prototype.CopyTexImage2D = function(target, level, internal, x, y, w, h, border) {
-		var $ptr, border, c, h, internal, level, target, w, x, y;
-		c = this;
-		c.Object.copyTexImage2D(target, level, internal, x, y, w, h, border);
-	};
-	Context.prototype.CopyTexImage2D = function(target, level, internal, x, y, w, h, border) { return this.$val.CopyTexImage2D(target, level, internal, x, y, w, h, border); };
-	Context.ptr.prototype.CopyTexSubImage2D = function(target, level, xoffset, yoffset, x, y, w, h) {
-		var $ptr, c, h, level, target, w, x, xoffset, y, yoffset;
-		c = this;
-		c.Object.copyTexSubImage2D(target, level, xoffset, yoffset, x, y, w, h);
-	};
-	Context.prototype.CopyTexSubImage2D = function(target, level, xoffset, yoffset, x, y, w, h) { return this.$val.CopyTexSubImage2D(target, level, xoffset, yoffset, x, y, w, h); };
-	Context.ptr.prototype.CreateBuffer = function() {
-		var $ptr, c;
-		c = this;
-		return c.Object.createBuffer();
-	};
-	Context.prototype.CreateBuffer = function() { return this.$val.CreateBuffer(); };
-	Context.ptr.prototype.CreateFramebuffer = function() {
-		var $ptr, c;
-		c = this;
-		return c.Object.createFramebuffer();
-	};
-	Context.prototype.CreateFramebuffer = function() { return this.$val.CreateFramebuffer(); };
-	Context.ptr.prototype.CreateProgram = function() {
-		var $ptr, c;
-		c = this;
-		return c.Object.createProgram();
-	};
-	Context.prototype.CreateProgram = function() { return this.$val.CreateProgram(); };
-	Context.ptr.prototype.CreateRenderbuffer = function() {
-		var $ptr, c;
-		c = this;
-		return c.Object.createRenderbuffer();
-	};
-	Context.prototype.CreateRenderbuffer = function() { return this.$val.CreateRenderbuffer(); };
-	Context.ptr.prototype.CreateShader = function(typ) {
-		var $ptr, c, typ;
-		c = this;
-		return c.Object.createShader(typ);
-	};
-	Context.prototype.CreateShader = function(typ) { return this.$val.CreateShader(typ); };
-	Context.ptr.prototype.CreateTexture = function() {
-		var $ptr, c;
-		c = this;
-		return c.Object.createTexture();
-	};
-	Context.prototype.CreateTexture = function() { return this.$val.CreateTexture(); };
-	Context.ptr.prototype.CullFace = function(mode) {
-		var $ptr, c, mode;
-		c = this;
-		c.Object.cullFace(mode);
-	};
-	Context.prototype.CullFace = function(mode) { return this.$val.CullFace(mode); };
-	Context.ptr.prototype.DeleteBuffer = function(buffer) {
-		var $ptr, buffer, c;
-		c = this;
-		c.Object.deleteBuffer(buffer);
-	};
-	Context.prototype.DeleteBuffer = function(buffer) { return this.$val.DeleteBuffer(buffer); };
-	Context.ptr.prototype.DeleteFramebuffer = function(framebuffer) {
-		var $ptr, c, framebuffer;
-		c = this;
-		c.Object.deleteFramebuffer(framebuffer);
-	};
-	Context.prototype.DeleteFramebuffer = function(framebuffer) { return this.$val.DeleteFramebuffer(framebuffer); };
-	Context.ptr.prototype.DeleteProgram = function(program) {
-		var $ptr, c, program;
-		c = this;
-		c.Object.deleteProgram(program);
-	};
-	Context.prototype.DeleteProgram = function(program) { return this.$val.DeleteProgram(program); };
-	Context.ptr.prototype.DeleteRenderbuffer = function(renderbuffer) {
-		var $ptr, c, renderbuffer;
-		c = this;
-		c.Object.deleteRenderbuffer(renderbuffer);
-	};
-	Context.prototype.DeleteRenderbuffer = function(renderbuffer) { return this.$val.DeleteRenderbuffer(renderbuffer); };
-	Context.ptr.prototype.DeleteShader = function(shader) {
-		var $ptr, c, shader;
-		c = this;
-		c.Object.deleteShader(shader);
-	};
-	Context.prototype.DeleteShader = function(shader) { return this.$val.DeleteShader(shader); };
-	Context.ptr.prototype.DeleteTexture = function(texture) {
-		var $ptr, c, texture;
-		c = this;
-		c.Object.deleteTexture(texture);
-	};
-	Context.prototype.DeleteTexture = function(texture) { return this.$val.DeleteTexture(texture); };
-	Context.ptr.prototype.DepthFunc = function(fun) {
-		var $ptr, c, fun;
-		c = this;
-		c.Object.depthFunc(fun);
-	};
-	Context.prototype.DepthFunc = function(fun) { return this.$val.DepthFunc(fun); };
-	Context.ptr.prototype.DepthMask = function(flag) {
-		var $ptr, c, flag;
-		c = this;
-		c.Object.depthMask($externalize(flag, $Bool));
-	};
-	Context.prototype.DepthMask = function(flag) { return this.$val.DepthMask(flag); };
-	Context.ptr.prototype.DepthRange = function(zNear, zFar) {
-		var $ptr, c, zFar, zNear;
-		c = this;
-		c.Object.depthRange(zNear, zFar);
-	};
-	Context.prototype.DepthRange = function(zNear, zFar) { return this.$val.DepthRange(zNear, zFar); };
-	Context.ptr.prototype.DetachShader = function(program, shader) {
-		var $ptr, c, program, shader;
-		c = this;
-		c.Object.detachShader(program, shader);
-	};
-	Context.prototype.DetachShader = function(program, shader) { return this.$val.DetachShader(program, shader); };
-	Context.ptr.prototype.Disable = function(cap) {
-		var $ptr, c, cap;
-		c = this;
-		c.Object.disable(cap);
-	};
-	Context.prototype.Disable = function(cap) { return this.$val.Disable(cap); };
-	Context.ptr.prototype.DisableVertexAttribArray = function(index) {
-		var $ptr, c, index;
-		c = this;
-		c.Object.disableVertexAttribArray(index);
-	};
-	Context.prototype.DisableVertexAttribArray = function(index) { return this.$val.DisableVertexAttribArray(index); };
-	Context.ptr.prototype.DrawArrays = function(mode, first, count) {
-		var $ptr, c, count, first, mode;
-		c = this;
-		c.Object.drawArrays(mode, first, count);
-	};
-	Context.prototype.DrawArrays = function(mode, first, count) { return this.$val.DrawArrays(mode, first, count); };
-	Context.ptr.prototype.DrawElements = function(mode, count, typ, offset) {
-		var $ptr, c, count, mode, offset, typ;
-		c = this;
-		c.Object.drawElements(mode, count, typ, offset);
-	};
-	Context.prototype.DrawElements = function(mode, count, typ, offset) { return this.$val.DrawElements(mode, count, typ, offset); };
-	Context.ptr.prototype.Enable = function(cap) {
-		var $ptr, c, cap;
-		c = this;
-		c.Object.enable(cap);
-	};
-	Context.prototype.Enable = function(cap) { return this.$val.Enable(cap); };
-	Context.ptr.prototype.EnableVertexAttribArray = function(index) {
-		var $ptr, c, index;
-		c = this;
-		c.Object.enableVertexAttribArray(index);
-	};
-	Context.prototype.EnableVertexAttribArray = function(index) { return this.$val.EnableVertexAttribArray(index); };
-	Context.ptr.prototype.Finish = function() {
-		var $ptr, c;
-		c = this;
-		c.Object.finish();
-	};
-	Context.prototype.Finish = function() { return this.$val.Finish(); };
-	Context.ptr.prototype.Flush = function() {
-		var $ptr, c;
-		c = this;
-		c.Object.flush();
-	};
-	Context.prototype.Flush = function() { return this.$val.Flush(); };
-	Context.ptr.prototype.FrameBufferRenderBuffer = function(target, attachment, renderbufferTarget, renderbuffer) {
-		var $ptr, attachment, c, renderbuffer, renderbufferTarget, target;
-		c = this;
-		c.Object.framebufferRenderBuffer(target, attachment, renderbufferTarget, renderbuffer);
-	};
-	Context.prototype.FrameBufferRenderBuffer = function(target, attachment, renderbufferTarget, renderbuffer) { return this.$val.FrameBufferRenderBuffer(target, attachment, renderbufferTarget, renderbuffer); };
-	Context.ptr.prototype.FramebufferTexture2D = function(target, attachment, textarget, texture, level) {
-		var $ptr, attachment, c, level, target, textarget, texture;
-		c = this;
-		c.Object.framebufferTexture2D(target, attachment, textarget, texture, level);
-	};
-	Context.prototype.FramebufferTexture2D = function(target, attachment, textarget, texture, level) { return this.$val.FramebufferTexture2D(target, attachment, textarget, texture, level); };
-	Context.ptr.prototype.FrontFace = function(mode) {
-		var $ptr, c, mode;
-		c = this;
-		c.Object.frontFace(mode);
-	};
-	Context.prototype.FrontFace = function(mode) { return this.$val.FrontFace(mode); };
-	Context.ptr.prototype.GenerateMipmap = function(target) {
-		var $ptr, c, target;
-		c = this;
-		c.Object.generateMipmap(target);
-	};
-	Context.prototype.GenerateMipmap = function(target) { return this.$val.GenerateMipmap(target); };
-	Context.ptr.prototype.GetActiveAttrib = function(program, index) {
-		var $ptr, c, index, program;
-		c = this;
-		return c.Object.getActiveAttrib(program, index);
-	};
-	Context.prototype.GetActiveAttrib = function(program, index) { return this.$val.GetActiveAttrib(program, index); };
-	Context.ptr.prototype.GetActiveUniform = function(program, index) {
-		var $ptr, c, index, program;
-		c = this;
-		return c.Object.getActiveUniform(program, index);
-	};
-	Context.prototype.GetActiveUniform = function(program, index) { return this.$val.GetActiveUniform(program, index); };
-	Context.ptr.prototype.GetAttachedShaders = function(program) {
-		var $ptr, c, i, objs, program, shaders;
-		c = this;
-		objs = c.Object.getAttachedShaders(program);
-		shaders = $makeSlice(sliceType, $parseInt(objs.length));
-		i = 0;
+	generateFixedLiteralEncoding = function() {
+		var $ptr, bits, ch, code, codeBits, h, size;
+		h = newHuffmanEncoder(286);
+		codeBits = h.codeBits;
+		code = h.code;
+		ch = 0;
+		ch = 0;
 		while (true) {
-			if (!(i < $parseInt(objs.length))) { break; }
-			((i < 0 || i >= shaders.$length) ? $throwRuntimeError("index out of range") : shaders.$array[shaders.$offset + i] = objs[i]);
-			i = i + (1) >> 0;
+			if (!(ch < 286)) { break; }
+			bits = 0;
+			size = 0;
+			switch (0) { default: if (ch < 144) {
+				bits = ch + 48 << 16 >>> 16;
+				size = 8;
+				break;
+			} else if (ch < 256) {
+				bits = (ch + 400 << 16 >>> 16) - 144 << 16 >>> 16;
+				size = 9;
+				break;
+			} else if (ch < 280) {
+				bits = ch - 256 << 16 >>> 16;
+				size = 7;
+				break;
+			} else {
+				bits = (ch + 192 << 16 >>> 16) - 280 << 16 >>> 16;
+				size = 8;
+			} }
+			((ch < 0 || ch >= codeBits.$length) ? $throwRuntimeError("index out of range") : codeBits.$array[codeBits.$offset + ch] = size);
+			((ch < 0 || ch >= code.$length) ? $throwRuntimeError("index out of range") : code.$array[code.$offset + ch] = reverseBits(bits, size));
+			ch = ch + (1) << 16 >>> 16;
 		}
-		return shaders;
+		return h;
 	};
-	Context.prototype.GetAttachedShaders = function(program) { return this.$val.GetAttachedShaders(program); };
-	Context.ptr.prototype.GetAttribLocation = function(program, name) {
-		var $ptr, c, name, program;
-		c = this;
-		return $parseInt(c.Object.getAttribLocation(program, $externalize(name, $String))) >> 0;
-	};
-	Context.prototype.GetAttribLocation = function(program, name) { return this.$val.GetAttribLocation(program, name); };
-	Context.ptr.prototype.GetBufferParameter = function(target, pname) {
-		var $ptr, c, pname, target;
-		c = this;
-		return c.Object.getBufferParameter(target, pname);
-	};
-	Context.prototype.GetBufferParameter = function(target, pname) { return this.$val.GetBufferParameter(target, pname); };
-	Context.ptr.prototype.GetParameter = function(pname) {
-		var $ptr, c, pname;
-		c = this;
-		return c.Object.getParameter(pname);
-	};
-	Context.prototype.GetParameter = function(pname) { return this.$val.GetParameter(pname); };
-	Context.ptr.prototype.GetError = function() {
-		var $ptr, c;
-		c = this;
-		return $parseInt(c.Object.getError()) >> 0;
-	};
-	Context.prototype.GetError = function() { return this.$val.GetError(); };
-	Context.ptr.prototype.GetExtension = function(name) {
-		var $ptr, c, name;
-		c = this;
-		return c.Object.getExtension($externalize(name, $String));
-	};
-	Context.prototype.GetExtension = function(name) { return this.$val.GetExtension(name); };
-	Context.ptr.prototype.GetFramebufferAttachmentParameter = function(target, attachment, pname) {
-		var $ptr, attachment, c, pname, target;
-		c = this;
-		return c.Object.getFramebufferAttachmentParameter(target, attachment, pname);
-	};
-	Context.prototype.GetFramebufferAttachmentParameter = function(target, attachment, pname) { return this.$val.GetFramebufferAttachmentParameter(target, attachment, pname); };
-	Context.ptr.prototype.GetProgramParameteri = function(program, pname) {
-		var $ptr, c, pname, program;
-		c = this;
-		return $parseInt(c.Object.getProgramParameter(program, pname)) >> 0;
-	};
-	Context.prototype.GetProgramParameteri = function(program, pname) { return this.$val.GetProgramParameteri(program, pname); };
-	Context.ptr.prototype.GetProgramParameterb = function(program, pname) {
-		var $ptr, c, pname, program;
-		c = this;
-		return !!(c.Object.getProgramParameter(program, pname));
-	};
-	Context.prototype.GetProgramParameterb = function(program, pname) { return this.$val.GetProgramParameterb(program, pname); };
-	Context.ptr.prototype.GetProgramInfoLog = function(program) {
-		var $ptr, c, program;
-		c = this;
-		return $internalize(c.Object.getProgramInfoLog(program), $String);
-	};
-	Context.prototype.GetProgramInfoLog = function(program) { return this.$val.GetProgramInfoLog(program); };
-	Context.ptr.prototype.GetRenderbufferParameter = function(target, pname) {
-		var $ptr, c, pname, target;
-		c = this;
-		return c.Object.getRenderbufferParameter(target, pname);
-	};
-	Context.prototype.GetRenderbufferParameter = function(target, pname) { return this.$val.GetRenderbufferParameter(target, pname); };
-	Context.ptr.prototype.GetShaderParameter = function(shader, pname) {
-		var $ptr, c, pname, shader;
-		c = this;
-		return c.Object.getShaderParameter(shader, pname);
-	};
-	Context.prototype.GetShaderParameter = function(shader, pname) { return this.$val.GetShaderParameter(shader, pname); };
-	Context.ptr.prototype.GetShaderParameterb = function(shader, pname) {
-		var $ptr, c, pname, shader;
-		c = this;
-		return !!(c.Object.getShaderParameter(shader, pname));
-	};
-	Context.prototype.GetShaderParameterb = function(shader, pname) { return this.$val.GetShaderParameterb(shader, pname); };
-	Context.ptr.prototype.GetShaderInfoLog = function(shader) {
-		var $ptr, c, shader;
-		c = this;
-		return $internalize(c.Object.getShaderInfoLog(shader), $String);
-	};
-	Context.prototype.GetShaderInfoLog = function(shader) { return this.$val.GetShaderInfoLog(shader); };
-	Context.ptr.prototype.GetShaderSource = function(shader) {
-		var $ptr, c, shader;
-		c = this;
-		return $internalize(c.Object.getShaderSource(shader), $String);
-	};
-	Context.prototype.GetShaderSource = function(shader) { return this.$val.GetShaderSource(shader); };
-	Context.ptr.prototype.GetSupportedExtensions = function() {
-		var $ptr, c, ext, extensions, i;
-		c = this;
-		ext = c.Object.getSupportedExtensions();
-		extensions = $makeSlice(sliceType$1, $parseInt(ext.length));
-		i = 0;
+	generateFixedOffsetEncoding = function() {
+		var $ptr, ch, code, codeBits, h;
+		h = newHuffmanEncoder(30);
+		codeBits = h.codeBits;
+		code = h.code;
+		ch = 0;
 		while (true) {
-			if (!(i < $parseInt(ext.length))) { break; }
-			((i < 0 || i >= extensions.$length) ? $throwRuntimeError("index out of range") : extensions.$array[extensions.$offset + i] = $internalize(ext[i], $String));
-			i = i + (1) >> 0;
+			if (!(ch < 30)) { break; }
+			((ch < 0 || ch >= codeBits.$length) ? $throwRuntimeError("index out of range") : codeBits.$array[codeBits.$offset + ch] = 5);
+			((ch < 0 || ch >= code.$length) ? $throwRuntimeError("index out of range") : code.$array[code.$offset + ch] = reverseBits(ch, 5));
+			ch = ch + (1) << 16 >>> 16;
 		}
-		return extensions;
+		return h;
 	};
-	Context.prototype.GetSupportedExtensions = function() { return this.$val.GetSupportedExtensions(); };
-	Context.ptr.prototype.GetTexParameter = function(target, pname) {
-		var $ptr, c, pname, target;
-		c = this;
-		return c.Object.getTexParameter(target, pname);
+	reverseUint16 = function(v) {
+		var $ptr, v, x, x$1;
+		return (((x = v >>> 8 << 16 >>> 16, ((x < 0 || x >= reverseByte.length) ? $throwRuntimeError("index out of range") : reverseByte[x])) << 16 >>> 16) | (((x$1 = (v & 255) >>> 0, ((x$1 < 0 || x$1 >= reverseByte.length) ? $throwRuntimeError("index out of range") : reverseByte[x$1])) << 16 >>> 16) << 8 << 16 >>> 16)) >>> 0;
 	};
-	Context.prototype.GetTexParameter = function(target, pname) { return this.$val.GetTexParameter(target, pname); };
-	Context.ptr.prototype.GetUniform = function(program, location) {
-		var $ptr, c, location, program;
-		c = this;
-		return c.Object.getUniform(program, location);
+	reverseBits = function(number, bitLength) {
+		var $ptr, bitLength, number, y;
+		return reverseUint16((y = (16 - bitLength << 24 >>> 24), y < 32 ? (number << y) : 0) << 16 >>> 16);
 	};
-	Context.prototype.GetUniform = function(program, location) { return this.$val.GetUniform(program, location); };
-	Context.ptr.prototype.GetUniformLocation = function(program, name) {
-		var $ptr, c, name, program;
-		c = this;
-		return c.Object.getUniformLocation(program, $externalize(name, $String));
+	ptrType$4.methods = [{prop: "bitLength", name: "bitLength", pkg: "compress/flate", typ: $funcType([sliceType$8], [$Int64], false)}, {prop: "bitCounts", name: "bitCounts", pkg: "compress/flate", typ: $funcType([sliceType$10, $Int32], [sliceType$8], false)}, {prop: "assignEncodingAndSize", name: "assignEncodingAndSize", pkg: "compress/flate", typ: $funcType([sliceType$8, sliceType$10], [], false)}, {prop: "generate", name: "generate", pkg: "compress/flate", typ: $funcType([sliceType$8, $Int32], [], false)}];
+	huffmanEncoder.init([{prop: "codeBits", name: "codeBits", pkg: "compress/flate", typ: sliceType$4, tag: ""}, {prop: "code", name: "code", pkg: "compress/flate", typ: sliceType$9, tag: ""}]);
+	literalNode.init([{prop: "literal", name: "literal", pkg: "compress/flate", typ: $Uint16, tag: ""}, {prop: "freq", name: "freq", pkg: "compress/flate", typ: $Int32, tag: ""}]);
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = bufio.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = fmt.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = io.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = math.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = sort.$init(); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = strconv.$init(); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = sync.$init(); /* */ $s = 7; case 7: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		reverseByte = $toNativeArray($kindUint8, [0, 128, 64, 192, 32, 160, 96, 224, 16, 144, 80, 208, 48, 176, 112, 240, 8, 136, 72, 200, 40, 168, 104, 232, 24, 152, 88, 216, 56, 184, 120, 248, 4, 132, 68, 196, 36, 164, 100, 228, 20, 148, 84, 212, 52, 180, 116, 244, 12, 140, 76, 204, 44, 172, 108, 236, 28, 156, 92, 220, 60, 188, 124, 252, 2, 130, 66, 194, 34, 162, 98, 226, 18, 146, 82, 210, 50, 178, 114, 242, 10, 138, 74, 202, 42, 170, 106, 234, 26, 154, 90, 218, 58, 186, 122, 250, 6, 134, 70, 198, 38, 166, 102, 230, 22, 150, 86, 214, 54, 182, 118, 246, 14, 142, 78, 206, 46, 174, 110, 238, 30, 158, 94, 222, 62, 190, 126, 254, 1, 129, 65, 193, 33, 161, 97, 225, 17, 145, 81, 209, 49, 177, 113, 241, 9, 137, 73, 201, 41, 169, 105, 233, 25, 153, 89, 217, 57, 185, 121, 249, 5, 133, 69, 197, 37, 165, 101, 229, 21, 149, 85, 213, 53, 181, 117, 245, 13, 141, 77, 205, 45, 173, 109, 237, 29, 157, 93, 221, 61, 189, 125, 253, 3, 131, 67, 195, 35, 163, 99, 227, 19, 147, 83, 211, 51, 179, 115, 243, 11, 139, 75, 203, 43, 171, 107, 235, 27, 155, 91, 219, 59, 187, 123, 251, 7, 135, 71, 199, 39, 167, 103, 231, 23, 151, 87, 215, 55, 183, 119, 247, 15, 143, 79, 207, 47, 175, 111, 239, 31, 159, 95, 223, 63, 191, 127, 255]);
+		fixedLiteralEncoding = generateFixedLiteralEncoding();
+		fixedOffsetEncoding = generateFixedOffsetEncoding();
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
 	};
-	Context.prototype.GetUniformLocation = function(program, name) { return this.$val.GetUniformLocation(program, name); };
-	Context.ptr.prototype.GetVertexAttrib = function(index, pname) {
-		var $ptr, c, index, pname;
-		c = this;
-		return c.Object.getVertexAttrib(index, pname);
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["hash"] = (function() {
+	var $pkg = {}, $init, io;
+	io = $packages["io"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = io.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
 	};
-	Context.prototype.GetVertexAttrib = function(index, pname) { return this.$val.GetVertexAttrib(index, pname); };
-	Context.ptr.prototype.GetVertexAttribOffset = function(index, pname) {
-		var $ptr, c, index, pname;
-		c = this;
-		return $parseInt(c.Object.getVertexAttribOffset(index, pname)) >> 0;
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["hash/adler32"] = (function() {
+	var $pkg = {}, $init, hash;
+	hash = $packages["hash"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = hash.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
 	};
-	Context.prototype.GetVertexAttribOffset = function(index, pname) { return this.$val.GetVertexAttribOffset(index, pname); };
-	Context.ptr.prototype.IsBuffer = function(buffer) {
-		var $ptr, buffer, c;
-		c = this;
-		return !!(c.Object.isBuffer(buffer));
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["compress/zlib"] = (function() {
+	var $pkg = {}, $init, bufio, flate, errors, fmt, hash, adler32, io;
+	bufio = $packages["bufio"];
+	flate = $packages["compress/flate"];
+	errors = $packages["errors"];
+	fmt = $packages["fmt"];
+	hash = $packages["hash"];
+	adler32 = $packages["hash/adler32"];
+	io = $packages["io"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = bufio.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = flate.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = errors.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = fmt.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = hash.$init(); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = adler32.$init(); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = io.$init(); /* */ $s = 7; case 7: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$pkg.ErrChecksum = errors.New("zlib: invalid checksum");
+		$pkg.ErrDictionary = errors.New("zlib: invalid dictionary");
+		$pkg.ErrHeader = errors.New("zlib: invalid header");
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
 	};
-	Context.prototype.IsBuffer = function(buffer) { return this.$val.IsBuffer(buffer); };
-	Context.ptr.prototype.IsContextLost = function() {
-		var $ptr, c;
-		c = this;
-		return !!(c.Object.isContextLost());
-	};
-	Context.prototype.IsContextLost = function() { return this.$val.IsContextLost(); };
-	Context.ptr.prototype.IsFramebuffer = function(framebuffer) {
-		var $ptr, c, framebuffer;
-		c = this;
-		return !!(c.Object.isFramebuffer(framebuffer));
-	};
-	Context.prototype.IsFramebuffer = function(framebuffer) { return this.$val.IsFramebuffer(framebuffer); };
-	Context.ptr.prototype.IsProgram = function(program) {
-		var $ptr, c, program;
-		c = this;
-		return !!(c.Object.isProgram(program));
-	};
-	Context.prototype.IsProgram = function(program) { return this.$val.IsProgram(program); };
-	Context.ptr.prototype.IsRenderbuffer = function(renderbuffer) {
-		var $ptr, c, renderbuffer;
-		c = this;
-		return !!(c.Object.isRenderbuffer(renderbuffer));
-	};
-	Context.prototype.IsRenderbuffer = function(renderbuffer) { return this.$val.IsRenderbuffer(renderbuffer); };
-	Context.ptr.prototype.IsShader = function(shader) {
-		var $ptr, c, shader;
-		c = this;
-		return !!(c.Object.isShader(shader));
-	};
-	Context.prototype.IsShader = function(shader) { return this.$val.IsShader(shader); };
-	Context.ptr.prototype.IsTexture = function(texture) {
-		var $ptr, c, texture;
-		c = this;
-		return !!(c.Object.isTexture(texture));
-	};
-	Context.prototype.IsTexture = function(texture) { return this.$val.IsTexture(texture); };
-	Context.ptr.prototype.IsEnabled = function(capability) {
-		var $ptr, c, capability;
-		c = this;
-		return !!(c.Object.isEnabled(capability));
-	};
-	Context.prototype.IsEnabled = function(capability) { return this.$val.IsEnabled(capability); };
-	Context.ptr.prototype.LineWidth = function(width) {
-		var $ptr, c, width;
-		c = this;
-		c.Object.lineWidth(width);
-	};
-	Context.prototype.LineWidth = function(width) { return this.$val.LineWidth(width); };
-	Context.ptr.prototype.LinkProgram = function(program) {
-		var $ptr, c, program;
-		c = this;
-		c.Object.linkProgram(program);
-	};
-	Context.prototype.LinkProgram = function(program) { return this.$val.LinkProgram(program); };
-	Context.ptr.prototype.PixelStorei = function(pname, param) {
-		var $ptr, c, param, pname;
-		c = this;
-		c.Object.pixelStorei(pname, param);
-	};
-	Context.prototype.PixelStorei = function(pname, param) { return this.$val.PixelStorei(pname, param); };
-	Context.ptr.prototype.PolygonOffset = function(factor, units) {
-		var $ptr, c, factor, units;
-		c = this;
-		c.Object.polygonOffset(factor, units);
-	};
-	Context.prototype.PolygonOffset = function(factor, units) { return this.$val.PolygonOffset(factor, units); };
-	Context.ptr.prototype.ReadPixels = function(x, y, width, height, format, typ, pixels) {
-		var $ptr, c, format, height, pixels, typ, width, x, y;
-		c = this;
-		c.Object.readPixels(x, y, width, height, format, typ, pixels);
-	};
-	Context.prototype.ReadPixels = function(x, y, width, height, format, typ, pixels) { return this.$val.ReadPixels(x, y, width, height, format, typ, pixels); };
-	Context.ptr.prototype.RenderbufferStorage = function(target, internalFormat, width, height) {
-		var $ptr, c, height, internalFormat, target, width;
-		c = this;
-		c.Object.renderbufferStorage(target, internalFormat, width, height);
-	};
-	Context.prototype.RenderbufferStorage = function(target, internalFormat, width, height) { return this.$val.RenderbufferStorage(target, internalFormat, width, height); };
-	Context.ptr.prototype.Scissor = function(x, y, width, height) {
-		var $ptr, c, height, width, x, y;
-		c = this;
-		c.Object.scissor(x, y, width, height);
-	};
-	Context.prototype.Scissor = function(x, y, width, height) { return this.$val.Scissor(x, y, width, height); };
-	Context.ptr.prototype.ShaderSource = function(shader, source) {
-		var $ptr, c, shader, source;
-		c = this;
-		c.Object.shaderSource(shader, $externalize(source, $String));
-	};
-	Context.prototype.ShaderSource = function(shader, source) { return this.$val.ShaderSource(shader, source); };
-	Context.ptr.prototype.TexImage2D = function(target, level, internalFormat, format, kind, image) {
-		var $ptr, c, format, image, internalFormat, kind, level, target;
-		c = this;
-		c.Object.texImage2D(target, level, internalFormat, format, kind, image);
-	};
-	Context.prototype.TexImage2D = function(target, level, internalFormat, format, kind, image) { return this.$val.TexImage2D(target, level, internalFormat, format, kind, image); };
-	Context.ptr.prototype.TexParameteri = function(target, pname, param) {
-		var $ptr, c, param, pname, target;
-		c = this;
-		c.Object.texParameteri(target, pname, param);
-	};
-	Context.prototype.TexParameteri = function(target, pname, param) { return this.$val.TexParameteri(target, pname, param); };
-	Context.ptr.prototype.TexSubImage2D = function(target, level, xoffset, yoffset, format, typ, image) {
-		var $ptr, c, format, image, level, target, typ, xoffset, yoffset;
-		c = this;
-		c.Object.texSubImage2D(target, level, xoffset, yoffset, format, typ, image);
-	};
-	Context.prototype.TexSubImage2D = function(target, level, xoffset, yoffset, format, typ, image) { return this.$val.TexSubImage2D(target, level, xoffset, yoffset, format, typ, image); };
-	Context.ptr.prototype.Uniform1f = function(location, x) {
-		var $ptr, c, location, x;
-		c = this;
-		c.Object.uniform1f(location, x);
-	};
-	Context.prototype.Uniform1f = function(location, x) { return this.$val.Uniform1f(location, x); };
-	Context.ptr.prototype.Uniform1i = function(location, x) {
-		var $ptr, c, location, x;
-		c = this;
-		c.Object.uniform1i(location, x);
-	};
-	Context.prototype.Uniform1i = function(location, x) { return this.$val.Uniform1i(location, x); };
-	Context.ptr.prototype.Uniform2f = function(location, x, y) {
-		var $ptr, c, location, x, y;
-		c = this;
-		c.Object.uniform2f(location, x, y);
-	};
-	Context.prototype.Uniform2f = function(location, x, y) { return this.$val.Uniform2f(location, x, y); };
-	Context.ptr.prototype.Uniform2i = function(location, x, y) {
-		var $ptr, c, location, x, y;
-		c = this;
-		c.Object.uniform2i(location, x, y);
-	};
-	Context.prototype.Uniform2i = function(location, x, y) { return this.$val.Uniform2i(location, x, y); };
-	Context.ptr.prototype.Uniform3f = function(location, x, y, z) {
-		var $ptr, c, location, x, y, z;
-		c = this;
-		c.Object.uniform3f(location, x, y, z);
-	};
-	Context.prototype.Uniform3f = function(location, x, y, z) { return this.$val.Uniform3f(location, x, y, z); };
-	Context.ptr.prototype.Uniform3i = function(location, x, y, z) {
-		var $ptr, c, location, x, y, z;
-		c = this;
-		c.Object.uniform3i(location, x, y, z);
-	};
-	Context.prototype.Uniform3i = function(location, x, y, z) { return this.$val.Uniform3i(location, x, y, z); };
-	Context.ptr.prototype.Uniform4f = function(location, x, y, z, w) {
-		var $ptr, c, location, w, x, y, z;
-		c = this;
-		c.Object.uniform4f(location, x, y, z, w);
-	};
-	Context.prototype.Uniform4f = function(location, x, y, z, w) { return this.$val.Uniform4f(location, x, y, z, w); };
-	Context.ptr.prototype.Uniform4i = function(location, x, y, z, w) {
-		var $ptr, c, location, w, x, y, z;
-		c = this;
-		c.Object.uniform4i(location, x, y, z, w);
-	};
-	Context.prototype.Uniform4i = function(location, x, y, z, w) { return this.$val.Uniform4i(location, x, y, z, w); };
-	Context.ptr.prototype.UniformMatrix2fv = function(location, transpose, value) {
-		var $ptr, c, location, transpose, value;
-		c = this;
-		c.Object.uniformMatrix2fv(location, $externalize(transpose, $Bool), $externalize(value, sliceType$2));
-	};
-	Context.prototype.UniformMatrix2fv = function(location, transpose, value) { return this.$val.UniformMatrix2fv(location, transpose, value); };
-	Context.ptr.prototype.UniformMatrix3fv = function(location, transpose, value) {
-		var $ptr, c, location, transpose, value;
-		c = this;
-		c.Object.uniformMatrix3fv(location, $externalize(transpose, $Bool), $externalize(value, sliceType$2));
-	};
-	Context.prototype.UniformMatrix3fv = function(location, transpose, value) { return this.$val.UniformMatrix3fv(location, transpose, value); };
-	Context.ptr.prototype.UniformMatrix4fv = function(location, transpose, value) {
-		var $ptr, c, location, transpose, value;
-		c = this;
-		c.Object.uniformMatrix4fv(location, $externalize(transpose, $Bool), $externalize(value, sliceType$2));
-	};
-	Context.prototype.UniformMatrix4fv = function(location, transpose, value) { return this.$val.UniformMatrix4fv(location, transpose, value); };
-	Context.ptr.prototype.UseProgram = function(program) {
-		var $ptr, c, program;
-		c = this;
-		c.Object.useProgram(program);
-	};
-	Context.prototype.UseProgram = function(program) { return this.$val.UseProgram(program); };
-	Context.ptr.prototype.ValidateProgram = function(program) {
-		var $ptr, c, program;
-		c = this;
-		c.Object.validateProgram(program);
-	};
-	Context.prototype.ValidateProgram = function(program) { return this.$val.ValidateProgram(program); };
-	Context.ptr.prototype.VertexAttribPointer = function(index, size, typ, normal, stride, offset) {
-		var $ptr, c, index, normal, offset, size, stride, typ;
-		c = this;
-		c.Object.vertexAttribPointer(index, size, typ, $externalize(normal, $Bool), stride, offset);
-	};
-	Context.prototype.VertexAttribPointer = function(index, size, typ, normal, stride, offset) { return this.$val.VertexAttribPointer(index, size, typ, normal, stride, offset); };
-	Context.ptr.prototype.Viewport = function(x, y, width, height) {
-		var $ptr, c, height, width, x, y;
-		c = this;
-		c.Object.viewport(x, y, width, height);
-	};
-	Context.prototype.Viewport = function(x, y, width, height) { return this.$val.Viewport(x, y, width, height); };
-	ptrType.methods = [{prop: "GetContextAttributes", name: "GetContextAttributes", pkg: "", typ: $funcType([], [ContextAttributes], false)}, {prop: "ActiveTexture", name: "ActiveTexture", pkg: "", typ: $funcType([$Int], [], false)}, {prop: "AttachShader", name: "AttachShader", pkg: "", typ: $funcType([ptrType$2, ptrType$2], [], false)}, {prop: "BindAttribLocation", name: "BindAttribLocation", pkg: "", typ: $funcType([ptrType$2, $Int, $String], [], false)}, {prop: "BindBuffer", name: "BindBuffer", pkg: "", typ: $funcType([$Int, ptrType$2], [], false)}, {prop: "BindFramebuffer", name: "BindFramebuffer", pkg: "", typ: $funcType([$Int, ptrType$2], [], false)}, {prop: "BindRenderbuffer", name: "BindRenderbuffer", pkg: "", typ: $funcType([$Int, ptrType$2], [], false)}, {prop: "BindTexture", name: "BindTexture", pkg: "", typ: $funcType([$Int, ptrType$2], [], false)}, {prop: "BlendColor", name: "BlendColor", pkg: "", typ: $funcType([$Float64, $Float64, $Float64, $Float64], [], false)}, {prop: "BlendEquation", name: "BlendEquation", pkg: "", typ: $funcType([$Int], [], false)}, {prop: "BlendEquationSeparate", name: "BlendEquationSeparate", pkg: "", typ: $funcType([$Int, $Int], [], false)}, {prop: "BlendFunc", name: "BlendFunc", pkg: "", typ: $funcType([$Int, $Int], [], false)}, {prop: "BlendFuncSeparate", name: "BlendFuncSeparate", pkg: "", typ: $funcType([$Int, $Int, $Int, $Int], [], false)}, {prop: "BufferData", name: "BufferData", pkg: "", typ: $funcType([$Int, $emptyInterface, $Int], [], false)}, {prop: "BufferSubData", name: "BufferSubData", pkg: "", typ: $funcType([$Int, $Int, $emptyInterface], [], false)}, {prop: "CheckFramebufferStatus", name: "CheckFramebufferStatus", pkg: "", typ: $funcType([$Int], [$Int], false)}, {prop: "Clear", name: "Clear", pkg: "", typ: $funcType([$Int], [], false)}, {prop: "ClearColor", name: "ClearColor", pkg: "", typ: $funcType([$Float32, $Float32, $Float32, $Float32], [], false)}, {prop: "ClearDepth", name: "ClearDepth", pkg: "", typ: $funcType([$Float64], [], false)}, {prop: "ClearStencil", name: "ClearStencil", pkg: "", typ: $funcType([$Int], [], false)}, {prop: "ColorMask", name: "ColorMask", pkg: "", typ: $funcType([$Bool, $Bool, $Bool, $Bool], [], false)}, {prop: "CompileShader", name: "CompileShader", pkg: "", typ: $funcType([ptrType$2], [], false)}, {prop: "CopyTexImage2D", name: "CopyTexImage2D", pkg: "", typ: $funcType([$Int, $Int, $Int, $Int, $Int, $Int, $Int, $Int], [], false)}, {prop: "CopyTexSubImage2D", name: "CopyTexSubImage2D", pkg: "", typ: $funcType([$Int, $Int, $Int, $Int, $Int, $Int, $Int, $Int], [], false)}, {prop: "CreateBuffer", name: "CreateBuffer", pkg: "", typ: $funcType([], [ptrType$2], false)}, {prop: "CreateFramebuffer", name: "CreateFramebuffer", pkg: "", typ: $funcType([], [ptrType$2], false)}, {prop: "CreateProgram", name: "CreateProgram", pkg: "", typ: $funcType([], [ptrType$2], false)}, {prop: "CreateRenderbuffer", name: "CreateRenderbuffer", pkg: "", typ: $funcType([], [ptrType$2], false)}, {prop: "CreateShader", name: "CreateShader", pkg: "", typ: $funcType([$Int], [ptrType$2], false)}, {prop: "CreateTexture", name: "CreateTexture", pkg: "", typ: $funcType([], [ptrType$2], false)}, {prop: "CullFace", name: "CullFace", pkg: "", typ: $funcType([$Int], [], false)}, {prop: "DeleteBuffer", name: "DeleteBuffer", pkg: "", typ: $funcType([ptrType$2], [], false)}, {prop: "DeleteFramebuffer", name: "DeleteFramebuffer", pkg: "", typ: $funcType([ptrType$2], [], false)}, {prop: "DeleteProgram", name: "DeleteProgram", pkg: "", typ: $funcType([ptrType$2], [], false)}, {prop: "DeleteRenderbuffer", name: "DeleteRenderbuffer", pkg: "", typ: $funcType([ptrType$2], [], false)}, {prop: "DeleteShader", name: "DeleteShader", pkg: "", typ: $funcType([ptrType$2], [], false)}, {prop: "DeleteTexture", name: "DeleteTexture", pkg: "", typ: $funcType([ptrType$2], [], false)}, {prop: "DepthFunc", name: "DepthFunc", pkg: "", typ: $funcType([$Int], [], false)}, {prop: "DepthMask", name: "DepthMask", pkg: "", typ: $funcType([$Bool], [], false)}, {prop: "DepthRange", name: "DepthRange", pkg: "", typ: $funcType([$Float64, $Float64], [], false)}, {prop: "DetachShader", name: "DetachShader", pkg: "", typ: $funcType([ptrType$2, ptrType$2], [], false)}, {prop: "Disable", name: "Disable", pkg: "", typ: $funcType([$Int], [], false)}, {prop: "DisableVertexAttribArray", name: "DisableVertexAttribArray", pkg: "", typ: $funcType([$Int], [], false)}, {prop: "DrawArrays", name: "DrawArrays", pkg: "", typ: $funcType([$Int, $Int, $Int], [], false)}, {prop: "DrawElements", name: "DrawElements", pkg: "", typ: $funcType([$Int, $Int, $Int, $Int], [], false)}, {prop: "Enable", name: "Enable", pkg: "", typ: $funcType([$Int], [], false)}, {prop: "EnableVertexAttribArray", name: "EnableVertexAttribArray", pkg: "", typ: $funcType([$Int], [], false)}, {prop: "Finish", name: "Finish", pkg: "", typ: $funcType([], [], false)}, {prop: "Flush", name: "Flush", pkg: "", typ: $funcType([], [], false)}, {prop: "FrameBufferRenderBuffer", name: "FrameBufferRenderBuffer", pkg: "", typ: $funcType([$Int, $Int, $Int, ptrType$2], [], false)}, {prop: "FramebufferTexture2D", name: "FramebufferTexture2D", pkg: "", typ: $funcType([$Int, $Int, $Int, ptrType$2, $Int], [], false)}, {prop: "FrontFace", name: "FrontFace", pkg: "", typ: $funcType([$Int], [], false)}, {prop: "GenerateMipmap", name: "GenerateMipmap", pkg: "", typ: $funcType([$Int], [], false)}, {prop: "GetActiveAttrib", name: "GetActiveAttrib", pkg: "", typ: $funcType([ptrType$2, $Int], [ptrType$2], false)}, {prop: "GetActiveUniform", name: "GetActiveUniform", pkg: "", typ: $funcType([ptrType$2, $Int], [ptrType$2], false)}, {prop: "GetAttachedShaders", name: "GetAttachedShaders", pkg: "", typ: $funcType([ptrType$2], [sliceType], false)}, {prop: "GetAttribLocation", name: "GetAttribLocation", pkg: "", typ: $funcType([ptrType$2, $String], [$Int], false)}, {prop: "GetBufferParameter", name: "GetBufferParameter", pkg: "", typ: $funcType([$Int, $Int], [ptrType$2], false)}, {prop: "GetParameter", name: "GetParameter", pkg: "", typ: $funcType([$Int], [ptrType$2], false)}, {prop: "GetError", name: "GetError", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "GetExtension", name: "GetExtension", pkg: "", typ: $funcType([$String], [ptrType$2], false)}, {prop: "GetFramebufferAttachmentParameter", name: "GetFramebufferAttachmentParameter", pkg: "", typ: $funcType([$Int, $Int, $Int], [ptrType$2], false)}, {prop: "GetProgramParameteri", name: "GetProgramParameteri", pkg: "", typ: $funcType([ptrType$2, $Int], [$Int], false)}, {prop: "GetProgramParameterb", name: "GetProgramParameterb", pkg: "", typ: $funcType([ptrType$2, $Int], [$Bool], false)}, {prop: "GetProgramInfoLog", name: "GetProgramInfoLog", pkg: "", typ: $funcType([ptrType$2], [$String], false)}, {prop: "GetRenderbufferParameter", name: "GetRenderbufferParameter", pkg: "", typ: $funcType([$Int, $Int], [ptrType$2], false)}, {prop: "GetShaderParameter", name: "GetShaderParameter", pkg: "", typ: $funcType([ptrType$2, $Int], [ptrType$2], false)}, {prop: "GetShaderParameterb", name: "GetShaderParameterb", pkg: "", typ: $funcType([ptrType$2, $Int], [$Bool], false)}, {prop: "GetShaderInfoLog", name: "GetShaderInfoLog", pkg: "", typ: $funcType([ptrType$2], [$String], false)}, {prop: "GetShaderSource", name: "GetShaderSource", pkg: "", typ: $funcType([ptrType$2], [$String], false)}, {prop: "GetSupportedExtensions", name: "GetSupportedExtensions", pkg: "", typ: $funcType([], [sliceType$1], false)}, {prop: "GetTexParameter", name: "GetTexParameter", pkg: "", typ: $funcType([$Int, $Int], [ptrType$2], false)}, {prop: "GetUniform", name: "GetUniform", pkg: "", typ: $funcType([ptrType$2, ptrType$2], [ptrType$2], false)}, {prop: "GetUniformLocation", name: "GetUniformLocation", pkg: "", typ: $funcType([ptrType$2, $String], [ptrType$2], false)}, {prop: "GetVertexAttrib", name: "GetVertexAttrib", pkg: "", typ: $funcType([$Int, $Int], [ptrType$2], false)}, {prop: "GetVertexAttribOffset", name: "GetVertexAttribOffset", pkg: "", typ: $funcType([$Int, $Int], [$Int], false)}, {prop: "IsBuffer", name: "IsBuffer", pkg: "", typ: $funcType([ptrType$2], [$Bool], false)}, {prop: "IsContextLost", name: "IsContextLost", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "IsFramebuffer", name: "IsFramebuffer", pkg: "", typ: $funcType([ptrType$2], [$Bool], false)}, {prop: "IsProgram", name: "IsProgram", pkg: "", typ: $funcType([ptrType$2], [$Bool], false)}, {prop: "IsRenderbuffer", name: "IsRenderbuffer", pkg: "", typ: $funcType([ptrType$2], [$Bool], false)}, {prop: "IsShader", name: "IsShader", pkg: "", typ: $funcType([ptrType$2], [$Bool], false)}, {prop: "IsTexture", name: "IsTexture", pkg: "", typ: $funcType([ptrType$2], [$Bool], false)}, {prop: "IsEnabled", name: "IsEnabled", pkg: "", typ: $funcType([$Int], [$Bool], false)}, {prop: "LineWidth", name: "LineWidth", pkg: "", typ: $funcType([$Float64], [], false)}, {prop: "LinkProgram", name: "LinkProgram", pkg: "", typ: $funcType([ptrType$2], [], false)}, {prop: "PixelStorei", name: "PixelStorei", pkg: "", typ: $funcType([$Int, $Int], [], false)}, {prop: "PolygonOffset", name: "PolygonOffset", pkg: "", typ: $funcType([$Float64, $Float64], [], false)}, {prop: "ReadPixels", name: "ReadPixels", pkg: "", typ: $funcType([$Int, $Int, $Int, $Int, $Int, $Int, ptrType$2], [], false)}, {prop: "RenderbufferStorage", name: "RenderbufferStorage", pkg: "", typ: $funcType([$Int, $Int, $Int, $Int], [], false)}, {prop: "Scissor", name: "Scissor", pkg: "", typ: $funcType([$Int, $Int, $Int, $Int], [], false)}, {prop: "ShaderSource", name: "ShaderSource", pkg: "", typ: $funcType([ptrType$2, $String], [], false)}, {prop: "TexImage2D", name: "TexImage2D", pkg: "", typ: $funcType([$Int, $Int, $Int, $Int, $Int, ptrType$2], [], false)}, {prop: "TexParameteri", name: "TexParameteri", pkg: "", typ: $funcType([$Int, $Int, $Int], [], false)}, {prop: "TexSubImage2D", name: "TexSubImage2D", pkg: "", typ: $funcType([$Int, $Int, $Int, $Int, $Int, $Int, ptrType$2], [], false)}, {prop: "Uniform1f", name: "Uniform1f", pkg: "", typ: $funcType([ptrType$2, $Float32], [], false)}, {prop: "Uniform1i", name: "Uniform1i", pkg: "", typ: $funcType([ptrType$2, $Int], [], false)}, {prop: "Uniform2f", name: "Uniform2f", pkg: "", typ: $funcType([ptrType$2, $Float32, $Float32], [], false)}, {prop: "Uniform2i", name: "Uniform2i", pkg: "", typ: $funcType([ptrType$2, $Int, $Int], [], false)}, {prop: "Uniform3f", name: "Uniform3f", pkg: "", typ: $funcType([ptrType$2, $Float32, $Float32, $Float32], [], false)}, {prop: "Uniform3i", name: "Uniform3i", pkg: "", typ: $funcType([ptrType$2, $Int, $Int, $Int], [], false)}, {prop: "Uniform4f", name: "Uniform4f", pkg: "", typ: $funcType([ptrType$2, $Float32, $Float32, $Float32, $Float32], [], false)}, {prop: "Uniform4i", name: "Uniform4i", pkg: "", typ: $funcType([ptrType$2, $Int, $Int, $Int, $Int], [], false)}, {prop: "UniformMatrix2fv", name: "UniformMatrix2fv", pkg: "", typ: $funcType([ptrType$2, $Bool, sliceType$2], [], false)}, {prop: "UniformMatrix3fv", name: "UniformMatrix3fv", pkg: "", typ: $funcType([ptrType$2, $Bool, sliceType$2], [], false)}, {prop: "UniformMatrix4fv", name: "UniformMatrix4fv", pkg: "", typ: $funcType([ptrType$2, $Bool, sliceType$2], [], false)}, {prop: "UseProgram", name: "UseProgram", pkg: "", typ: $funcType([ptrType$2], [], false)}, {prop: "ValidateProgram", name: "ValidateProgram", pkg: "", typ: $funcType([ptrType$2], [], false)}, {prop: "VertexAttribPointer", name: "VertexAttribPointer", pkg: "", typ: $funcType([$Int, $Int, $Int, $Bool, $Int, $Int], [], false)}, {prop: "Viewport", name: "Viewport", pkg: "", typ: $funcType([$Int, $Int, $Int, $Int], [], false)}];
-	ContextAttributes.init([{prop: "Alpha", name: "Alpha", pkg: "", typ: $Bool, tag: ""}, {prop: "Depth", name: "Depth", pkg: "", typ: $Bool, tag: ""}, {prop: "Stencil", name: "Stencil", pkg: "", typ: $Bool, tag: ""}, {prop: "Antialias", name: "Antialias", pkg: "", typ: $Bool, tag: ""}, {prop: "PremultipliedAlpha", name: "PremultipliedAlpha", pkg: "", typ: $Bool, tag: ""}, {prop: "PreserveDrawingBuffer", name: "PreserveDrawingBuffer", pkg: "", typ: $Bool, tag: ""}]);
-	Context.init([{prop: "Object", name: "", pkg: "", typ: ptrType$2, tag: ""}, {prop: "ARRAY_BUFFER", name: "ARRAY_BUFFER", pkg: "", typ: $Int, tag: "js:\"ARRAY_BUFFER\""}, {prop: "ARRAY_BUFFER_BINDING", name: "ARRAY_BUFFER_BINDING", pkg: "", typ: $Int, tag: "js:\"ARRAY_BUFFER_BINDING\""}, {prop: "ATTACHED_SHADERS", name: "ATTACHED_SHADERS", pkg: "", typ: $Int, tag: "js:\"ATTACHED_SHADERS\""}, {prop: "BACK", name: "BACK", pkg: "", typ: $Int, tag: "js:\"BACK\""}, {prop: "BLEND", name: "BLEND", pkg: "", typ: $Int, tag: "js:\"BLEND\""}, {prop: "BLEND_COLOR", name: "BLEND_COLOR", pkg: "", typ: $Int, tag: "js:\"BLEND_COLOR\""}, {prop: "BLEND_DST_ALPHA", name: "BLEND_DST_ALPHA", pkg: "", typ: $Int, tag: "js:\"BLEND_DST_ALPHA\""}, {prop: "BLEND_DST_RGB", name: "BLEND_DST_RGB", pkg: "", typ: $Int, tag: "js:\"BLEND_DST_RGB\""}, {prop: "BLEND_EQUATION", name: "BLEND_EQUATION", pkg: "", typ: $Int, tag: "js:\"BLEND_EQUATION\""}, {prop: "BLEND_EQUATION_ALPHA", name: "BLEND_EQUATION_ALPHA", pkg: "", typ: $Int, tag: "js:\"BLEND_EQUATION_ALPHA\""}, {prop: "BLEND_EQUATION_RGB", name: "BLEND_EQUATION_RGB", pkg: "", typ: $Int, tag: "js:\"BLEND_EQUATION_RGB\""}, {prop: "BLEND_SRC_ALPHA", name: "BLEND_SRC_ALPHA", pkg: "", typ: $Int, tag: "js:\"BLEND_SRC_ALPHA\""}, {prop: "BLEND_SRC_RGB", name: "BLEND_SRC_RGB", pkg: "", typ: $Int, tag: "js:\"BLEND_SRC_RGB\""}, {prop: "BLUE_BITS", name: "BLUE_BITS", pkg: "", typ: $Int, tag: "js:\"BLUE_BITS\""}, {prop: "BOOL", name: "BOOL", pkg: "", typ: $Int, tag: "js:\"BOOL\""}, {prop: "BOOL_VEC2", name: "BOOL_VEC2", pkg: "", typ: $Int, tag: "js:\"BOOL_VEC2\""}, {prop: "BOOL_VEC3", name: "BOOL_VEC3", pkg: "", typ: $Int, tag: "js:\"BOOL_VEC3\""}, {prop: "BOOL_VEC4", name: "BOOL_VEC4", pkg: "", typ: $Int, tag: "js:\"BOOL_VEC4\""}, {prop: "BROWSER_DEFAULT_WEBGL", name: "BROWSER_DEFAULT_WEBGL", pkg: "", typ: $Int, tag: "js:\"BROWSER_DEFAULT_WEBGL\""}, {prop: "BUFFER_SIZE", name: "BUFFER_SIZE", pkg: "", typ: $Int, tag: "js:\"BUFFER_SIZE\""}, {prop: "BUFFER_USAGE", name: "BUFFER_USAGE", pkg: "", typ: $Int, tag: "js:\"BUFFER_USAGE\""}, {prop: "BYTE", name: "BYTE", pkg: "", typ: $Int, tag: "js:\"BYTE\""}, {prop: "CCW", name: "CCW", pkg: "", typ: $Int, tag: "js:\"CCW\""}, {prop: "CLAMP_TO_EDGE", name: "CLAMP_TO_EDGE", pkg: "", typ: $Int, tag: "js:\"CLAMP_TO_EDGE\""}, {prop: "COLOR_ATTACHMENT0", name: "COLOR_ATTACHMENT0", pkg: "", typ: $Int, tag: "js:\"COLOR_ATTACHMENT0\""}, {prop: "COLOR_BUFFER_BIT", name: "COLOR_BUFFER_BIT", pkg: "", typ: $Int, tag: "js:\"COLOR_BUFFER_BIT\""}, {prop: "COLOR_CLEAR_VALUE", name: "COLOR_CLEAR_VALUE", pkg: "", typ: $Int, tag: "js:\"COLOR_CLEAR_VALUE\""}, {prop: "COLOR_WRITEMASK", name: "COLOR_WRITEMASK", pkg: "", typ: $Int, tag: "js:\"COLOR_WRITEMASK\""}, {prop: "COMPILE_STATUS", name: "COMPILE_STATUS", pkg: "", typ: $Int, tag: "js:\"COMPILE_STATUS\""}, {prop: "COMPRESSED_TEXTURE_FORMATS", name: "COMPRESSED_TEXTURE_FORMATS", pkg: "", typ: $Int, tag: "js:\"COMPRESSED_TEXTURE_FORMATS\""}, {prop: "CONSTANT_ALPHA", name: "CONSTANT_ALPHA", pkg: "", typ: $Int, tag: "js:\"CONSTANT_ALPHA\""}, {prop: "CONSTANT_COLOR", name: "CONSTANT_COLOR", pkg: "", typ: $Int, tag: "js:\"CONSTANT_COLOR\""}, {prop: "CONTEXT_LOST_WEBGL", name: "CONTEXT_LOST_WEBGL", pkg: "", typ: $Int, tag: "js:\"CONTEXT_LOST_WEBGL\""}, {prop: "CULL_FACE", name: "CULL_FACE", pkg: "", typ: $Int, tag: "js:\"CULL_FACE\""}, {prop: "CULL_FACE_MODE", name: "CULL_FACE_MODE", pkg: "", typ: $Int, tag: "js:\"CULL_FACE_MODE\""}, {prop: "CURRENT_PROGRAM", name: "CURRENT_PROGRAM", pkg: "", typ: $Int, tag: "js:\"CURRENT_PROGRAM\""}, {prop: "CURRENT_VERTEX_ATTRIB", name: "CURRENT_VERTEX_ATTRIB", pkg: "", typ: $Int, tag: "js:\"CURRENT_VERTEX_ATTRIB\""}, {prop: "CW", name: "CW", pkg: "", typ: $Int, tag: "js:\"CW\""}, {prop: "DECR", name: "DECR", pkg: "", typ: $Int, tag: "js:\"DECR\""}, {prop: "DECR_WRAP", name: "DECR_WRAP", pkg: "", typ: $Int, tag: "js:\"DECR_WRAP\""}, {prop: "DELETE_STATUS", name: "DELETE_STATUS", pkg: "", typ: $Int, tag: "js:\"DELETE_STATUS\""}, {prop: "DEPTH_ATTACHMENT", name: "DEPTH_ATTACHMENT", pkg: "", typ: $Int, tag: "js:\"DEPTH_ATTACHMENT\""}, {prop: "DEPTH_BITS", name: "DEPTH_BITS", pkg: "", typ: $Int, tag: "js:\"DEPTH_BITS\""}, {prop: "DEPTH_BUFFER_BIT", name: "DEPTH_BUFFER_BIT", pkg: "", typ: $Int, tag: "js:\"DEPTH_BUFFER_BIT\""}, {prop: "DEPTH_CLEAR_VALUE", name: "DEPTH_CLEAR_VALUE", pkg: "", typ: $Int, tag: "js:\"DEPTH_CLEAR_VALUE\""}, {prop: "DEPTH_COMPONENT", name: "DEPTH_COMPONENT", pkg: "", typ: $Int, tag: "js:\"DEPTH_COMPONENT\""}, {prop: "DEPTH_COMPONENT16", name: "DEPTH_COMPONENT16", pkg: "", typ: $Int, tag: "js:\"DEPTH_COMPONENT16\""}, {prop: "DEPTH_FUNC", name: "DEPTH_FUNC", pkg: "", typ: $Int, tag: "js:\"DEPTH_FUNC\""}, {prop: "DEPTH_RANGE", name: "DEPTH_RANGE", pkg: "", typ: $Int, tag: "js:\"DEPTH_RANGE\""}, {prop: "DEPTH_STENCIL", name: "DEPTH_STENCIL", pkg: "", typ: $Int, tag: "js:\"DEPTH_STENCIL\""}, {prop: "DEPTH_STENCIL_ATTACHMENT", name: "DEPTH_STENCIL_ATTACHMENT", pkg: "", typ: $Int, tag: "js:\"DEPTH_STENCIL_ATTACHMENT\""}, {prop: "DEPTH_TEST", name: "DEPTH_TEST", pkg: "", typ: $Int, tag: "js:\"DEPTH_TEST\""}, {prop: "DEPTH_WRITEMASK", name: "DEPTH_WRITEMASK", pkg: "", typ: $Int, tag: "js:\"DEPTH_WRITEMASK\""}, {prop: "DITHER", name: "DITHER", pkg: "", typ: $Int, tag: "js:\"DITHER\""}, {prop: "DONT_CARE", name: "DONT_CARE", pkg: "", typ: $Int, tag: "js:\"DONT_CARE\""}, {prop: "DST_ALPHA", name: "DST_ALPHA", pkg: "", typ: $Int, tag: "js:\"DST_ALPHA\""}, {prop: "DST_COLOR", name: "DST_COLOR", pkg: "", typ: $Int, tag: "js:\"DST_COLOR\""}, {prop: "DYNAMIC_DRAW", name: "DYNAMIC_DRAW", pkg: "", typ: $Int, tag: "js:\"DYNAMIC_DRAW\""}, {prop: "ELEMENT_ARRAY_BUFFER", name: "ELEMENT_ARRAY_BUFFER", pkg: "", typ: $Int, tag: "js:\"ELEMENT_ARRAY_BUFFER\""}, {prop: "ELEMENT_ARRAY_BUFFER_BINDING", name: "ELEMENT_ARRAY_BUFFER_BINDING", pkg: "", typ: $Int, tag: "js:\"ELEMENT_ARRAY_BUFFER_BINDING\""}, {prop: "EQUAL", name: "EQUAL", pkg: "", typ: $Int, tag: "js:\"EQUAL\""}, {prop: "FASTEST", name: "FASTEST", pkg: "", typ: $Int, tag: "js:\"FASTEST\""}, {prop: "FLOAT", name: "FLOAT", pkg: "", typ: $Int, tag: "js:\"FLOAT\""}, {prop: "FLOAT_MAT2", name: "FLOAT_MAT2", pkg: "", typ: $Int, tag: "js:\"FLOAT_MAT2\""}, {prop: "FLOAT_MAT3", name: "FLOAT_MAT3", pkg: "", typ: $Int, tag: "js:\"FLOAT_MAT3\""}, {prop: "FLOAT_MAT4", name: "FLOAT_MAT4", pkg: "", typ: $Int, tag: "js:\"FLOAT_MAT4\""}, {prop: "FLOAT_VEC2", name: "FLOAT_VEC2", pkg: "", typ: $Int, tag: "js:\"FLOAT_VEC2\""}, {prop: "FLOAT_VEC3", name: "FLOAT_VEC3", pkg: "", typ: $Int, tag: "js:\"FLOAT_VEC3\""}, {prop: "FLOAT_VEC4", name: "FLOAT_VEC4", pkg: "", typ: $Int, tag: "js:\"FLOAT_VEC4\""}, {prop: "FRAGMENT_SHADER", name: "FRAGMENT_SHADER", pkg: "", typ: $Int, tag: "js:\"FRAGMENT_SHADER\""}, {prop: "FRAMEBUFFER", name: "FRAMEBUFFER", pkg: "", typ: $Int, tag: "js:\"FRAMEBUFFER\""}, {prop: "FRAMEBUFFER_ATTACHMENT_OBJECT_NAME", name: "FRAMEBUFFER_ATTACHMENT_OBJECT_NAME", pkg: "", typ: $Int, tag: "js:\"FRAMEBUFFER_ATTACHMENT_OBJECT_NAME\""}, {prop: "FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE", name: "FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE", pkg: "", typ: $Int, tag: "js:\"FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE\""}, {prop: "FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE", name: "FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE", pkg: "", typ: $Int, tag: "js:\"FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE\""}, {prop: "FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL", name: "FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL", pkg: "", typ: $Int, tag: "js:\"FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL\""}, {prop: "FRAMEBUFFER_BINDING", name: "FRAMEBUFFER_BINDING", pkg: "", typ: $Int, tag: "js:\"FRAMEBUFFER_BINDING\""}, {prop: "FRAMEBUFFER_COMPLETE", name: "FRAMEBUFFER_COMPLETE", pkg: "", typ: $Int, tag: "js:\"FRAMEBUFFER_COMPLETE\""}, {prop: "FRAMEBUFFER_INCOMPLETE_ATTACHMENT", name: "FRAMEBUFFER_INCOMPLETE_ATTACHMENT", pkg: "", typ: $Int, tag: "js:\"FRAMEBUFFER_INCOMPLETE_ATTACHMENT\""}, {prop: "FRAMEBUFFER_INCOMPLETE_DIMENSIONS", name: "FRAMEBUFFER_INCOMPLETE_DIMENSIONS", pkg: "", typ: $Int, tag: "js:\"FRAMEBUFFER_INCOMPLETE_DIMENSIONS\""}, {prop: "FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT", name: "FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT", pkg: "", typ: $Int, tag: "js:\"FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT\""}, {prop: "FRAMEBUFFER_UNSUPPORTED", name: "FRAMEBUFFER_UNSUPPORTED", pkg: "", typ: $Int, tag: "js:\"FRAMEBUFFER_UNSUPPORTED\""}, {prop: "FRONT", name: "FRONT", pkg: "", typ: $Int, tag: "js:\"FRONT\""}, {prop: "FRONT_AND_BACK", name: "FRONT_AND_BACK", pkg: "", typ: $Int, tag: "js:\"FRONT_AND_BACK\""}, {prop: "FRONT_FACE", name: "FRONT_FACE", pkg: "", typ: $Int, tag: "js:\"FRONT_FACE\""}, {prop: "FUNC_ADD", name: "FUNC_ADD", pkg: "", typ: $Int, tag: "js:\"FUNC_ADD\""}, {prop: "FUNC_REVERSE_SUBTRACT", name: "FUNC_REVERSE_SUBTRACT", pkg: "", typ: $Int, tag: "js:\"FUNC_REVERSE_SUBTRACT\""}, {prop: "FUNC_SUBTRACT", name: "FUNC_SUBTRACT", pkg: "", typ: $Int, tag: "js:\"FUNC_SUBTRACT\""}, {prop: "GENERATE_MIPMAP_HINT", name: "GENERATE_MIPMAP_HINT", pkg: "", typ: $Int, tag: "js:\"GENERATE_MIPMAP_HINT\""}, {prop: "GEQUAL", name: "GEQUAL", pkg: "", typ: $Int, tag: "js:\"GEQUAL\""}, {prop: "GREATER", name: "GREATER", pkg: "", typ: $Int, tag: "js:\"GREATER\""}, {prop: "GREEN_BITS", name: "GREEN_BITS", pkg: "", typ: $Int, tag: "js:\"GREEN_BITS\""}, {prop: "HIGH_FLOAT", name: "HIGH_FLOAT", pkg: "", typ: $Int, tag: "js:\"HIGH_FLOAT\""}, {prop: "HIGH_INT", name: "HIGH_INT", pkg: "", typ: $Int, tag: "js:\"HIGH_INT\""}, {prop: "INCR", name: "INCR", pkg: "", typ: $Int, tag: "js:\"INCR\""}, {prop: "INCR_WRAP", name: "INCR_WRAP", pkg: "", typ: $Int, tag: "js:\"INCR_WRAP\""}, {prop: "INFO_LOG_LENGTH", name: "INFO_LOG_LENGTH", pkg: "", typ: $Int, tag: "js:\"INFO_LOG_LENGTH\""}, {prop: "INT", name: "INT", pkg: "", typ: $Int, tag: "js:\"INT\""}, {prop: "INT_VEC2", name: "INT_VEC2", pkg: "", typ: $Int, tag: "js:\"INT_VEC2\""}, {prop: "INT_VEC3", name: "INT_VEC3", pkg: "", typ: $Int, tag: "js:\"INT_VEC3\""}, {prop: "INT_VEC4", name: "INT_VEC4", pkg: "", typ: $Int, tag: "js:\"INT_VEC4\""}, {prop: "INVALID_ENUM", name: "INVALID_ENUM", pkg: "", typ: $Int, tag: "js:\"INVALID_ENUM\""}, {prop: "INVALID_FRAMEBUFFER_OPERATION", name: "INVALID_FRAMEBUFFER_OPERATION", pkg: "", typ: $Int, tag: "js:\"INVALID_FRAMEBUFFER_OPERATION\""}, {prop: "INVALID_OPERATION", name: "INVALID_OPERATION", pkg: "", typ: $Int, tag: "js:\"INVALID_OPERATION\""}, {prop: "INVALID_VALUE", name: "INVALID_VALUE", pkg: "", typ: $Int, tag: "js:\"INVALID_VALUE\""}, {prop: "INVERT", name: "INVERT", pkg: "", typ: $Int, tag: "js:\"INVERT\""}, {prop: "KEEP", name: "KEEP", pkg: "", typ: $Int, tag: "js:\"KEEP\""}, {prop: "LEQUAL", name: "LEQUAL", pkg: "", typ: $Int, tag: "js:\"LEQUAL\""}, {prop: "LESS", name: "LESS", pkg: "", typ: $Int, tag: "js:\"LESS\""}, {prop: "LINEAR", name: "LINEAR", pkg: "", typ: $Int, tag: "js:\"LINEAR\""}, {prop: "LINEAR_MIPMAP_LINEAR", name: "LINEAR_MIPMAP_LINEAR", pkg: "", typ: $Int, tag: "js:\"LINEAR_MIPMAP_LINEAR\""}, {prop: "LINEAR_MIPMAP_NEAREST", name: "LINEAR_MIPMAP_NEAREST", pkg: "", typ: $Int, tag: "js:\"LINEAR_MIPMAP_NEAREST\""}, {prop: "LINES", name: "LINES", pkg: "", typ: $Int, tag: "js:\"LINES\""}, {prop: "LINE_LOOP", name: "LINE_LOOP", pkg: "", typ: $Int, tag: "js:\"LINE_LOOP\""}, {prop: "LINE_STRIP", name: "LINE_STRIP", pkg: "", typ: $Int, tag: "js:\"LINE_STRIP\""}, {prop: "LINE_WIDTH", name: "LINE_WIDTH", pkg: "", typ: $Int, tag: "js:\"LINE_WIDTH\""}, {prop: "LINK_STATUS", name: "LINK_STATUS", pkg: "", typ: $Int, tag: "js:\"LINK_STATUS\""}, {prop: "LOW_FLOAT", name: "LOW_FLOAT", pkg: "", typ: $Int, tag: "js:\"LOW_FLOAT\""}, {prop: "LOW_INT", name: "LOW_INT", pkg: "", typ: $Int, tag: "js:\"LOW_INT\""}, {prop: "LUMINANCE", name: "LUMINANCE", pkg: "", typ: $Int, tag: "js:\"LUMINANCE\""}, {prop: "LUMINANCE_ALPHA", name: "LUMINANCE_ALPHA", pkg: "", typ: $Int, tag: "js:\"LUMINANCE_ALPHA\""}, {prop: "MAX_COMBINED_TEXTURE_IMAGE_UNITS", name: "MAX_COMBINED_TEXTURE_IMAGE_UNITS", pkg: "", typ: $Int, tag: "js:\"MAX_COMBINED_TEXTURE_IMAGE_UNITS\""}, {prop: "MAX_CUBE_MAP_TEXTURE_SIZE", name: "MAX_CUBE_MAP_TEXTURE_SIZE", pkg: "", typ: $Int, tag: "js:\"MAX_CUBE_MAP_TEXTURE_SIZE\""}, {prop: "MAX_FRAGMENT_UNIFORM_VECTORS", name: "MAX_FRAGMENT_UNIFORM_VECTORS", pkg: "", typ: $Int, tag: "js:\"MAX_FRAGMENT_UNIFORM_VECTORS\""}, {prop: "MAX_RENDERBUFFER_SIZE", name: "MAX_RENDERBUFFER_SIZE", pkg: "", typ: $Int, tag: "js:\"MAX_RENDERBUFFER_SIZE\""}, {prop: "MAX_TEXTURE_IMAGE_UNITS", name: "MAX_TEXTURE_IMAGE_UNITS", pkg: "", typ: $Int, tag: "js:\"MAX_TEXTURE_IMAGE_UNITS\""}, {prop: "MAX_TEXTURE_SIZE", name: "MAX_TEXTURE_SIZE", pkg: "", typ: $Int, tag: "js:\"MAX_TEXTURE_SIZE\""}, {prop: "MAX_VARYING_VECTORS", name: "MAX_VARYING_VECTORS", pkg: "", typ: $Int, tag: "js:\"MAX_VARYING_VECTORS\""}, {prop: "MAX_VERTEX_ATTRIBS", name: "MAX_VERTEX_ATTRIBS", pkg: "", typ: $Int, tag: "js:\"MAX_VERTEX_ATTRIBS\""}, {prop: "MAX_VERTEX_TEXTURE_IMAGE_UNITS", name: "MAX_VERTEX_TEXTURE_IMAGE_UNITS", pkg: "", typ: $Int, tag: "js:\"MAX_VERTEX_TEXTURE_IMAGE_UNITS\""}, {prop: "MAX_VERTEX_UNIFORM_VECTORS", name: "MAX_VERTEX_UNIFORM_VECTORS", pkg: "", typ: $Int, tag: "js:\"MAX_VERTEX_UNIFORM_VECTORS\""}, {prop: "MAX_VIEWPORT_DIMS", name: "MAX_VIEWPORT_DIMS", pkg: "", typ: $Int, tag: "js:\"MAX_VIEWPORT_DIMS\""}, {prop: "MEDIUM_FLOAT", name: "MEDIUM_FLOAT", pkg: "", typ: $Int, tag: "js:\"MEDIUM_FLOAT\""}, {prop: "MEDIUM_INT", name: "MEDIUM_INT", pkg: "", typ: $Int, tag: "js:\"MEDIUM_INT\""}, {prop: "MIRRORED_REPEAT", name: "MIRRORED_REPEAT", pkg: "", typ: $Int, tag: "js:\"MIRRORED_REPEAT\""}, {prop: "NEAREST", name: "NEAREST", pkg: "", typ: $Int, tag: "js:\"NEAREST\""}, {prop: "NEAREST_MIPMAP_LINEAR", name: "NEAREST_MIPMAP_LINEAR", pkg: "", typ: $Int, tag: "js:\"NEAREST_MIPMAP_LINEAR\""}, {prop: "NEAREST_MIPMAP_NEAREST", name: "NEAREST_MIPMAP_NEAREST", pkg: "", typ: $Int, tag: "js:\"NEAREST_MIPMAP_NEAREST\""}, {prop: "NEVER", name: "NEVER", pkg: "", typ: $Int, tag: "js:\"NEVER\""}, {prop: "NICEST", name: "NICEST", pkg: "", typ: $Int, tag: "js:\"NICEST\""}, {prop: "NONE", name: "NONE", pkg: "", typ: $Int, tag: "js:\"NONE\""}, {prop: "NOTEQUAL", name: "NOTEQUAL", pkg: "", typ: $Int, tag: "js:\"NOTEQUAL\""}, {prop: "NO_ERROR", name: "NO_ERROR", pkg: "", typ: $Int, tag: "js:\"NO_ERROR\""}, {prop: "NUM_COMPRESSED_TEXTURE_FORMATS", name: "NUM_COMPRESSED_TEXTURE_FORMATS", pkg: "", typ: $Int, tag: "js:\"NUM_COMPRESSED_TEXTURE_FORMATS\""}, {prop: "ONE", name: "ONE", pkg: "", typ: $Int, tag: "js:\"ONE\""}, {prop: "ONE_MINUS_CONSTANT_ALPHA", name: "ONE_MINUS_CONSTANT_ALPHA", pkg: "", typ: $Int, tag: "js:\"ONE_MINUS_CONSTANT_ALPHA\""}, {prop: "ONE_MINUS_CONSTANT_COLOR", name: "ONE_MINUS_CONSTANT_COLOR", pkg: "", typ: $Int, tag: "js:\"ONE_MINUS_CONSTANT_COLOR\""}, {prop: "ONE_MINUS_DST_ALPHA", name: "ONE_MINUS_DST_ALPHA", pkg: "", typ: $Int, tag: "js:\"ONE_MINUS_DST_ALPHA\""}, {prop: "ONE_MINUS_DST_COLOR", name: "ONE_MINUS_DST_COLOR", pkg: "", typ: $Int, tag: "js:\"ONE_MINUS_DST_COLOR\""}, {prop: "ONE_MINUS_SRC_ALPHA", name: "ONE_MINUS_SRC_ALPHA", pkg: "", typ: $Int, tag: "js:\"ONE_MINUS_SRC_ALPHA\""}, {prop: "ONE_MINUS_SRC_COLOR", name: "ONE_MINUS_SRC_COLOR", pkg: "", typ: $Int, tag: "js:\"ONE_MINUS_SRC_COLOR\""}, {prop: "OUT_OF_MEMORY", name: "OUT_OF_MEMORY", pkg: "", typ: $Int, tag: "js:\"OUT_OF_MEMORY\""}, {prop: "PACK_ALIGNMENT", name: "PACK_ALIGNMENT", pkg: "", typ: $Int, tag: "js:\"PACK_ALIGNMENT\""}, {prop: "POINTS", name: "POINTS", pkg: "", typ: $Int, tag: "js:\"POINTS\""}, {prop: "POLYGON_OFFSET_FACTOR", name: "POLYGON_OFFSET_FACTOR", pkg: "", typ: $Int, tag: "js:\"POLYGON_OFFSET_FACTOR\""}, {prop: "POLYGON_OFFSET_FILL", name: "POLYGON_OFFSET_FILL", pkg: "", typ: $Int, tag: "js:\"POLYGON_OFFSET_FILL\""}, {prop: "POLYGON_OFFSET_UNITS", name: "POLYGON_OFFSET_UNITS", pkg: "", typ: $Int, tag: "js:\"POLYGON_OFFSET_UNITS\""}, {prop: "RED_BITS", name: "RED_BITS", pkg: "", typ: $Int, tag: "js:\"RED_BITS\""}, {prop: "RENDERBUFFER", name: "RENDERBUFFER", pkg: "", typ: $Int, tag: "js:\"RENDERBUFFER\""}, {prop: "RENDERBUFFER_ALPHA_SIZE", name: "RENDERBUFFER_ALPHA_SIZE", pkg: "", typ: $Int, tag: "js:\"RENDERBUFFER_ALPHA_SIZE\""}, {prop: "RENDERBUFFER_BINDING", name: "RENDERBUFFER_BINDING", pkg: "", typ: $Int, tag: "js:\"RENDERBUFFER_BINDING\""}, {prop: "RENDERBUFFER_BLUE_SIZE", name: "RENDERBUFFER_BLUE_SIZE", pkg: "", typ: $Int, tag: "js:\"RENDERBUFFER_BLUE_SIZE\""}, {prop: "RENDERBUFFER_DEPTH_SIZE", name: "RENDERBUFFER_DEPTH_SIZE", pkg: "", typ: $Int, tag: "js:\"RENDERBUFFER_DEPTH_SIZE\""}, {prop: "RENDERBUFFER_GREEN_SIZE", name: "RENDERBUFFER_GREEN_SIZE", pkg: "", typ: $Int, tag: "js:\"RENDERBUFFER_GREEN_SIZE\""}, {prop: "RENDERBUFFER_HEIGHT", name: "RENDERBUFFER_HEIGHT", pkg: "", typ: $Int, tag: "js:\"RENDERBUFFER_HEIGHT\""}, {prop: "RENDERBUFFER_INTERNAL_FORMAT", name: "RENDERBUFFER_INTERNAL_FORMAT", pkg: "", typ: $Int, tag: "js:\"RENDERBUFFER_INTERNAL_FORMAT\""}, {prop: "RENDERBUFFER_RED_SIZE", name: "RENDERBUFFER_RED_SIZE", pkg: "", typ: $Int, tag: "js:\"RENDERBUFFER_RED_SIZE\""}, {prop: "RENDERBUFFER_STENCIL_SIZE", name: "RENDERBUFFER_STENCIL_SIZE", pkg: "", typ: $Int, tag: "js:\"RENDERBUFFER_STENCIL_SIZE\""}, {prop: "RENDERBUFFER_WIDTH", name: "RENDERBUFFER_WIDTH", pkg: "", typ: $Int, tag: "js:\"RENDERBUFFER_WIDTH\""}, {prop: "RENDERER", name: "RENDERER", pkg: "", typ: $Int, tag: "js:\"RENDERER\""}, {prop: "REPEAT", name: "REPEAT", pkg: "", typ: $Int, tag: "js:\"REPEAT\""}, {prop: "REPLACE", name: "REPLACE", pkg: "", typ: $Int, tag: "js:\"REPLACE\""}, {prop: "RGB", name: "RGB", pkg: "", typ: $Int, tag: "js:\"RGB\""}, {prop: "RGB5_A1", name: "RGB5_A1", pkg: "", typ: $Int, tag: "js:\"RGB5_A1\""}, {prop: "RGB565", name: "RGB565", pkg: "", typ: $Int, tag: "js:\"RGB565\""}, {prop: "RGBA", name: "RGBA", pkg: "", typ: $Int, tag: "js:\"RGBA\""}, {prop: "RGBA4", name: "RGBA4", pkg: "", typ: $Int, tag: "js:\"RGBA4\""}, {prop: "SAMPLER_2D", name: "SAMPLER_2D", pkg: "", typ: $Int, tag: "js:\"SAMPLER_2D\""}, {prop: "SAMPLER_CUBE", name: "SAMPLER_CUBE", pkg: "", typ: $Int, tag: "js:\"SAMPLER_CUBE\""}, {prop: "SAMPLES", name: "SAMPLES", pkg: "", typ: $Int, tag: "js:\"SAMPLES\""}, {prop: "SAMPLE_ALPHA_TO_COVERAGE", name: "SAMPLE_ALPHA_TO_COVERAGE", pkg: "", typ: $Int, tag: "js:\"SAMPLE_ALPHA_TO_COVERAGE\""}, {prop: "SAMPLE_BUFFERS", name: "SAMPLE_BUFFERS", pkg: "", typ: $Int, tag: "js:\"SAMPLE_BUFFERS\""}, {prop: "SAMPLE_COVERAGE", name: "SAMPLE_COVERAGE", pkg: "", typ: $Int, tag: "js:\"SAMPLE_COVERAGE\""}, {prop: "SAMPLE_COVERAGE_INVERT", name: "SAMPLE_COVERAGE_INVERT", pkg: "", typ: $Int, tag: "js:\"SAMPLE_COVERAGE_INVERT\""}, {prop: "SAMPLE_COVERAGE_VALUE", name: "SAMPLE_COVERAGE_VALUE", pkg: "", typ: $Int, tag: "js:\"SAMPLE_COVERAGE_VALUE\""}, {prop: "SCISSOR_BOX", name: "SCISSOR_BOX", pkg: "", typ: $Int, tag: "js:\"SCISSOR_BOX\""}, {prop: "SCISSOR_TEST", name: "SCISSOR_TEST", pkg: "", typ: $Int, tag: "js:\"SCISSOR_TEST\""}, {prop: "SHADER_COMPILER", name: "SHADER_COMPILER", pkg: "", typ: $Int, tag: "js:\"SHADER_COMPILER\""}, {prop: "SHADER_SOURCE_LENGTH", name: "SHADER_SOURCE_LENGTH", pkg: "", typ: $Int, tag: "js:\"SHADER_SOURCE_LENGTH\""}, {prop: "SHADER_TYPE", name: "SHADER_TYPE", pkg: "", typ: $Int, tag: "js:\"SHADER_TYPE\""}, {prop: "SHADING_LANGUAGE_VERSION", name: "SHADING_LANGUAGE_VERSION", pkg: "", typ: $Int, tag: "js:\"SHADING_LANGUAGE_VERSION\""}, {prop: "SHORT", name: "SHORT", pkg: "", typ: $Int, tag: "js:\"SHORT\""}, {prop: "SRC_ALPHA", name: "SRC_ALPHA", pkg: "", typ: $Int, tag: "js:\"SRC_ALPHA\""}, {prop: "SRC_ALPHA_SATURATE", name: "SRC_ALPHA_SATURATE", pkg: "", typ: $Int, tag: "js:\"SRC_ALPHA_SATURATE\""}, {prop: "SRC_COLOR", name: "SRC_COLOR", pkg: "", typ: $Int, tag: "js:\"SRC_COLOR\""}, {prop: "STATIC_DRAW", name: "STATIC_DRAW", pkg: "", typ: $Int, tag: "js:\"STATIC_DRAW\""}, {prop: "STENCIL_ATTACHMENT", name: "STENCIL_ATTACHMENT", pkg: "", typ: $Int, tag: "js:\"STENCIL_ATTACHMENT\""}, {prop: "STENCIL_BACK_FAIL", name: "STENCIL_BACK_FAIL", pkg: "", typ: $Int, tag: "js:\"STENCIL_BACK_FAIL\""}, {prop: "STENCIL_BACK_FUNC", name: "STENCIL_BACK_FUNC", pkg: "", typ: $Int, tag: "js:\"STENCIL_BACK_FUNC\""}, {prop: "STENCIL_BACK_PASS_DEPTH_FAIL", name: "STENCIL_BACK_PASS_DEPTH_FAIL", pkg: "", typ: $Int, tag: "js:\"STENCIL_BACK_PASS_DEPTH_FAIL\""}, {prop: "STENCIL_BACK_PASS_DEPTH_PASS", name: "STENCIL_BACK_PASS_DEPTH_PASS", pkg: "", typ: $Int, tag: "js:\"STENCIL_BACK_PASS_DEPTH_PASS\""}, {prop: "STENCIL_BACK_REF", name: "STENCIL_BACK_REF", pkg: "", typ: $Int, tag: "js:\"STENCIL_BACK_REF\""}, {prop: "STENCIL_BACK_VALUE_MASK", name: "STENCIL_BACK_VALUE_MASK", pkg: "", typ: $Int, tag: "js:\"STENCIL_BACK_VALUE_MASK\""}, {prop: "STENCIL_BACK_WRITEMASK", name: "STENCIL_BACK_WRITEMASK", pkg: "", typ: $Int, tag: "js:\"STENCIL_BACK_WRITEMASK\""}, {prop: "STENCIL_BITS", name: "STENCIL_BITS", pkg: "", typ: $Int, tag: "js:\"STENCIL_BITS\""}, {prop: "STENCIL_BUFFER_BIT", name: "STENCIL_BUFFER_BIT", pkg: "", typ: $Int, tag: "js:\"STENCIL_BUFFER_BIT\""}, {prop: "STENCIL_CLEAR_VALUE", name: "STENCIL_CLEAR_VALUE", pkg: "", typ: $Int, tag: "js:\"STENCIL_CLEAR_VALUE\""}, {prop: "STENCIL_FAIL", name: "STENCIL_FAIL", pkg: "", typ: $Int, tag: "js:\"STENCIL_FAIL\""}, {prop: "STENCIL_FUNC", name: "STENCIL_FUNC", pkg: "", typ: $Int, tag: "js:\"STENCIL_FUNC\""}, {prop: "STENCIL_INDEX", name: "STENCIL_INDEX", pkg: "", typ: $Int, tag: "js:\"STENCIL_INDEX\""}, {prop: "STENCIL_INDEX8", name: "STENCIL_INDEX8", pkg: "", typ: $Int, tag: "js:\"STENCIL_INDEX8\""}, {prop: "STENCIL_PASS_DEPTH_FAIL", name: "STENCIL_PASS_DEPTH_FAIL", pkg: "", typ: $Int, tag: "js:\"STENCIL_PASS_DEPTH_FAIL\""}, {prop: "STENCIL_PASS_DEPTH_PASS", name: "STENCIL_PASS_DEPTH_PASS", pkg: "", typ: $Int, tag: "js:\"STENCIL_PASS_DEPTH_PASS\""}, {prop: "STENCIL_REF", name: "STENCIL_REF", pkg: "", typ: $Int, tag: "js:\"STENCIL_REF\""}, {prop: "STENCIL_TEST", name: "STENCIL_TEST", pkg: "", typ: $Int, tag: "js:\"STENCIL_TEST\""}, {prop: "STENCIL_VALUE_MASK", name: "STENCIL_VALUE_MASK", pkg: "", typ: $Int, tag: "js:\"STENCIL_VALUE_MASK\""}, {prop: "STENCIL_WRITEMASK", name: "STENCIL_WRITEMASK", pkg: "", typ: $Int, tag: "js:\"STENCIL_WRITEMASK\""}, {prop: "STREAM_DRAW", name: "STREAM_DRAW", pkg: "", typ: $Int, tag: "js:\"STREAM_DRAW\""}, {prop: "SUBPIXEL_BITS", name: "SUBPIXEL_BITS", pkg: "", typ: $Int, tag: "js:\"SUBPIXEL_BITS\""}, {prop: "TEXTURE", name: "TEXTURE", pkg: "", typ: $Int, tag: "js:\"TEXTURE\""}, {prop: "TEXTURE0", name: "TEXTURE0", pkg: "", typ: $Int, tag: "js:\"TEXTURE0\""}, {prop: "TEXTURE1", name: "TEXTURE1", pkg: "", typ: $Int, tag: "js:\"TEXTURE1\""}, {prop: "TEXTURE2", name: "TEXTURE2", pkg: "", typ: $Int, tag: "js:\"TEXTURE2\""}, {prop: "TEXTURE3", name: "TEXTURE3", pkg: "", typ: $Int, tag: "js:\"TEXTURE3\""}, {prop: "TEXTURE4", name: "TEXTURE4", pkg: "", typ: $Int, tag: "js:\"TEXTURE4\""}, {prop: "TEXTURE5", name: "TEXTURE5", pkg: "", typ: $Int, tag: "js:\"TEXTURE5\""}, {prop: "TEXTURE6", name: "TEXTURE6", pkg: "", typ: $Int, tag: "js:\"TEXTURE6\""}, {prop: "TEXTURE7", name: "TEXTURE7", pkg: "", typ: $Int, tag: "js:\"TEXTURE7\""}, {prop: "TEXTURE8", name: "TEXTURE8", pkg: "", typ: $Int, tag: "js:\"TEXTURE8\""}, {prop: "TEXTURE9", name: "TEXTURE9", pkg: "", typ: $Int, tag: "js:\"TEXTURE9\""}, {prop: "TEXTURE10", name: "TEXTURE10", pkg: "", typ: $Int, tag: "js:\"TEXTURE10\""}, {prop: "TEXTURE11", name: "TEXTURE11", pkg: "", typ: $Int, tag: "js:\"TEXTURE11\""}, {prop: "TEXTURE12", name: "TEXTURE12", pkg: "", typ: $Int, tag: "js:\"TEXTURE12\""}, {prop: "TEXTURE13", name: "TEXTURE13", pkg: "", typ: $Int, tag: "js:\"TEXTURE13\""}, {prop: "TEXTURE14", name: "TEXTURE14", pkg: "", typ: $Int, tag: "js:\"TEXTURE14\""}, {prop: "TEXTURE15", name: "TEXTURE15", pkg: "", typ: $Int, tag: "js:\"TEXTURE15\""}, {prop: "TEXTURE16", name: "TEXTURE16", pkg: "", typ: $Int, tag: "js:\"TEXTURE16\""}, {prop: "TEXTURE17", name: "TEXTURE17", pkg: "", typ: $Int, tag: "js:\"TEXTURE17\""}, {prop: "TEXTURE18", name: "TEXTURE18", pkg: "", typ: $Int, tag: "js:\"TEXTURE18\""}, {prop: "TEXTURE19", name: "TEXTURE19", pkg: "", typ: $Int, tag: "js:\"TEXTURE19\""}, {prop: "TEXTURE20", name: "TEXTURE20", pkg: "", typ: $Int, tag: "js:\"TEXTURE20\""}, {prop: "TEXTURE21", name: "TEXTURE21", pkg: "", typ: $Int, tag: "js:\"TEXTURE21\""}, {prop: "TEXTURE22", name: "TEXTURE22", pkg: "", typ: $Int, tag: "js:\"TEXTURE22\""}, {prop: "TEXTURE23", name: "TEXTURE23", pkg: "", typ: $Int, tag: "js:\"TEXTURE23\""}, {prop: "TEXTURE24", name: "TEXTURE24", pkg: "", typ: $Int, tag: "js:\"TEXTURE24\""}, {prop: "TEXTURE25", name: "TEXTURE25", pkg: "", typ: $Int, tag: "js:\"TEXTURE25\""}, {prop: "TEXTURE26", name: "TEXTURE26", pkg: "", typ: $Int, tag: "js:\"TEXTURE26\""}, {prop: "TEXTURE27", name: "TEXTURE27", pkg: "", typ: $Int, tag: "js:\"TEXTURE27\""}, {prop: "TEXTURE28", name: "TEXTURE28", pkg: "", typ: $Int, tag: "js:\"TEXTURE28\""}, {prop: "TEXTURE29", name: "TEXTURE29", pkg: "", typ: $Int, tag: "js:\"TEXTURE29\""}, {prop: "TEXTURE30", name: "TEXTURE30", pkg: "", typ: $Int, tag: "js:\"TEXTURE30\""}, {prop: "TEXTURE31", name: "TEXTURE31", pkg: "", typ: $Int, tag: "js:\"TEXTURE31\""}, {prop: "TEXTURE_2D", name: "TEXTURE_2D", pkg: "", typ: $Int, tag: "js:\"TEXTURE_2D\""}, {prop: "TEXTURE_BINDING_2D", name: "TEXTURE_BINDING_2D", pkg: "", typ: $Int, tag: "js:\"TEXTURE_BINDING_2D\""}, {prop: "TEXTURE_BINDING_CUBE_MAP", name: "TEXTURE_BINDING_CUBE_MAP", pkg: "", typ: $Int, tag: "js:\"TEXTURE_BINDING_CUBE_MAP\""}, {prop: "TEXTURE_CUBE_MAP", name: "TEXTURE_CUBE_MAP", pkg: "", typ: $Int, tag: "js:\"TEXTURE_CUBE_MAP\""}, {prop: "TEXTURE_CUBE_MAP_NEGATIVE_X", name: "TEXTURE_CUBE_MAP_NEGATIVE_X", pkg: "", typ: $Int, tag: "js:\"TEXTURE_CUBE_MAP_NEGATIVE_X\""}, {prop: "TEXTURE_CUBE_MAP_NEGATIVE_Y", name: "TEXTURE_CUBE_MAP_NEGATIVE_Y", pkg: "", typ: $Int, tag: "js:\"TEXTURE_CUBE_MAP_NEGATIVE_Y\""}, {prop: "TEXTURE_CUBE_MAP_NEGATIVE_Z", name: "TEXTURE_CUBE_MAP_NEGATIVE_Z", pkg: "", typ: $Int, tag: "js:\"TEXTURE_CUBE_MAP_NEGATIVE_Z\""}, {prop: "TEXTURE_CUBE_MAP_POSITIVE_X", name: "TEXTURE_CUBE_MAP_POSITIVE_X", pkg: "", typ: $Int, tag: "js:\"TEXTURE_CUBE_MAP_POSITIVE_X\""}, {prop: "TEXTURE_CUBE_MAP_POSITIVE_Y", name: "TEXTURE_CUBE_MAP_POSITIVE_Y", pkg: "", typ: $Int, tag: "js:\"TEXTURE_CUBE_MAP_POSITIVE_Y\""}, {prop: "TEXTURE_CUBE_MAP_POSITIVE_Z", name: "TEXTURE_CUBE_MAP_POSITIVE_Z", pkg: "", typ: $Int, tag: "js:\"TEXTURE_CUBE_MAP_POSITIVE_Z\""}, {prop: "TEXTURE_MAG_FILTER", name: "TEXTURE_MAG_FILTER", pkg: "", typ: $Int, tag: "js:\"TEXTURE_MAG_FILTER\""}, {prop: "TEXTURE_MIN_FILTER", name: "TEXTURE_MIN_FILTER", pkg: "", typ: $Int, tag: "js:\"TEXTURE_MIN_FILTER\""}, {prop: "TEXTURE_WRAP_S", name: "TEXTURE_WRAP_S", pkg: "", typ: $Int, tag: "js:\"TEXTURE_WRAP_S\""}, {prop: "TEXTURE_WRAP_T", name: "TEXTURE_WRAP_T", pkg: "", typ: $Int, tag: "js:\"TEXTURE_WRAP_T\""}, {prop: "TRIANGLES", name: "TRIANGLES", pkg: "", typ: $Int, tag: "js:\"TRIANGLES\""}, {prop: "TRIANGLE_FAN", name: "TRIANGLE_FAN", pkg: "", typ: $Int, tag: "js:\"TRIANGLE_FAN\""}, {prop: "TRIANGLE_STRIP", name: "TRIANGLE_STRIP", pkg: "", typ: $Int, tag: "js:\"TRIANGLE_STRIP\""}, {prop: "UNPACK_ALIGNMENT", name: "UNPACK_ALIGNMENT", pkg: "", typ: $Int, tag: "js:\"UNPACK_ALIGNMENT\""}, {prop: "UNPACK_COLORSPACE_CONVERSION_WEBGL", name: "UNPACK_COLORSPACE_CONVERSION_WEBGL", pkg: "", typ: $Int, tag: "js:\"UNPACK_COLORSPACE_CONVERSION_WEBGL\""}, {prop: "UNPACK_FLIP_Y_WEBGL", name: "UNPACK_FLIP_Y_WEBGL", pkg: "", typ: $Int, tag: "js:\"UNPACK_FLIP_Y_WEBGL\""}, {prop: "UNPACK_PREMULTIPLY_ALPHA_WEBGL", name: "UNPACK_PREMULTIPLY_ALPHA_WEBGL", pkg: "", typ: $Int, tag: "js:\"UNPACK_PREMULTIPLY_ALPHA_WEBGL\""}, {prop: "UNSIGNED_BYTE", name: "UNSIGNED_BYTE", pkg: "", typ: $Int, tag: "js:\"UNSIGNED_BYTE\""}, {prop: "UNSIGNED_INT", name: "UNSIGNED_INT", pkg: "", typ: $Int, tag: "js:\"UNSIGNED_INT\""}, {prop: "UNSIGNED_SHORT", name: "UNSIGNED_SHORT", pkg: "", typ: $Int, tag: "js:\"UNSIGNED_SHORT\""}, {prop: "UNSIGNED_SHORT_4_4_4_4", name: "UNSIGNED_SHORT_4_4_4_4", pkg: "", typ: $Int, tag: "js:\"UNSIGNED_SHORT_4_4_4_4\""}, {prop: "UNSIGNED_SHORT_5_5_5_1", name: "UNSIGNED_SHORT_5_5_5_1", pkg: "", typ: $Int, tag: "js:\"UNSIGNED_SHORT_5_5_5_1\""}, {prop: "UNSIGNED_SHORT_5_6_5", name: "UNSIGNED_SHORT_5_6_5", pkg: "", typ: $Int, tag: "js:\"UNSIGNED_SHORT_5_6_5\""}, {prop: "VALIDATE_STATUS", name: "VALIDATE_STATUS", pkg: "", typ: $Int, tag: "js:\"VALIDATE_STATUS\""}, {prop: "VENDOR", name: "VENDOR", pkg: "", typ: $Int, tag: "js:\"VENDOR\""}, {prop: "VERSION", name: "VERSION", pkg: "", typ: $Int, tag: "js:\"VERSION\""}, {prop: "VERTEX_ATTRIB_ARRAY_BUFFER_BINDING", name: "VERTEX_ATTRIB_ARRAY_BUFFER_BINDING", pkg: "", typ: $Int, tag: "js:\"VERTEX_ATTRIB_ARRAY_BUFFER_BINDING\""}, {prop: "VERTEX_ATTRIB_ARRAY_ENABLED", name: "VERTEX_ATTRIB_ARRAY_ENABLED", pkg: "", typ: $Int, tag: "js:\"VERTEX_ATTRIB_ARRAY_ENABLED\""}, {prop: "VERTEX_ATTRIB_ARRAY_NORMALIZED", name: "VERTEX_ATTRIB_ARRAY_NORMALIZED", pkg: "", typ: $Int, tag: "js:\"VERTEX_ATTRIB_ARRAY_NORMALIZED\""}, {prop: "VERTEX_ATTRIB_ARRAY_POINTER", name: "VERTEX_ATTRIB_ARRAY_POINTER", pkg: "", typ: $Int, tag: "js:\"VERTEX_ATTRIB_ARRAY_POINTER\""}, {prop: "VERTEX_ATTRIB_ARRAY_SIZE", name: "VERTEX_ATTRIB_ARRAY_SIZE", pkg: "", typ: $Int, tag: "js:\"VERTEX_ATTRIB_ARRAY_SIZE\""}, {prop: "VERTEX_ATTRIB_ARRAY_STRIDE", name: "VERTEX_ATTRIB_ARRAY_STRIDE", pkg: "", typ: $Int, tag: "js:\"VERTEX_ATTRIB_ARRAY_STRIDE\""}, {prop: "VERTEX_ATTRIB_ARRAY_TYPE", name: "VERTEX_ATTRIB_ARRAY_TYPE", pkg: "", typ: $Int, tag: "js:\"VERTEX_ATTRIB_ARRAY_TYPE\""}, {prop: "VERTEX_SHADER", name: "VERTEX_SHADER", pkg: "", typ: $Int, tag: "js:\"VERTEX_SHADER\""}, {prop: "VIEWPORT", name: "VIEWPORT", pkg: "", typ: $Int, tag: "js:\"VIEWPORT\""}, {prop: "ZERO", name: "ZERO", pkg: "", typ: $Int, tag: "js:\"ZERO\""}]);
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["encoding/binary"] = (function() {
+	var $pkg = {}, $init, errors, io, math, reflect, overflow;
+	errors = $packages["errors"];
+	io = $packages["io"];
+	math = $packages["math"];
+	reflect = $packages["reflect"];
 	$init = function() {
 		$pkg.$init = function() {};
 		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		$r = errors.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		$r = js.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = io.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = math.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = reflect.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		overflow = errors.New("binary: varint overflows a 64-bit integer");
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["path/filepath"] = (function() {
+	var $pkg = {}, $init, errors, os, runtime, sort, strings, utf8;
+	errors = $packages["errors"];
+	os = $packages["os"];
+	runtime = $packages["runtime"];
+	sort = $packages["sort"];
+	strings = $packages["strings"];
+	utf8 = $packages["unicode/utf8"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = errors.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = os.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = runtime.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = sort.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = strings.$init(); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = utf8.$init(); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$pkg.ErrBadPattern = errors.New("syntax error in pattern");
+		$pkg.SkipDir = errors.New("skip this directory");
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["io/ioutil"] = (function() {
+	var $pkg = {}, $init, bytes, io, os, filepath, sort, strconv, sync, time, sliceType, sliceType$1, ptrType, blackHolePool;
+	bytes = $packages["bytes"];
+	io = $packages["io"];
+	os = $packages["os"];
+	filepath = $packages["path/filepath"];
+	sort = $packages["sort"];
+	strconv = $packages["strconv"];
+	sync = $packages["sync"];
+	time = $packages["time"];
+	sliceType = $sliceType($emptyInterface);
+	sliceType$1 = $sliceType($Uint8);
+	ptrType = $ptrType(sliceType$1);
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = bytes.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = io.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = os.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = filepath.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = sort.$init(); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = strconv.$init(); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = sync.$init(); /* */ $s = 7; case 7: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = time.$init(); /* */ $s = 8; case 8: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		blackHolePool = new sync.Pool.ptr(0, 0, sliceType.nil, (function() {
+			var $ptr, b, b$24ptr;
+			b = $makeSlice(sliceType$1, 8192);
+			return (b$24ptr || (b$24ptr = new ptrType(function() { return b; }, function($v) { b = $subslice(new sliceType$1($v.$array), $v.$offset, $v.$offset + $v.$length); })));
+		}));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["github.com/andreas-jonsson/octatron/pack"] = (function() {
+	var $pkg = {}, $init, zlib, binary, errors, io, ioutil, math, os, errUnsupportedFormat, errInvalidFile, errOctreeOverflow, errVoxelsPowerOfTwo, errInputIsCompressed;
+	zlib = $packages["compress/zlib"];
+	binary = $packages["encoding/binary"];
+	errors = $packages["errors"];
+	io = $packages["io"];
+	ioutil = $packages["io/ioutil"];
+	math = $packages["math"];
+	os = $packages["os"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = zlib.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = binary.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = errors.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = io.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = ioutil.$init(); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = math.$init(); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = os.$init(); /* */ $s = 7; case 7: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		errUnsupportedFormat = errors.New("unsupported octree-format");
+		errInvalidFile = errors.New("invalid file");
+		errOctreeOverflow = errors.New("octree-format overflow");
+		errVoxelsPowerOfTwo = errors.New("voxels must be a power of two");
+		errInputIsCompressed = errors.New("input is compressed");
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["github.com/barnex/fmath"] = (function() {
+	var $pkg = {}, $init, math;
+	math = $packages["math"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = math.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["github.com/ungerik/go3d/generic"] = (function() {
+	var $pkg = {}, $init;
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["github.com/ungerik/go3d/vec3"] = (function() {
+	var $pkg = {}, $init, fmt, fmath, generic;
+	fmt = $packages["fmt"];
+	fmath = $packages["github.com/barnex/fmath"];
+	generic = $packages["github.com/ungerik/go3d/generic"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = fmt.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = fmath.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = generic.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["github.com/ungerik/go3d/vec4"] = (function() {
+	var $pkg = {}, $init, fmt, fmath, generic, vec3;
+	fmt = $packages["fmt"];
+	fmath = $packages["github.com/barnex/fmath"];
+	generic = $packages["github.com/ungerik/go3d/generic"];
+	vec3 = $packages["github.com/ungerik/go3d/vec3"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = fmt.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = fmath.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = generic.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = vec3.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["github.com/ungerik/go3d/quaternion"] = (function() {
+	var $pkg = {}, $init, fmt, fmath, vec3, vec4;
+	fmt = $packages["fmt"];
+	fmath = $packages["github.com/barnex/fmath"];
+	vec3 = $packages["github.com/ungerik/go3d/vec3"];
+	vec4 = $packages["github.com/ungerik/go3d/vec4"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = fmt.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = fmath.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = vec3.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = vec4.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["image/color"] = (function() {
+	var $pkg = {}, $init, Color, RGBA, RGBA64, NRGBA, NRGBA64, Alpha, Alpha16, Gray, Gray16, Model, modelFunc, Palette, YCbCr, NYCbCrA, CMYK, ptrType, funcType, ModelFunc, rgbaModel, rgba64Model, nrgbaModel, nrgba64Model, alphaModel, alpha16Model, grayModel, gray16Model, sqDiff, RGBToYCbCr, yCbCrModel, nYCbCrAModel, RGBToCMYK, cmykModel;
+	Color = $pkg.Color = $newType(8, $kindInterface, "color.Color", "Color", "image/color", null);
+	RGBA = $pkg.RGBA = $newType(0, $kindStruct, "color.RGBA", "RGBA", "image/color", function(R_, G_, B_, A_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.R = 0;
+			this.G = 0;
+			this.B = 0;
+			this.A = 0;
+			return;
+		}
+		this.R = R_;
+		this.G = G_;
+		this.B = B_;
+		this.A = A_;
+	});
+	RGBA64 = $pkg.RGBA64 = $newType(0, $kindStruct, "color.RGBA64", "RGBA64", "image/color", function(R_, G_, B_, A_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.R = 0;
+			this.G = 0;
+			this.B = 0;
+			this.A = 0;
+			return;
+		}
+		this.R = R_;
+		this.G = G_;
+		this.B = B_;
+		this.A = A_;
+	});
+	NRGBA = $pkg.NRGBA = $newType(0, $kindStruct, "color.NRGBA", "NRGBA", "image/color", function(R_, G_, B_, A_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.R = 0;
+			this.G = 0;
+			this.B = 0;
+			this.A = 0;
+			return;
+		}
+		this.R = R_;
+		this.G = G_;
+		this.B = B_;
+		this.A = A_;
+	});
+	NRGBA64 = $pkg.NRGBA64 = $newType(0, $kindStruct, "color.NRGBA64", "NRGBA64", "image/color", function(R_, G_, B_, A_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.R = 0;
+			this.G = 0;
+			this.B = 0;
+			this.A = 0;
+			return;
+		}
+		this.R = R_;
+		this.G = G_;
+		this.B = B_;
+		this.A = A_;
+	});
+	Alpha = $pkg.Alpha = $newType(0, $kindStruct, "color.Alpha", "Alpha", "image/color", function(A_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.A = 0;
+			return;
+		}
+		this.A = A_;
+	});
+	Alpha16 = $pkg.Alpha16 = $newType(0, $kindStruct, "color.Alpha16", "Alpha16", "image/color", function(A_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.A = 0;
+			return;
+		}
+		this.A = A_;
+	});
+	Gray = $pkg.Gray = $newType(0, $kindStruct, "color.Gray", "Gray", "image/color", function(Y_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.Y = 0;
+			return;
+		}
+		this.Y = Y_;
+	});
+	Gray16 = $pkg.Gray16 = $newType(0, $kindStruct, "color.Gray16", "Gray16", "image/color", function(Y_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.Y = 0;
+			return;
+		}
+		this.Y = Y_;
+	});
+	Model = $pkg.Model = $newType(8, $kindInterface, "color.Model", "Model", "image/color", null);
+	modelFunc = $pkg.modelFunc = $newType(0, $kindStruct, "color.modelFunc", "modelFunc", "image/color", function(f_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.f = $throwNilPointerError;
+			return;
+		}
+		this.f = f_;
+	});
+	Palette = $pkg.Palette = $newType(12, $kindSlice, "color.Palette", "Palette", "image/color", null);
+	YCbCr = $pkg.YCbCr = $newType(0, $kindStruct, "color.YCbCr", "YCbCr", "image/color", function(Y_, Cb_, Cr_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.Y = 0;
+			this.Cb = 0;
+			this.Cr = 0;
+			return;
+		}
+		this.Y = Y_;
+		this.Cb = Cb_;
+		this.Cr = Cr_;
+	});
+	NYCbCrA = $pkg.NYCbCrA = $newType(0, $kindStruct, "color.NYCbCrA", "NYCbCrA", "image/color", function(YCbCr_, A_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.YCbCr = new YCbCr.ptr(0, 0, 0);
+			this.A = 0;
+			return;
+		}
+		this.YCbCr = YCbCr_;
+		this.A = A_;
+	});
+	CMYK = $pkg.CMYK = $newType(0, $kindStruct, "color.CMYK", "CMYK", "image/color", function(C_, M_, Y_, K_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.C = 0;
+			this.M = 0;
+			this.Y = 0;
+			this.K = 0;
+			return;
+		}
+		this.C = C_;
+		this.M = M_;
+		this.Y = Y_;
+		this.K = K_;
+	});
+	ptrType = $ptrType(modelFunc);
+	funcType = $funcType([Color], [Color], false);
+	RGBA.ptr.prototype.RGBA = function() {
+		var $ptr, a, b, c, g, r;
+		r = 0;
+		g = 0;
+		b = 0;
+		a = 0;
+		c = $clone(this, RGBA);
+		r = (c.R >>> 0);
+		r = (r | ((r << 8 >>> 0))) >>> 0;
+		g = (c.G >>> 0);
+		g = (g | ((g << 8 >>> 0))) >>> 0;
+		b = (c.B >>> 0);
+		b = (b | ((b << 8 >>> 0))) >>> 0;
+		a = (c.A >>> 0);
+		a = (a | ((a << 8 >>> 0))) >>> 0;
+		return [r, g, b, a];
+	};
+	RGBA.prototype.RGBA = function() { return this.$val.RGBA(); };
+	RGBA64.ptr.prototype.RGBA = function() {
+		var $ptr, _tmp, _tmp$1, _tmp$2, _tmp$3, a, b, c, g, r;
+		r = 0;
+		g = 0;
+		b = 0;
+		a = 0;
+		c = $clone(this, RGBA64);
+		_tmp = (c.R >>> 0);
+		_tmp$1 = (c.G >>> 0);
+		_tmp$2 = (c.B >>> 0);
+		_tmp$3 = (c.A >>> 0);
+		r = _tmp;
+		g = _tmp$1;
+		b = _tmp$2;
+		a = _tmp$3;
+		return [r, g, b, a];
+	};
+	RGBA64.prototype.RGBA = function() { return this.$val.RGBA(); };
+	NRGBA.ptr.prototype.RGBA = function() {
+		var $ptr, _q, _q$1, _q$2, a, b, c, g, r;
+		r = 0;
+		g = 0;
+		b = 0;
+		a = 0;
+		c = $clone(this, NRGBA);
+		r = (c.R >>> 0);
+		r = (r | ((r << 8 >>> 0))) >>> 0;
+		r = $imul(r, ((c.A >>> 0))) >>> 0;
+		r = (_q = r / (255), (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
+		g = (c.G >>> 0);
+		g = (g | ((g << 8 >>> 0))) >>> 0;
+		g = $imul(g, ((c.A >>> 0))) >>> 0;
+		g = (_q$1 = g / (255), (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		b = (c.B >>> 0);
+		b = (b | ((b << 8 >>> 0))) >>> 0;
+		b = $imul(b, ((c.A >>> 0))) >>> 0;
+		b = (_q$2 = b / (255), (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		a = (c.A >>> 0);
+		a = (a | ((a << 8 >>> 0))) >>> 0;
+		return [r, g, b, a];
+	};
+	NRGBA.prototype.RGBA = function() { return this.$val.RGBA(); };
+	NRGBA64.ptr.prototype.RGBA = function() {
+		var $ptr, _q, _q$1, _q$2, a, b, c, g, r;
+		r = 0;
+		g = 0;
+		b = 0;
+		a = 0;
+		c = $clone(this, NRGBA64);
+		r = (c.R >>> 0);
+		r = $imul(r, ((c.A >>> 0))) >>> 0;
+		r = (_q = r / (65535), (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
+		g = (c.G >>> 0);
+		g = $imul(g, ((c.A >>> 0))) >>> 0;
+		g = (_q$1 = g / (65535), (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		b = (c.B >>> 0);
+		b = $imul(b, ((c.A >>> 0))) >>> 0;
+		b = (_q$2 = b / (65535), (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		a = (c.A >>> 0);
+		return [r, g, b, a];
+	};
+	NRGBA64.prototype.RGBA = function() { return this.$val.RGBA(); };
+	Alpha.ptr.prototype.RGBA = function() {
+		var $ptr, _tmp, _tmp$1, _tmp$2, _tmp$3, a, b, c, g, r;
+		r = 0;
+		g = 0;
+		b = 0;
+		a = 0;
+		c = $clone(this, Alpha);
+		a = (c.A >>> 0);
+		a = (a | ((a << 8 >>> 0))) >>> 0;
+		_tmp = a;
+		_tmp$1 = a;
+		_tmp$2 = a;
+		_tmp$3 = a;
+		r = _tmp;
+		g = _tmp$1;
+		b = _tmp$2;
+		a = _tmp$3;
+		return [r, g, b, a];
+	};
+	Alpha.prototype.RGBA = function() { return this.$val.RGBA(); };
+	Alpha16.ptr.prototype.RGBA = function() {
+		var $ptr, _tmp, _tmp$1, _tmp$2, _tmp$3, a, b, c, g, r;
+		r = 0;
+		g = 0;
+		b = 0;
+		a = 0;
+		c = $clone(this, Alpha16);
+		a = (c.A >>> 0);
+		_tmp = a;
+		_tmp$1 = a;
+		_tmp$2 = a;
+		_tmp$3 = a;
+		r = _tmp;
+		g = _tmp$1;
+		b = _tmp$2;
+		a = _tmp$3;
+		return [r, g, b, a];
+	};
+	Alpha16.prototype.RGBA = function() { return this.$val.RGBA(); };
+	Gray.ptr.prototype.RGBA = function() {
+		var $ptr, _tmp, _tmp$1, _tmp$2, _tmp$3, a, b, c, g, r, y;
+		r = 0;
+		g = 0;
+		b = 0;
+		a = 0;
+		c = $clone(this, Gray);
+		y = (c.Y >>> 0);
+		y = (y | ((y << 8 >>> 0))) >>> 0;
+		_tmp = y;
+		_tmp$1 = y;
+		_tmp$2 = y;
+		_tmp$3 = 65535;
+		r = _tmp;
+		g = _tmp$1;
+		b = _tmp$2;
+		a = _tmp$3;
+		return [r, g, b, a];
+	};
+	Gray.prototype.RGBA = function() { return this.$val.RGBA(); };
+	Gray16.ptr.prototype.RGBA = function() {
+		var $ptr, _tmp, _tmp$1, _tmp$2, _tmp$3, a, b, c, g, r, y;
+		r = 0;
+		g = 0;
+		b = 0;
+		a = 0;
+		c = $clone(this, Gray16);
+		y = (c.Y >>> 0);
+		_tmp = y;
+		_tmp$1 = y;
+		_tmp$2 = y;
+		_tmp$3 = 65535;
+		r = _tmp;
+		g = _tmp$1;
+		b = _tmp$2;
+		a = _tmp$3;
+		return [r, g, b, a];
+	};
+	Gray16.prototype.RGBA = function() { return this.$val.RGBA(); };
+	ModelFunc = function(f) {
+		var $ptr, f;
+		return new modelFunc.ptr(f);
+	};
+	$pkg.ModelFunc = ModelFunc;
+	modelFunc.ptr.prototype.Convert = function(c) {
+		var $ptr, _r, c, m, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; c = $f.c; m = $f.m; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		m = this;
+		_r = m.f(c); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		/* */ $s = 2; case 2:
+		return _r;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: modelFunc.ptr.prototype.Convert }; } $f.$ptr = $ptr; $f._r = _r; $f.c = c; $f.m = m; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	modelFunc.prototype.Convert = function(c) { return this.$val.Convert(c); };
+	rgbaModel = function(c) {
+		var $ptr, _r, _tuple, _tuple$1, a, b, c, g, ok, r, x, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; a = $f.a; b = $f.b; c = $f.c; g = $f.g; ok = $f.ok; r = $f.r; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_tuple = $assertType(c, RGBA, true);
+		ok = _tuple[1];
+		if (ok) {
+			return c;
+		}
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple$1 = _r;
+		r = _tuple$1[0];
+		g = _tuple$1[1];
+		b = _tuple$1[2];
+		a = _tuple$1[3];
+		return (x = new RGBA.ptr(((r >>> 8 >>> 0) << 24 >>> 24), ((g >>> 8 >>> 0) << 24 >>> 24), ((b >>> 8 >>> 0) << 24 >>> 24), ((a >>> 8 >>> 0) << 24 >>> 24)), new x.constructor.elem(x));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: rgbaModel }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.a = a; $f.b = b; $f.c = c; $f.g = g; $f.ok = ok; $f.r = r; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	rgba64Model = function(c) {
+		var $ptr, _r, _tuple, _tuple$1, a, b, c, g, ok, r, x, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; a = $f.a; b = $f.b; c = $f.c; g = $f.g; ok = $f.ok; r = $f.r; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_tuple = $assertType(c, RGBA64, true);
+		ok = _tuple[1];
+		if (ok) {
+			return c;
+		}
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple$1 = _r;
+		r = _tuple$1[0];
+		g = _tuple$1[1];
+		b = _tuple$1[2];
+		a = _tuple$1[3];
+		return (x = new RGBA64.ptr((r << 16 >>> 16), (g << 16 >>> 16), (b << 16 >>> 16), (a << 16 >>> 16)), new x.constructor.elem(x));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: rgba64Model }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.a = a; $f.b = b; $f.c = c; $f.g = g; $f.ok = ok; $f.r = r; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	nrgbaModel = function(c) {
+		var $ptr, _q, _q$1, _q$2, _r, _tuple, _tuple$1, a, b, c, g, ok, r, x, x$1, x$2, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _q = $f._q; _q$1 = $f._q$1; _q$2 = $f._q$2; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; a = $f.a; b = $f.b; c = $f.c; g = $f.g; ok = $f.ok; r = $f.r; x = $f.x; x$1 = $f.x$1; x$2 = $f.x$2; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_tuple = $assertType(c, NRGBA, true);
+		ok = _tuple[1];
+		if (ok) {
+			return c;
+		}
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple$1 = _r;
+		r = _tuple$1[0];
+		g = _tuple$1[1];
+		b = _tuple$1[2];
+		a = _tuple$1[3];
+		if (a === 65535) {
+			return (x = new NRGBA.ptr(((r >>> 8 >>> 0) << 24 >>> 24), ((g >>> 8 >>> 0) << 24 >>> 24), ((b >>> 8 >>> 0) << 24 >>> 24), 255), new x.constructor.elem(x));
+		}
+		if (a === 0) {
+			return (x$1 = new NRGBA.ptr(0, 0, 0, 0), new x$1.constructor.elem(x$1));
+		}
+		r = (_q = (($imul(r, 65535) >>> 0)) / a, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
+		g = (_q$1 = (($imul(g, 65535) >>> 0)) / a, (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		b = (_q$2 = (($imul(b, 65535) >>> 0)) / a, (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		return (x$2 = new NRGBA.ptr(((r >>> 8 >>> 0) << 24 >>> 24), ((g >>> 8 >>> 0) << 24 >>> 24), ((b >>> 8 >>> 0) << 24 >>> 24), ((a >>> 8 >>> 0) << 24 >>> 24)), new x$2.constructor.elem(x$2));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: nrgbaModel }; } $f.$ptr = $ptr; $f._q = _q; $f._q$1 = _q$1; $f._q$2 = _q$2; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.a = a; $f.b = b; $f.c = c; $f.g = g; $f.ok = ok; $f.r = r; $f.x = x; $f.x$1 = x$1; $f.x$2 = x$2; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	nrgba64Model = function(c) {
+		var $ptr, _q, _q$1, _q$2, _r, _tuple, _tuple$1, a, b, c, g, ok, r, x, x$1, x$2, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _q = $f._q; _q$1 = $f._q$1; _q$2 = $f._q$2; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; a = $f.a; b = $f.b; c = $f.c; g = $f.g; ok = $f.ok; r = $f.r; x = $f.x; x$1 = $f.x$1; x$2 = $f.x$2; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_tuple = $assertType(c, NRGBA64, true);
+		ok = _tuple[1];
+		if (ok) {
+			return c;
+		}
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple$1 = _r;
+		r = _tuple$1[0];
+		g = _tuple$1[1];
+		b = _tuple$1[2];
+		a = _tuple$1[3];
+		if (a === 65535) {
+			return (x = new NRGBA64.ptr((r << 16 >>> 16), (g << 16 >>> 16), (b << 16 >>> 16), 65535), new x.constructor.elem(x));
+		}
+		if (a === 0) {
+			return (x$1 = new NRGBA64.ptr(0, 0, 0, 0), new x$1.constructor.elem(x$1));
+		}
+		r = (_q = (($imul(r, 65535) >>> 0)) / a, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
+		g = (_q$1 = (($imul(g, 65535) >>> 0)) / a, (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		b = (_q$2 = (($imul(b, 65535) >>> 0)) / a, (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		return (x$2 = new NRGBA64.ptr((r << 16 >>> 16), (g << 16 >>> 16), (b << 16 >>> 16), (a << 16 >>> 16)), new x$2.constructor.elem(x$2));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: nrgba64Model }; } $f.$ptr = $ptr; $f._q = _q; $f._q$1 = _q$1; $f._q$2 = _q$2; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.a = a; $f.b = b; $f.c = c; $f.g = g; $f.ok = ok; $f.r = r; $f.x = x; $f.x$1 = x$1; $f.x$2 = x$2; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	alphaModel = function(c) {
+		var $ptr, _r, _tuple, _tuple$1, a, c, ok, x, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; a = $f.a; c = $f.c; ok = $f.ok; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_tuple = $assertType(c, Alpha, true);
+		ok = _tuple[1];
+		if (ok) {
+			return c;
+		}
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple$1 = _r;
+		a = _tuple$1[3];
+		return (x = new Alpha.ptr(((a >>> 8 >>> 0) << 24 >>> 24)), new x.constructor.elem(x));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: alphaModel }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.a = a; $f.c = c; $f.ok = ok; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	alpha16Model = function(c) {
+		var $ptr, _r, _tuple, _tuple$1, a, c, ok, x, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; a = $f.a; c = $f.c; ok = $f.ok; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_tuple = $assertType(c, Alpha16, true);
+		ok = _tuple[1];
+		if (ok) {
+			return c;
+		}
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple$1 = _r;
+		a = _tuple$1[3];
+		return (x = new Alpha16.ptr((a << 16 >>> 16)), new x.constructor.elem(x));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: alpha16Model }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.a = a; $f.c = c; $f.ok = ok; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	grayModel = function(c) {
+		var $ptr, _q, _r, _tuple, _tuple$1, b, c, g, ok, r, x, y, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _q = $f._q; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; b = $f.b; c = $f.c; g = $f.g; ok = $f.ok; r = $f.r; x = $f.x; y = $f.y; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_tuple = $assertType(c, Gray, true);
+		ok = _tuple[1];
+		if (ok) {
+			return c;
+		}
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple$1 = _r;
+		r = _tuple$1[0];
+		g = _tuple$1[1];
+		b = _tuple$1[2];
+		y = (_q = ((((($imul(299, r) >>> 0) + ($imul(587, g) >>> 0) >>> 0) + ($imul(114, b) >>> 0) >>> 0) + 500 >>> 0)) / 1000, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
+		return (x = new Gray.ptr(((y >>> 8 >>> 0) << 24 >>> 24)), new x.constructor.elem(x));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: grayModel }; } $f.$ptr = $ptr; $f._q = _q; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.b = b; $f.c = c; $f.g = g; $f.ok = ok; $f.r = r; $f.x = x; $f.y = y; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	gray16Model = function(c) {
+		var $ptr, _q, _r, _tuple, _tuple$1, b, c, g, ok, r, x, y, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _q = $f._q; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; b = $f.b; c = $f.c; g = $f.g; ok = $f.ok; r = $f.r; x = $f.x; y = $f.y; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_tuple = $assertType(c, Gray16, true);
+		ok = _tuple[1];
+		if (ok) {
+			return c;
+		}
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple$1 = _r;
+		r = _tuple$1[0];
+		g = _tuple$1[1];
+		b = _tuple$1[2];
+		y = (_q = ((((($imul(299, r) >>> 0) + ($imul(587, g) >>> 0) >>> 0) + ($imul(114, b) >>> 0) >>> 0) + 500 >>> 0)) / 1000, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
+		return (x = new Gray16.ptr((y << 16 >>> 16)), new x.constructor.elem(x));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: gray16Model }; } $f.$ptr = $ptr; $f._q = _q; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.b = b; $f.c = c; $f.g = g; $f.ok = ok; $f.r = r; $f.x = x; $f.y = y; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	Palette.prototype.Convert = function(c) {
+		var $ptr, _r, c, p, x, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; c = $f.c; p = $f.p; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		p = this;
+		if (p.$length === 0) {
+			return $ifaceNil;
+		}
+		_r = p.Index(c); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		/* */ $s = 2; case 2:
+		return (x = _r, ((x < 0 || x >= p.$length) ? $throwRuntimeError("index out of range") : p.$array[p.$offset + x]));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Palette.prototype.Convert }; } $f.$ptr = $ptr; $f._r = _r; $f.c = c; $f.p = p; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$ptrType(Palette).prototype.Convert = function(c) { return this.$get().Convert(c); };
+	Palette.prototype.Index = function(c) {
+		var $ptr, _i, _r, _r$1, _ref, _tmp, _tmp$1, _tmp$2, _tmp$3, _tuple, _tuple$1, bestSum, c, ca, cb, cg, cr, i, p, ret, sum, v, va, vb, vg, vr, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _i = $f._i; _r = $f._r; _r$1 = $f._r$1; _ref = $f._ref; _tmp = $f._tmp; _tmp$1 = $f._tmp$1; _tmp$2 = $f._tmp$2; _tmp$3 = $f._tmp$3; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; bestSum = $f.bestSum; c = $f.c; ca = $f.ca; cb = $f.cb; cg = $f.cg; cr = $f.cr; i = $f.i; p = $f.p; ret = $f.ret; sum = $f.sum; v = $f.v; va = $f.va; vb = $f.vb; vg = $f.vg; vr = $f.vr; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		p = this;
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple = _r;
+		cr = _tuple[0];
+		cg = _tuple[1];
+		cb = _tuple[2];
+		ca = _tuple[3];
+		_tmp = 0;
+		_tmp$1 = 4294967295;
+		ret = _tmp;
+		bestSum = _tmp$1;
+		_ref = p;
+		_i = 0;
+		/* while (true) { */ case 2:
+			/* if (!(_i < _ref.$length)) { break; } */ if(!(_i < _ref.$length)) { $s = 3; continue; }
+			i = _i;
+			v = ((_i < 0 || _i >= _ref.$length) ? $throwRuntimeError("index out of range") : _ref.$array[_ref.$offset + _i]);
+			_r$1 = v.RGBA(); /* */ $s = 4; case 4: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+			_tuple$1 = _r$1;
+			vr = _tuple$1[0];
+			vg = _tuple$1[1];
+			vb = _tuple$1[2];
+			va = _tuple$1[3];
+			sum = ((sqDiff(cr, vr) + sqDiff(cg, vg) >>> 0) + sqDiff(cb, vb) >>> 0) + sqDiff(ca, va) >>> 0;
+			if (sum < bestSum) {
+				if (sum === 0) {
+					return i;
+				}
+				_tmp$2 = i;
+				_tmp$3 = sum;
+				ret = _tmp$2;
+				bestSum = _tmp$3;
+			}
+			_i++;
+		/* } */ $s = 2; continue; case 3:
+		return ret;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Palette.prototype.Index }; } $f.$ptr = $ptr; $f._i = _i; $f._r = _r; $f._r$1 = _r$1; $f._ref = _ref; $f._tmp = _tmp; $f._tmp$1 = _tmp$1; $f._tmp$2 = _tmp$2; $f._tmp$3 = _tmp$3; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.bestSum = bestSum; $f.c = c; $f.ca = ca; $f.cb = cb; $f.cg = cg; $f.cr = cr; $f.i = i; $f.p = p; $f.ret = ret; $f.sum = sum; $f.v = v; $f.va = va; $f.vb = vb; $f.vg = vg; $f.vr = vr; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$ptrType(Palette).prototype.Index = function(c) { return this.$get().Index(c); };
+	sqDiff = function(x, y) {
+		var $ptr, d, x, y;
+		d = 0;
+		if (x > y) {
+			d = x - y >>> 0;
+		} else {
+			d = y - x >>> 0;
+		}
+		return (($imul(d, d) >>> 0)) >>> 2 >>> 0;
+	};
+	RGBToYCbCr = function(r, g, b) {
+		var $ptr, b, b1, cb, cr, g, g1, r, r1, yy;
+		r1 = (r >> 0);
+		g1 = (g >> 0);
+		b1 = (b >> 0);
+		yy = ((((($imul(19595, r1)) + ($imul(38470, g1)) >> 0) + ($imul(7471, b1)) >> 0) + 32768 >> 0)) >> 16 >> 0;
+		cb = ((((($imul(-11056, r1)) - ($imul(21712, g1)) >> 0) + ($imul(32768, b1)) >> 0) + 8421376 >> 0)) >> 16 >> 0;
+		cr = ((((($imul(32768, r1)) - ($imul(27440, g1)) >> 0) - ($imul(5328, b1)) >> 0) + 8421376 >> 0)) >> 16 >> 0;
+		if (yy < 0) {
+			yy = 0;
+		} else if (yy > 255) {
+			yy = 255;
+		}
+		if (cb < 0) {
+			cb = 0;
+		} else if (cb > 255) {
+			cb = 255;
+		}
+		if (cr < 0) {
+			cr = 0;
+		} else if (cr > 255) {
+			cr = 255;
+		}
+		return [(yy << 24 >>> 24), (cb << 24 >>> 24), (cr << 24 >>> 24)];
+	};
+	$pkg.RGBToYCbCr = RGBToYCbCr;
+	YCbCr.ptr.prototype.RGBA = function() {
+		var $ptr, b, c, cb1, cr1, g, r, yy1;
+		c = $clone(this, YCbCr);
+		yy1 = $imul((c.Y >> 0), 65792);
+		cb1 = (c.Cb >> 0) - 128 >> 0;
+		cr1 = (c.Cr >> 0) - 128 >> 0;
+		r = ((yy1 + ($imul(91881, cr1)) >> 0)) >> 8 >> 0;
+		g = (((yy1 - ($imul(22554, cb1)) >> 0) - ($imul(46802, cr1)) >> 0)) >> 8 >> 0;
+		b = ((yy1 + ($imul(116130, cb1)) >> 0)) >> 8 >> 0;
+		if (r < 0) {
+			r = 0;
+		} else if (r > 65535) {
+			r = 65535;
+		}
+		if (g < 0) {
+			g = 0;
+		} else if (g > 65535) {
+			g = 65535;
+		}
+		if (b < 0) {
+			b = 0;
+		} else if (b > 65535) {
+			b = 65535;
+		}
+		return [(r >>> 0), (g >>> 0), (b >>> 0), 65535];
+	};
+	YCbCr.prototype.RGBA = function() { return this.$val.RGBA(); };
+	yCbCrModel = function(c) {
+		var $ptr, _r, _tuple, _tuple$1, _tuple$2, b, c, g, ok, r, u, v, x, y, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; _tuple$2 = $f._tuple$2; b = $f.b; c = $f.c; g = $f.g; ok = $f.ok; r = $f.r; u = $f.u; v = $f.v; x = $f.x; y = $f.y; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_tuple = $assertType(c, YCbCr, true);
+		ok = _tuple[1];
+		if (ok) {
+			return c;
+		}
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple$1 = _r;
+		r = _tuple$1[0];
+		g = _tuple$1[1];
+		b = _tuple$1[2];
+		_tuple$2 = RGBToYCbCr(((r >>> 8 >>> 0) << 24 >>> 24), ((g >>> 8 >>> 0) << 24 >>> 24), ((b >>> 8 >>> 0) << 24 >>> 24));
+		y = _tuple$2[0];
+		u = _tuple$2[1];
+		v = _tuple$2[2];
+		return (x = new YCbCr.ptr(y, u, v), new x.constructor.elem(x));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: yCbCrModel }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f._tuple$2 = _tuple$2; $f.b = b; $f.c = c; $f.g = g; $f.ok = ok; $f.r = r; $f.u = u; $f.v = v; $f.x = x; $f.y = y; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	NYCbCrA.ptr.prototype.RGBA = function() {
+		var $ptr, _q, _q$1, _q$2, a, b, c, cb1, cr1, g, r, yy1;
+		c = $clone(this, NYCbCrA);
+		yy1 = $imul((c.YCbCr.Y >> 0), 65792);
+		cb1 = (c.YCbCr.Cb >> 0) - 128 >> 0;
+		cr1 = (c.YCbCr.Cr >> 0) - 128 >> 0;
+		r = ((yy1 + ($imul(91881, cr1)) >> 0)) >> 8 >> 0;
+		g = (((yy1 - ($imul(22554, cb1)) >> 0) - ($imul(46802, cr1)) >> 0)) >> 8 >> 0;
+		b = ((yy1 + ($imul(116130, cb1)) >> 0)) >> 8 >> 0;
+		if (r < 0) {
+			r = 0;
+		} else if (r > 65535) {
+			r = 65535;
+		}
+		if (g < 0) {
+			g = 0;
+		} else if (g > 65535) {
+			g = 65535;
+		}
+		if (b < 0) {
+			b = 0;
+		} else if (b > 65535) {
+			b = 65535;
+		}
+		a = $imul((c.A >>> 0), 257) >>> 0;
+		return [(_q = ($imul((r >>> 0), a) >>> 0) / 65535, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero")), (_q$1 = ($imul((g >>> 0), a) >>> 0) / 65535, (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero")), (_q$2 = ($imul((b >>> 0), a) >>> 0) / 65535, (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero")), a];
+	};
+	NYCbCrA.prototype.RGBA = function() { return this.$val.RGBA(); };
+	nYCbCrAModel = function(c) {
+		var $ptr, _q, _q$1, _q$2, _r, _ref, _tuple, _tuple$1, a, b, c, c$1, c$2, g, r, u, v, x, x$1, y, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _q = $f._q; _q$1 = $f._q$1; _q$2 = $f._q$2; _r = $f._r; _ref = $f._ref; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; a = $f.a; b = $f.b; c = $f.c; c$1 = $f.c$1; c$2 = $f.c$2; g = $f.g; r = $f.r; u = $f.u; v = $f.v; x = $f.x; x$1 = $f.x$1; y = $f.y; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_ref = c;
+		if ($assertType(_ref, NYCbCrA, true)[1]) {
+			c$1 = _ref.$val;
+			return new c$1.constructor.elem(c$1);
+		} else if ($assertType(_ref, YCbCr, true)[1]) {
+			c$2 = _ref.$val;
+			return (x = new NYCbCrA.ptr($clone(c$2, YCbCr), 255), new x.constructor.elem(x));
+		}
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple = _r;
+		r = _tuple[0];
+		g = _tuple[1];
+		b = _tuple[2];
+		a = _tuple[3];
+		if (!((a === 0))) {
+			r = (_q = (($imul(r, 65535) >>> 0)) / a, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
+			g = (_q$1 = (($imul(g, 65535) >>> 0)) / a, (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero"));
+			b = (_q$2 = (($imul(b, 65535) >>> 0)) / a, (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		}
+		_tuple$1 = RGBToYCbCr(((r >>> 8 >>> 0) << 24 >>> 24), ((g >>> 8 >>> 0) << 24 >>> 24), ((b >>> 8 >>> 0) << 24 >>> 24));
+		y = _tuple$1[0];
+		u = _tuple$1[1];
+		v = _tuple$1[2];
+		return (x$1 = new NYCbCrA.ptr(new YCbCr.ptr(y, u, v), ((a >>> 8 >>> 0) << 24 >>> 24)), new x$1.constructor.elem(x$1));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: nYCbCrAModel }; } $f.$ptr = $ptr; $f._q = _q; $f._q$1 = _q$1; $f._q$2 = _q$2; $f._r = _r; $f._ref = _ref; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.a = a; $f.b = b; $f.c = c; $f.c$1 = c$1; $f.c$2 = c$2; $f.g = g; $f.r = r; $f.u = u; $f.v = v; $f.x = x; $f.x$1 = x$1; $f.y = y; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	RGBToCMYK = function(r, g, b) {
+		var $ptr, _q, _q$1, _q$2, b, bb, c, g, gg, m, r, rr, w, y;
+		rr = (r >>> 0);
+		gg = (g >>> 0);
+		bb = (b >>> 0);
+		w = rr;
+		if (w < gg) {
+			w = gg;
+		}
+		if (w < bb) {
+			w = bb;
+		}
+		if (w === 0) {
+			return [0, 0, 0, 255];
+		}
+		c = (_q = ($imul(((w - rr >>> 0)), 255) >>> 0) / w, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
+		m = (_q$1 = ($imul(((w - gg >>> 0)), 255) >>> 0) / w, (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		y = (_q$2 = ($imul(((w - bb >>> 0)), 255) >>> 0) / w, (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		return [(c << 24 >>> 24), (m << 24 >>> 24), (y << 24 >>> 24), ((255 - w >>> 0) << 24 >>> 24)];
+	};
+	$pkg.RGBToCMYK = RGBToCMYK;
+	CMYK.ptr.prototype.RGBA = function() {
+		var $ptr, _q, _q$1, _q$2, b, c, g, r, w;
+		c = $clone(this, CMYK);
+		w = (65535 - ($imul((c.K >>> 0), 257) >>> 0) >>> 0);
+		r = (_q = ($imul((65535 - ($imul((c.C >>> 0), 257) >>> 0) >>> 0), w) >>> 0) / 65535, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
+		g = (_q$1 = ($imul((65535 - ($imul((c.M >>> 0), 257) >>> 0) >>> 0), w) >>> 0) / 65535, (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		b = (_q$2 = ($imul((65535 - ($imul((c.Y >>> 0), 257) >>> 0) >>> 0), w) >>> 0) / 65535, (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero"));
+		return [r, g, b, 65535];
+	};
+	CMYK.prototype.RGBA = function() { return this.$val.RGBA(); };
+	cmykModel = function(c) {
+		var $ptr, _r, _tuple, _tuple$1, _tuple$2, b, c, cc, g, kk, mm, ok, r, x, yy, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; _tuple$2 = $f._tuple$2; b = $f.b; c = $f.c; cc = $f.cc; g = $f.g; kk = $f.kk; mm = $f.mm; ok = $f.ok; r = $f.r; x = $f.x; yy = $f.yy; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_tuple = $assertType(c, CMYK, true);
+		ok = _tuple[1];
+		if (ok) {
+			return c;
+		}
+		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple$1 = _r;
+		r = _tuple$1[0];
+		g = _tuple$1[1];
+		b = _tuple$1[2];
+		_tuple$2 = RGBToCMYK(((r >>> 8 >>> 0) << 24 >>> 24), ((g >>> 8 >>> 0) << 24 >>> 24), ((b >>> 8 >>> 0) << 24 >>> 24));
+		cc = _tuple$2[0];
+		mm = _tuple$2[1];
+		yy = _tuple$2[2];
+		kk = _tuple$2[3];
+		return (x = new CMYK.ptr(cc, mm, yy, kk), new x.constructor.elem(x));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: cmykModel }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f._tuple$2 = _tuple$2; $f.b = b; $f.c = c; $f.cc = cc; $f.g = g; $f.kk = kk; $f.mm = mm; $f.ok = ok; $f.r = r; $f.x = x; $f.yy = yy; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	RGBA.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
+	RGBA64.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
+	NRGBA.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
+	NRGBA64.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
+	Alpha.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
+	Alpha16.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
+	Gray.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
+	Gray16.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
+	ptrType.methods = [{prop: "Convert", name: "Convert", pkg: "", typ: $funcType([Color], [Color], false)}];
+	Palette.methods = [{prop: "Convert", name: "Convert", pkg: "", typ: $funcType([Color], [Color], false)}, {prop: "Index", name: "Index", pkg: "", typ: $funcType([Color], [$Int], false)}];
+	YCbCr.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
+	NYCbCrA.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
+	CMYK.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
+	Color.init([{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}]);
+	RGBA.init([{prop: "R", name: "R", pkg: "", typ: $Uint8, tag: ""}, {prop: "G", name: "G", pkg: "", typ: $Uint8, tag: ""}, {prop: "B", name: "B", pkg: "", typ: $Uint8, tag: ""}, {prop: "A", name: "A", pkg: "", typ: $Uint8, tag: ""}]);
+	RGBA64.init([{prop: "R", name: "R", pkg: "", typ: $Uint16, tag: ""}, {prop: "G", name: "G", pkg: "", typ: $Uint16, tag: ""}, {prop: "B", name: "B", pkg: "", typ: $Uint16, tag: ""}, {prop: "A", name: "A", pkg: "", typ: $Uint16, tag: ""}]);
+	NRGBA.init([{prop: "R", name: "R", pkg: "", typ: $Uint8, tag: ""}, {prop: "G", name: "G", pkg: "", typ: $Uint8, tag: ""}, {prop: "B", name: "B", pkg: "", typ: $Uint8, tag: ""}, {prop: "A", name: "A", pkg: "", typ: $Uint8, tag: ""}]);
+	NRGBA64.init([{prop: "R", name: "R", pkg: "", typ: $Uint16, tag: ""}, {prop: "G", name: "G", pkg: "", typ: $Uint16, tag: ""}, {prop: "B", name: "B", pkg: "", typ: $Uint16, tag: ""}, {prop: "A", name: "A", pkg: "", typ: $Uint16, tag: ""}]);
+	Alpha.init([{prop: "A", name: "A", pkg: "", typ: $Uint8, tag: ""}]);
+	Alpha16.init([{prop: "A", name: "A", pkg: "", typ: $Uint16, tag: ""}]);
+	Gray.init([{prop: "Y", name: "Y", pkg: "", typ: $Uint8, tag: ""}]);
+	Gray16.init([{prop: "Y", name: "Y", pkg: "", typ: $Uint16, tag: ""}]);
+	Model.init([{prop: "Convert", name: "Convert", pkg: "", typ: $funcType([Color], [Color], false)}]);
+	modelFunc.init([{prop: "f", name: "f", pkg: "image/color", typ: funcType, tag: ""}]);
+	Palette.init(Color);
+	YCbCr.init([{prop: "Y", name: "Y", pkg: "", typ: $Uint8, tag: ""}, {prop: "Cb", name: "Cb", pkg: "", typ: $Uint8, tag: ""}, {prop: "Cr", name: "Cr", pkg: "", typ: $Uint8, tag: ""}]);
+	NYCbCrA.init([{prop: "YCbCr", name: "", pkg: "", typ: YCbCr, tag: ""}, {prop: "A", name: "A", pkg: "", typ: $Uint8, tag: ""}]);
+	CMYK.init([{prop: "C", name: "C", pkg: "", typ: $Uint8, tag: ""}, {prop: "M", name: "M", pkg: "", typ: $Uint8, tag: ""}, {prop: "Y", name: "Y", pkg: "", typ: $Uint8, tag: ""}, {prop: "K", name: "K", pkg: "", typ: $Uint8, tag: ""}]);
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$pkg.RGBAModel = ModelFunc(rgbaModel);
+		$pkg.RGBA64Model = ModelFunc(rgba64Model);
+		$pkg.NRGBAModel = ModelFunc(nrgbaModel);
+		$pkg.NRGBA64Model = ModelFunc(nrgba64Model);
+		$pkg.AlphaModel = ModelFunc(alphaModel);
+		$pkg.Alpha16Model = ModelFunc(alpha16Model);
+		$pkg.GrayModel = ModelFunc(grayModel);
+		$pkg.Gray16Model = ModelFunc(gray16Model);
+		$pkg.Black = new Gray16.ptr(0);
+		$pkg.White = new Gray16.ptr(65535);
+		$pkg.Transparent = new Alpha16.ptr(0);
+		$pkg.Opaque = new Alpha16.ptr(65535);
+		$pkg.YCbCrModel = ModelFunc(yCbCrModel);
+		$pkg.NYCbCrAModel = ModelFunc(nYCbCrAModel);
+		$pkg.CMYKModel = ModelFunc(cmykModel);
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["image"] = (function() {
+	var $pkg = {}, $init, bufio, errors, color, io, strconv, Point, Rectangle, Image, RGBA, Paletted, Uniform, sliceType$1, arrayType, ptrType, ptrType$9, ptrType$10, x, x$1, x$2, x$3, Rect, NewRGBA, NewPaletted, NewUniform;
+	bufio = $packages["bufio"];
+	errors = $packages["errors"];
+	color = $packages["image/color"];
+	io = $packages["io"];
+	strconv = $packages["strconv"];
+	Point = $pkg.Point = $newType(0, $kindStruct, "image.Point", "Point", "image", function(X_, Y_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.X = 0;
+			this.Y = 0;
+			return;
+		}
+		this.X = X_;
+		this.Y = Y_;
+	});
+	Rectangle = $pkg.Rectangle = $newType(0, $kindStruct, "image.Rectangle", "Rectangle", "image", function(Min_, Max_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.Min = new Point.ptr(0, 0);
+			this.Max = new Point.ptr(0, 0);
+			return;
+		}
+		this.Min = Min_;
+		this.Max = Max_;
+	});
+	Image = $pkg.Image = $newType(8, $kindInterface, "image.Image", "Image", "image", null);
+	RGBA = $pkg.RGBA = $newType(0, $kindStruct, "image.RGBA", "RGBA", "image", function(Pix_, Stride_, Rect_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.Pix = sliceType$1.nil;
+			this.Stride = 0;
+			this.Rect = new Rectangle.ptr(new Point.ptr(0, 0), new Point.ptr(0, 0));
+			return;
+		}
+		this.Pix = Pix_;
+		this.Stride = Stride_;
+		this.Rect = Rect_;
+	});
+	Paletted = $pkg.Paletted = $newType(0, $kindStruct, "image.Paletted", "Paletted", "image", function(Pix_, Stride_, Rect_, Palette_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.Pix = sliceType$1.nil;
+			this.Stride = 0;
+			this.Rect = new Rectangle.ptr(new Point.ptr(0, 0), new Point.ptr(0, 0));
+			this.Palette = color.Palette.nil;
+			return;
+		}
+		this.Pix = Pix_;
+		this.Stride = Stride_;
+		this.Rect = Rect_;
+		this.Palette = Palette_;
+	});
+	Uniform = $pkg.Uniform = $newType(0, $kindStruct, "image.Uniform", "Uniform", "image", function(C_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.C = $ifaceNil;
+			return;
+		}
+		this.C = C_;
+	});
+	sliceType$1 = $sliceType($Uint8);
+	arrayType = $arrayType($Bool, 256);
+	ptrType = $ptrType(RGBA);
+	ptrType$9 = $ptrType(Paletted);
+	ptrType$10 = $ptrType(Uniform);
+	Point.ptr.prototype.String = function() {
+		var $ptr, p;
+		p = $clone(this, Point);
+		return "(" + strconv.Itoa(p.X) + "," + strconv.Itoa(p.Y) + ")";
+	};
+	Point.prototype.String = function() { return this.$val.String(); };
+	Point.ptr.prototype.Add = function(q) {
+		var $ptr, p, q;
+		q = $clone(q, Point);
+		p = $clone(this, Point);
+		return new Point.ptr(p.X + q.X >> 0, p.Y + q.Y >> 0);
+	};
+	Point.prototype.Add = function(q) { return this.$val.Add(q); };
+	Point.ptr.prototype.Sub = function(q) {
+		var $ptr, p, q;
+		q = $clone(q, Point);
+		p = $clone(this, Point);
+		return new Point.ptr(p.X - q.X >> 0, p.Y - q.Y >> 0);
+	};
+	Point.prototype.Sub = function(q) { return this.$val.Sub(q); };
+	Point.ptr.prototype.Mul = function(k) {
+		var $ptr, k, p;
+		p = $clone(this, Point);
+		return new Point.ptr($imul(p.X, k), $imul(p.Y, k));
+	};
+	Point.prototype.Mul = function(k) { return this.$val.Mul(k); };
+	Point.ptr.prototype.Div = function(k) {
+		var $ptr, _q, _q$1, k, p;
+		p = $clone(this, Point);
+		return new Point.ptr((_q = p.X / k, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >> 0 : $throwRuntimeError("integer divide by zero")), (_q$1 = p.Y / k, (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >> 0 : $throwRuntimeError("integer divide by zero")));
+	};
+	Point.prototype.Div = function(k) { return this.$val.Div(k); };
+	Point.ptr.prototype.In = function(r) {
+		var $ptr, p, r;
+		r = $clone(r, Rectangle);
+		p = $clone(this, Point);
+		return r.Min.X <= p.X && p.X < r.Max.X && r.Min.Y <= p.Y && p.Y < r.Max.Y;
+	};
+	Point.prototype.In = function(r) { return this.$val.In(r); };
+	Point.ptr.prototype.Mod = function(r) {
+		var $ptr, _r, _r$1, _tmp, _tmp$1, h, p, r, w;
+		r = $clone(r, Rectangle);
+		p = $clone(this, Point);
+		_tmp = r.Dx();
+		_tmp$1 = r.Dy();
+		w = _tmp;
+		h = _tmp$1;
+		Point.copy(p, p.Sub(r.Min));
+		p.X = (_r = p.X % w, _r === _r ? _r : $throwRuntimeError("integer divide by zero"));
+		if (p.X < 0) {
+			p.X = p.X + (w) >> 0;
+		}
+		p.Y = (_r$1 = p.Y % h, _r$1 === _r$1 ? _r$1 : $throwRuntimeError("integer divide by zero"));
+		if (p.Y < 0) {
+			p.Y = p.Y + (h) >> 0;
+		}
+		return p.Add(r.Min);
+	};
+	Point.prototype.Mod = function(r) { return this.$val.Mod(r); };
+	Point.ptr.prototype.Eq = function(q) {
+		var $ptr, p, q;
+		q = $clone(q, Point);
+		p = $clone(this, Point);
+		return $equal(p, q, Point);
+	};
+	Point.prototype.Eq = function(q) { return this.$val.Eq(q); };
+	Rectangle.ptr.prototype.String = function() {
+		var $ptr, r;
+		r = $clone(this, Rectangle);
+		return r.Min.String() + "-" + r.Max.String();
+	};
+	Rectangle.prototype.String = function() { return this.$val.String(); };
+	Rectangle.ptr.prototype.Dx = function() {
+		var $ptr, r;
+		r = $clone(this, Rectangle);
+		return r.Max.X - r.Min.X >> 0;
+	};
+	Rectangle.prototype.Dx = function() { return this.$val.Dx(); };
+	Rectangle.ptr.prototype.Dy = function() {
+		var $ptr, r;
+		r = $clone(this, Rectangle);
+		return r.Max.Y - r.Min.Y >> 0;
+	};
+	Rectangle.prototype.Dy = function() { return this.$val.Dy(); };
+	Rectangle.ptr.prototype.Size = function() {
+		var $ptr, r;
+		r = $clone(this, Rectangle);
+		return new Point.ptr(r.Max.X - r.Min.X >> 0, r.Max.Y - r.Min.Y >> 0);
+	};
+	Rectangle.prototype.Size = function() { return this.$val.Size(); };
+	Rectangle.ptr.prototype.Add = function(p) {
+		var $ptr, p, r;
+		p = $clone(p, Point);
+		r = $clone(this, Rectangle);
+		return new Rectangle.ptr(new Point.ptr(r.Min.X + p.X >> 0, r.Min.Y + p.Y >> 0), new Point.ptr(r.Max.X + p.X >> 0, r.Max.Y + p.Y >> 0));
+	};
+	Rectangle.prototype.Add = function(p) { return this.$val.Add(p); };
+	Rectangle.ptr.prototype.Sub = function(p) {
+		var $ptr, p, r;
+		p = $clone(p, Point);
+		r = $clone(this, Rectangle);
+		return new Rectangle.ptr(new Point.ptr(r.Min.X - p.X >> 0, r.Min.Y - p.Y >> 0), new Point.ptr(r.Max.X - p.X >> 0, r.Max.Y - p.Y >> 0));
+	};
+	Rectangle.prototype.Sub = function(p) { return this.$val.Sub(p); };
+	Rectangle.ptr.prototype.Inset = function(n) {
+		var $ptr, _q, _q$1, n, r;
+		r = $clone(this, Rectangle);
+		if (r.Dx() < ($imul(2, n))) {
+			r.Min.X = (_q = ((r.Min.X + r.Max.X >> 0)) / 2, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >> 0 : $throwRuntimeError("integer divide by zero"));
+			r.Max.X = r.Min.X;
+		} else {
+			r.Min.X = r.Min.X + (n) >> 0;
+			r.Max.X = r.Max.X - (n) >> 0;
+		}
+		if (r.Dy() < ($imul(2, n))) {
+			r.Min.Y = (_q$1 = ((r.Min.Y + r.Max.Y >> 0)) / 2, (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >> 0 : $throwRuntimeError("integer divide by zero"));
+			r.Max.Y = r.Min.Y;
+		} else {
+			r.Min.Y = r.Min.Y + (n) >> 0;
+			r.Max.Y = r.Max.Y - (n) >> 0;
+		}
+		return r;
+	};
+	Rectangle.prototype.Inset = function(n) { return this.$val.Inset(n); };
+	Rectangle.ptr.prototype.Intersect = function(s) {
+		var $ptr, r, s;
+		s = $clone(s, Rectangle);
+		r = $clone(this, Rectangle);
+		if (r.Min.X < s.Min.X) {
+			r.Min.X = s.Min.X;
+		}
+		if (r.Min.Y < s.Min.Y) {
+			r.Min.Y = s.Min.Y;
+		}
+		if (r.Max.X > s.Max.X) {
+			r.Max.X = s.Max.X;
+		}
+		if (r.Max.Y > s.Max.Y) {
+			r.Max.Y = s.Max.Y;
+		}
+		if (r.Min.X > r.Max.X || r.Min.Y > r.Max.Y) {
+			return $pkg.ZR;
+		}
+		return r;
+	};
+	Rectangle.prototype.Intersect = function(s) { return this.$val.Intersect(s); };
+	Rectangle.ptr.prototype.Union = function(s) {
+		var $ptr, r, s;
+		s = $clone(s, Rectangle);
+		r = $clone(this, Rectangle);
+		if (r.Empty()) {
+			return s;
+		}
+		if (s.Empty()) {
+			return r;
+		}
+		if (r.Min.X > s.Min.X) {
+			r.Min.X = s.Min.X;
+		}
+		if (r.Min.Y > s.Min.Y) {
+			r.Min.Y = s.Min.Y;
+		}
+		if (r.Max.X < s.Max.X) {
+			r.Max.X = s.Max.X;
+		}
+		if (r.Max.Y < s.Max.Y) {
+			r.Max.Y = s.Max.Y;
+		}
+		return r;
+	};
+	Rectangle.prototype.Union = function(s) { return this.$val.Union(s); };
+	Rectangle.ptr.prototype.Empty = function() {
+		var $ptr, r;
+		r = $clone(this, Rectangle);
+		return r.Min.X >= r.Max.X || r.Min.Y >= r.Max.Y;
+	};
+	Rectangle.prototype.Empty = function() { return this.$val.Empty(); };
+	Rectangle.ptr.prototype.Eq = function(s) {
+		var $ptr, r, s;
+		s = $clone(s, Rectangle);
+		r = $clone(this, Rectangle);
+		return $equal(r, s, Rectangle) || r.Empty() && s.Empty();
+	};
+	Rectangle.prototype.Eq = function(s) { return this.$val.Eq(s); };
+	Rectangle.ptr.prototype.Overlaps = function(s) {
+		var $ptr, r, s;
+		s = $clone(s, Rectangle);
+		r = $clone(this, Rectangle);
+		return !r.Empty() && !s.Empty() && r.Min.X < s.Max.X && s.Min.X < r.Max.X && r.Min.Y < s.Max.Y && s.Min.Y < r.Max.Y;
+	};
+	Rectangle.prototype.Overlaps = function(s) { return this.$val.Overlaps(s); };
+	Rectangle.ptr.prototype.In = function(s) {
+		var $ptr, r, s;
+		s = $clone(s, Rectangle);
+		r = $clone(this, Rectangle);
+		if (r.Empty()) {
+			return true;
+		}
+		return s.Min.X <= r.Min.X && r.Max.X <= s.Max.X && s.Min.Y <= r.Min.Y && r.Max.Y <= s.Max.Y;
+	};
+	Rectangle.prototype.In = function(s) { return this.$val.In(s); };
+	Rectangle.ptr.prototype.Canon = function() {
+		var $ptr, _tmp, _tmp$1, _tmp$2, _tmp$3, r;
+		r = $clone(this, Rectangle);
+		if (r.Max.X < r.Min.X) {
+			_tmp = r.Max.X;
+			_tmp$1 = r.Min.X;
+			r.Min.X = _tmp;
+			r.Max.X = _tmp$1;
+		}
+		if (r.Max.Y < r.Min.Y) {
+			_tmp$2 = r.Max.Y;
+			_tmp$3 = r.Min.Y;
+			r.Min.Y = _tmp$2;
+			r.Max.Y = _tmp$3;
+		}
+		return r;
+	};
+	Rectangle.prototype.Canon = function() { return this.$val.Canon(); };
+	Rectangle.ptr.prototype.At = function(x$4, y) {
+		var $ptr, r, x$4, x$5, x$6, y;
+		r = $clone(this, Rectangle);
+		if ((new Point.ptr(x$4, y)).In(r)) {
+			return (x$5 = color.Opaque, new x$5.constructor.elem(x$5));
+		}
+		return (x$6 = color.Transparent, new x$6.constructor.elem(x$6));
+	};
+	Rectangle.prototype.At = function(x$4, y) { return this.$val.At(x$4, y); };
+	Rectangle.ptr.prototype.Bounds = function() {
+		var $ptr, r;
+		r = $clone(this, Rectangle);
+		return r;
+	};
+	Rectangle.prototype.Bounds = function() { return this.$val.Bounds(); };
+	Rectangle.ptr.prototype.ColorModel = function() {
+		var $ptr, r;
+		r = $clone(this, Rectangle);
+		return color.Alpha16Model;
+	};
+	Rectangle.prototype.ColorModel = function() { return this.$val.ColorModel(); };
+	Rect = function(x0, y0, x1, y1) {
+		var $ptr, _tmp, _tmp$1, _tmp$2, _tmp$3, x0, x1, y0, y1;
+		if (x0 > x1) {
+			_tmp = x1;
+			_tmp$1 = x0;
+			x0 = _tmp;
+			x1 = _tmp$1;
+		}
+		if (y0 > y1) {
+			_tmp$2 = y1;
+			_tmp$3 = y0;
+			y0 = _tmp$2;
+			y1 = _tmp$3;
+		}
+		return new Rectangle.ptr(new Point.ptr(x0, y0), new Point.ptr(x1, y1));
+	};
+	$pkg.Rect = Rect;
+	RGBA.ptr.prototype.ColorModel = function() {
+		var $ptr, p;
+		p = this;
+		return color.RGBAModel;
+	};
+	RGBA.prototype.ColorModel = function() { return this.$val.ColorModel(); };
+	RGBA.ptr.prototype.Bounds = function() {
+		var $ptr, p;
+		p = this;
+		return p.Rect;
+	};
+	RGBA.prototype.Bounds = function() { return this.$val.Bounds(); };
+	RGBA.ptr.prototype.At = function(x$4, y) {
+		var $ptr, p, x$4, x$5, y;
+		p = this;
+		return (x$5 = p.RGBAAt(x$4, y), new x$5.constructor.elem(x$5));
+	};
+	RGBA.prototype.At = function(x$4, y) { return this.$val.At(x$4, y); };
+	RGBA.ptr.prototype.RGBAAt = function(x$4, y) {
+		var $ptr, i, p, x$10, x$11, x$12, x$4, x$5, x$6, x$7, x$8, x$9, y;
+		p = this;
+		if (!(new Point.ptr(x$4, y).In(p.Rect))) {
+			return new color.RGBA.ptr(0, 0, 0, 0);
+		}
+		i = p.PixOffset(x$4, y);
+		return new color.RGBA.ptr((x$5 = p.Pix, x$6 = i + 0 >> 0, ((x$6 < 0 || x$6 >= x$5.$length) ? $throwRuntimeError("index out of range") : x$5.$array[x$5.$offset + x$6])), (x$7 = p.Pix, x$8 = i + 1 >> 0, ((x$8 < 0 || x$8 >= x$7.$length) ? $throwRuntimeError("index out of range") : x$7.$array[x$7.$offset + x$8])), (x$9 = p.Pix, x$10 = i + 2 >> 0, ((x$10 < 0 || x$10 >= x$9.$length) ? $throwRuntimeError("index out of range") : x$9.$array[x$9.$offset + x$10])), (x$11 = p.Pix, x$12 = i + 3 >> 0, ((x$12 < 0 || x$12 >= x$11.$length) ? $throwRuntimeError("index out of range") : x$11.$array[x$11.$offset + x$12])));
+	};
+	RGBA.prototype.RGBAAt = function(x$4, y) { return this.$val.RGBAAt(x$4, y); };
+	RGBA.ptr.prototype.PixOffset = function(x$4, y) {
+		var $ptr, p, x$4, y;
+		p = this;
+		return ($imul(((y - p.Rect.Min.Y >> 0)), p.Stride)) + ($imul(((x$4 - p.Rect.Min.X >> 0)), 4)) >> 0;
+	};
+	RGBA.prototype.PixOffset = function(x$4, y) { return this.$val.PixOffset(x$4, y); };
+	RGBA.ptr.prototype.Set = function(x$4, y, c) {
+		var $ptr, _r, c, c1, i, p, x$10, x$11, x$12, x$4, x$5, x$6, x$7, x$8, x$9, y, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; c = $f.c; c1 = $f.c1; i = $f.i; p = $f.p; x$10 = $f.x$10; x$11 = $f.x$11; x$12 = $f.x$12; x$4 = $f.x$4; x$5 = $f.x$5; x$6 = $f.x$6; x$7 = $f.x$7; x$8 = $f.x$8; x$9 = $f.x$9; y = $f.y; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		p = this;
+		if (!(new Point.ptr(x$4, y).In(p.Rect))) {
+			return;
+		}
+		i = p.PixOffset(x$4, y);
+		_r = color.RGBAModel.Convert(c); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		c1 = $clone($assertType(_r, color.RGBA), color.RGBA);
+		(x$5 = p.Pix, x$6 = i + 0 >> 0, ((x$6 < 0 || x$6 >= x$5.$length) ? $throwRuntimeError("index out of range") : x$5.$array[x$5.$offset + x$6] = c1.R));
+		(x$7 = p.Pix, x$8 = i + 1 >> 0, ((x$8 < 0 || x$8 >= x$7.$length) ? $throwRuntimeError("index out of range") : x$7.$array[x$7.$offset + x$8] = c1.G));
+		(x$9 = p.Pix, x$10 = i + 2 >> 0, ((x$10 < 0 || x$10 >= x$9.$length) ? $throwRuntimeError("index out of range") : x$9.$array[x$9.$offset + x$10] = c1.B));
+		(x$11 = p.Pix, x$12 = i + 3 >> 0, ((x$12 < 0 || x$12 >= x$11.$length) ? $throwRuntimeError("index out of range") : x$11.$array[x$11.$offset + x$12] = c1.A));
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: RGBA.ptr.prototype.Set }; } $f.$ptr = $ptr; $f._r = _r; $f.c = c; $f.c1 = c1; $f.i = i; $f.p = p; $f.x$10 = x$10; $f.x$11 = x$11; $f.x$12 = x$12; $f.x$4 = x$4; $f.x$5 = x$5; $f.x$6 = x$6; $f.x$7 = x$7; $f.x$8 = x$8; $f.x$9 = x$9; $f.y = y; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	RGBA.prototype.Set = function(x$4, y, c) { return this.$val.Set(x$4, y, c); };
+	RGBA.ptr.prototype.SetRGBA = function(x$4, y, c) {
+		var $ptr, c, i, p, x$10, x$11, x$12, x$4, x$5, x$6, x$7, x$8, x$9, y;
+		c = $clone(c, color.RGBA);
+		p = this;
+		if (!(new Point.ptr(x$4, y).In(p.Rect))) {
+			return;
+		}
+		i = p.PixOffset(x$4, y);
+		(x$5 = p.Pix, x$6 = i + 0 >> 0, ((x$6 < 0 || x$6 >= x$5.$length) ? $throwRuntimeError("index out of range") : x$5.$array[x$5.$offset + x$6] = c.R));
+		(x$7 = p.Pix, x$8 = i + 1 >> 0, ((x$8 < 0 || x$8 >= x$7.$length) ? $throwRuntimeError("index out of range") : x$7.$array[x$7.$offset + x$8] = c.G));
+		(x$9 = p.Pix, x$10 = i + 2 >> 0, ((x$10 < 0 || x$10 >= x$9.$length) ? $throwRuntimeError("index out of range") : x$9.$array[x$9.$offset + x$10] = c.B));
+		(x$11 = p.Pix, x$12 = i + 3 >> 0, ((x$12 < 0 || x$12 >= x$11.$length) ? $throwRuntimeError("index out of range") : x$11.$array[x$11.$offset + x$12] = c.A));
+	};
+	RGBA.prototype.SetRGBA = function(x$4, y, c) { return this.$val.SetRGBA(x$4, y, c); };
+	RGBA.ptr.prototype.SubImage = function(r) {
+		var $ptr, i, p, r;
+		r = $clone(r, Rectangle);
+		p = this;
+		Rectangle.copy(r, r.Intersect(p.Rect));
+		if (r.Empty()) {
+			return new RGBA.ptr(sliceType$1.nil, 0, new Rectangle.ptr(new Point.ptr(0, 0), new Point.ptr(0, 0)));
+		}
+		i = p.PixOffset(r.Min.X, r.Min.Y);
+		return new RGBA.ptr($subslice(p.Pix, i), p.Stride, $clone(r, Rectangle));
+	};
+	RGBA.prototype.SubImage = function(r) { return this.$val.SubImage(r); };
+	RGBA.ptr.prototype.Opaque = function() {
+		var $ptr, _tmp, _tmp$1, i, i0, i1, p, x$4, y;
+		p = this;
+		if (p.Rect.Empty()) {
+			return true;
+		}
+		_tmp = 3;
+		_tmp$1 = $imul(p.Rect.Dx(), 4);
+		i0 = _tmp;
+		i1 = _tmp$1;
+		y = p.Rect.Min.Y;
+		while (true) {
+			if (!(y < p.Rect.Max.Y)) { break; }
+			i = i0;
+			while (true) {
+				if (!(i < i1)) { break; }
+				if (!(((x$4 = p.Pix, ((i < 0 || i >= x$4.$length) ? $throwRuntimeError("index out of range") : x$4.$array[x$4.$offset + i])) === 255))) {
+					return false;
+				}
+				i = i + (4) >> 0;
+			}
+			i0 = i0 + (p.Stride) >> 0;
+			i1 = i1 + (p.Stride) >> 0;
+			y = y + (1) >> 0;
+		}
+		return true;
+	};
+	RGBA.prototype.Opaque = function() { return this.$val.Opaque(); };
+	NewRGBA = function(r) {
+		var $ptr, _tmp, _tmp$1, buf, h, r, w;
+		r = $clone(r, Rectangle);
+		_tmp = r.Dx();
+		_tmp$1 = r.Dy();
+		w = _tmp;
+		h = _tmp$1;
+		buf = $makeSlice(sliceType$1, ($imul(($imul(4, w)), h)));
+		return new RGBA.ptr(buf, $imul(4, w), $clone(r, Rectangle));
+	};
+	$pkg.NewRGBA = NewRGBA;
+	Paletted.ptr.prototype.ColorModel = function() {
+		var $ptr, p;
+		p = this;
+		return p.Palette;
+	};
+	Paletted.prototype.ColorModel = function() { return this.$val.ColorModel(); };
+	Paletted.ptr.prototype.Bounds = function() {
+		var $ptr, p;
+		p = this;
+		return p.Rect;
+	};
+	Paletted.prototype.Bounds = function() { return this.$val.Bounds(); };
+	Paletted.ptr.prototype.At = function(x$4, y) {
+		var $ptr, i, p, x$4, x$5, x$6, x$7, x$8, y;
+		p = this;
+		if (p.Palette.$length === 0) {
+			return $ifaceNil;
+		}
+		if (!(new Point.ptr(x$4, y).In(p.Rect))) {
+			return (x$5 = p.Palette, (0 >= x$5.$length ? $throwRuntimeError("index out of range") : x$5.$array[x$5.$offset + 0]));
+		}
+		i = p.PixOffset(x$4, y);
+		return (x$6 = p.Palette, x$7 = (x$8 = p.Pix, ((i < 0 || i >= x$8.$length) ? $throwRuntimeError("index out of range") : x$8.$array[x$8.$offset + i])), ((x$7 < 0 || x$7 >= x$6.$length) ? $throwRuntimeError("index out of range") : x$6.$array[x$6.$offset + x$7]));
+	};
+	Paletted.prototype.At = function(x$4, y) { return this.$val.At(x$4, y); };
+	Paletted.ptr.prototype.PixOffset = function(x$4, y) {
+		var $ptr, p, x$4, y;
+		p = this;
+		return ($imul(((y - p.Rect.Min.Y >> 0)), p.Stride)) + ($imul(((x$4 - p.Rect.Min.X >> 0)), 1)) >> 0;
+	};
+	Paletted.prototype.PixOffset = function(x$4, y) { return this.$val.PixOffset(x$4, y); };
+	Paletted.ptr.prototype.Set = function(x$4, y, c) {
+		var $ptr, _r, c, i, p, x$4, x$5, y, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; c = $f.c; i = $f.i; p = $f.p; x$4 = $f.x$4; x$5 = $f.x$5; y = $f.y; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		p = this;
+		if (!(new Point.ptr(x$4, y).In(p.Rect))) {
+			return;
+		}
+		i = p.PixOffset(x$4, y);
+		_r = p.Palette.Index(c); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		(x$5 = p.Pix, ((i < 0 || i >= x$5.$length) ? $throwRuntimeError("index out of range") : x$5.$array[x$5.$offset + i] = (_r << 24 >>> 24)));
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: Paletted.ptr.prototype.Set }; } $f.$ptr = $ptr; $f._r = _r; $f.c = c; $f.i = i; $f.p = p; $f.x$4 = x$4; $f.x$5 = x$5; $f.y = y; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	Paletted.prototype.Set = function(x$4, y, c) { return this.$val.Set(x$4, y, c); };
+	Paletted.ptr.prototype.ColorIndexAt = function(x$4, y) {
+		var $ptr, i, p, x$4, x$5, y;
+		p = this;
+		if (!(new Point.ptr(x$4, y).In(p.Rect))) {
+			return 0;
+		}
+		i = p.PixOffset(x$4, y);
+		return (x$5 = p.Pix, ((i < 0 || i >= x$5.$length) ? $throwRuntimeError("index out of range") : x$5.$array[x$5.$offset + i]));
+	};
+	Paletted.prototype.ColorIndexAt = function(x$4, y) { return this.$val.ColorIndexAt(x$4, y); };
+	Paletted.ptr.prototype.SetColorIndex = function(x$4, y, index) {
+		var $ptr, i, index, p, x$4, x$5, y;
+		p = this;
+		if (!(new Point.ptr(x$4, y).In(p.Rect))) {
+			return;
+		}
+		i = p.PixOffset(x$4, y);
+		(x$5 = p.Pix, ((i < 0 || i >= x$5.$length) ? $throwRuntimeError("index out of range") : x$5.$array[x$5.$offset + i] = index));
+	};
+	Paletted.prototype.SetColorIndex = function(x$4, y, index) { return this.$val.SetColorIndex(x$4, y, index); };
+	Paletted.ptr.prototype.SubImage = function(r) {
+		var $ptr, i, p, r;
+		r = $clone(r, Rectangle);
+		p = this;
+		Rectangle.copy(r, r.Intersect(p.Rect));
+		if (r.Empty()) {
+			return new Paletted.ptr(sliceType$1.nil, 0, new Rectangle.ptr(new Point.ptr(0, 0), new Point.ptr(0, 0)), p.Palette);
+		}
+		i = p.PixOffset(r.Min.X, r.Min.Y);
+		return new Paletted.ptr($subslice(p.Pix, i), p.Stride, $clone(p.Rect.Intersect(r), Rectangle), p.Palette);
+	};
+	Paletted.prototype.SubImage = function(r) { return this.$val.SubImage(r); };
+	Paletted.ptr.prototype.Opaque = function() {
+		var $ptr, _i, _i$1, _r, _ref, _ref$1, _tmp, _tmp$1, _tuple, a, c, c$1, i, i0, i1, p, present, y, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _i = $f._i; _i$1 = $f._i$1; _r = $f._r; _ref = $f._ref; _ref$1 = $f._ref$1; _tmp = $f._tmp; _tmp$1 = $f._tmp$1; _tuple = $f._tuple; a = $f.a; c = $f.c; c$1 = $f.c$1; i = $f.i; i0 = $f.i0; i1 = $f.i1; p = $f.p; present = $f.present; y = $f.y; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		p = this;
+		present = arrayType.zero();
+		_tmp = 0;
+		_tmp$1 = p.Rect.Dx();
+		i0 = _tmp;
+		i1 = _tmp$1;
+		y = p.Rect.Min.Y;
+		while (true) {
+			if (!(y < p.Rect.Max.Y)) { break; }
+			_ref = $subslice(p.Pix, i0, i1);
+			_i = 0;
+			while (true) {
+				if (!(_i < _ref.$length)) { break; }
+				c = ((_i < 0 || _i >= _ref.$length) ? $throwRuntimeError("index out of range") : _ref.$array[_ref.$offset + _i]);
+				((c < 0 || c >= present.length) ? $throwRuntimeError("index out of range") : present[c] = true);
+				_i++;
+			}
+			i0 = i0 + (p.Stride) >> 0;
+			i1 = i1 + (p.Stride) >> 0;
+			y = y + (1) >> 0;
+		}
+		_ref$1 = p.Palette;
+		_i$1 = 0;
+		/* while (true) { */ case 1:
+			/* if (!(_i$1 < _ref$1.$length)) { break; } */ if(!(_i$1 < _ref$1.$length)) { $s = 2; continue; }
+			i = _i$1;
+			c$1 = ((_i$1 < 0 || _i$1 >= _ref$1.$length) ? $throwRuntimeError("index out of range") : _ref$1.$array[_ref$1.$offset + _i$1]);
+			/* */ if (!((i < 0 || i >= present.length) ? $throwRuntimeError("index out of range") : present[i])) { $s = 3; continue; }
+			/* */ $s = 4; continue;
+			/* if (!((i < 0 || i >= present.length) ? $throwRuntimeError("index out of range") : present[i])) { */ case 3:
+				_i$1++;
+				/* continue; */ $s = 1; continue;
+			/* } */ case 4:
+			_r = c$1.RGBA(); /* */ $s = 5; case 5: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+			_tuple = _r;
+			a = _tuple[3];
+			if (!((a === 65535))) {
+				return false;
+			}
+			_i$1++;
+		/* } */ $s = 1; continue; case 2:
+		return true;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Paletted.ptr.prototype.Opaque }; } $f.$ptr = $ptr; $f._i = _i; $f._i$1 = _i$1; $f._r = _r; $f._ref = _ref; $f._ref$1 = _ref$1; $f._tmp = _tmp; $f._tmp$1 = _tmp$1; $f._tuple = _tuple; $f.a = a; $f.c = c; $f.c$1 = c$1; $f.i = i; $f.i0 = i0; $f.i1 = i1; $f.p = p; $f.present = present; $f.y = y; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	Paletted.prototype.Opaque = function() { return this.$val.Opaque(); };
+	NewPaletted = function(r, p) {
+		var $ptr, _tmp, _tmp$1, h, p, pix, r, w;
+		r = $clone(r, Rectangle);
+		_tmp = r.Dx();
+		_tmp$1 = r.Dy();
+		w = _tmp;
+		h = _tmp$1;
+		pix = $makeSlice(sliceType$1, ($imul(($imul(1, w)), h)));
+		return new Paletted.ptr(pix, $imul(1, w), $clone(r, Rectangle), p);
+	};
+	$pkg.NewPaletted = NewPaletted;
+	Uniform.ptr.prototype.RGBA = function() {
+		var $ptr, _r, _tuple, a, b, c, g, r, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; a = $f.a; b = $f.b; c = $f.c; g = $f.g; r = $f.r; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		r = 0;
+		g = 0;
+		b = 0;
+		a = 0;
+		c = this;
+		_r = c.C.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple = _r;
+		r = _tuple[0];
+		g = _tuple[1];
+		b = _tuple[2];
+		a = _tuple[3];
+		/* */ $s = 2; case 2:
+		return [r, g, b, a];
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Uniform.ptr.prototype.RGBA }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f.a = a; $f.b = b; $f.c = c; $f.g = g; $f.r = r; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	Uniform.prototype.RGBA = function() { return this.$val.RGBA(); };
+	Uniform.ptr.prototype.ColorModel = function() {
+		var $ptr, c;
+		c = this;
+		return c;
+	};
+	Uniform.prototype.ColorModel = function() { return this.$val.ColorModel(); };
+	Uniform.ptr.prototype.Convert = function(param) {
+		var $ptr, c, param;
+		c = this;
+		return c.C;
+	};
+	Uniform.prototype.Convert = function(param) { return this.$val.Convert(param); };
+	Uniform.ptr.prototype.Bounds = function() {
+		var $ptr, c;
+		c = this;
+		return new Rectangle.ptr(new Point.ptr(-1000000000, -1000000000), new Point.ptr(1000000000, 1000000000));
+	};
+	Uniform.prototype.Bounds = function() { return this.$val.Bounds(); };
+	Uniform.ptr.prototype.At = function(x$4, y) {
+		var $ptr, c, x$4, y;
+		c = this;
+		return c.C;
+	};
+	Uniform.prototype.At = function(x$4, y) { return this.$val.At(x$4, y); };
+	Uniform.ptr.prototype.Opaque = function() {
+		var $ptr, _r, _tuple, a, c, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; a = $f.a; c = $f.c; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		c = this;
+		_r = c.C.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple = _r;
+		a = _tuple[3];
+		return a === 65535;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Uniform.ptr.prototype.Opaque }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f.a = a; $f.c = c; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	Uniform.prototype.Opaque = function() { return this.$val.Opaque(); };
+	NewUniform = function(c) {
+		var $ptr, c;
+		return new Uniform.ptr(c);
+	};
+	$pkg.NewUniform = NewUniform;
+	Point.methods = [{prop: "String", name: "String", pkg: "", typ: $funcType([], [$String], false)}, {prop: "Add", name: "Add", pkg: "", typ: $funcType([Point], [Point], false)}, {prop: "Sub", name: "Sub", pkg: "", typ: $funcType([Point], [Point], false)}, {prop: "Mul", name: "Mul", pkg: "", typ: $funcType([$Int], [Point], false)}, {prop: "Div", name: "Div", pkg: "", typ: $funcType([$Int], [Point], false)}, {prop: "In", name: "In", pkg: "", typ: $funcType([Rectangle], [$Bool], false)}, {prop: "Mod", name: "Mod", pkg: "", typ: $funcType([Rectangle], [Point], false)}, {prop: "Eq", name: "Eq", pkg: "", typ: $funcType([Point], [$Bool], false)}];
+	Rectangle.methods = [{prop: "String", name: "String", pkg: "", typ: $funcType([], [$String], false)}, {prop: "Dx", name: "Dx", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "Dy", name: "Dy", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "Size", name: "Size", pkg: "", typ: $funcType([], [Point], false)}, {prop: "Add", name: "Add", pkg: "", typ: $funcType([Point], [Rectangle], false)}, {prop: "Sub", name: "Sub", pkg: "", typ: $funcType([Point], [Rectangle], false)}, {prop: "Inset", name: "Inset", pkg: "", typ: $funcType([$Int], [Rectangle], false)}, {prop: "Intersect", name: "Intersect", pkg: "", typ: $funcType([Rectangle], [Rectangle], false)}, {prop: "Union", name: "Union", pkg: "", typ: $funcType([Rectangle], [Rectangle], false)}, {prop: "Empty", name: "Empty", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "Eq", name: "Eq", pkg: "", typ: $funcType([Rectangle], [$Bool], false)}, {prop: "Overlaps", name: "Overlaps", pkg: "", typ: $funcType([Rectangle], [$Bool], false)}, {prop: "In", name: "In", pkg: "", typ: $funcType([Rectangle], [$Bool], false)}, {prop: "Canon", name: "Canon", pkg: "", typ: $funcType([], [Rectangle], false)}, {prop: "At", name: "At", pkg: "", typ: $funcType([$Int, $Int], [color.Color], false)}, {prop: "Bounds", name: "Bounds", pkg: "", typ: $funcType([], [Rectangle], false)}, {prop: "ColorModel", name: "ColorModel", pkg: "", typ: $funcType([], [color.Model], false)}];
+	ptrType.methods = [{prop: "ColorModel", name: "ColorModel", pkg: "", typ: $funcType([], [color.Model], false)}, {prop: "Bounds", name: "Bounds", pkg: "", typ: $funcType([], [Rectangle], false)}, {prop: "At", name: "At", pkg: "", typ: $funcType([$Int, $Int], [color.Color], false)}, {prop: "RGBAAt", name: "RGBAAt", pkg: "", typ: $funcType([$Int, $Int], [color.RGBA], false)}, {prop: "PixOffset", name: "PixOffset", pkg: "", typ: $funcType([$Int, $Int], [$Int], false)}, {prop: "Set", name: "Set", pkg: "", typ: $funcType([$Int, $Int, color.Color], [], false)}, {prop: "SetRGBA", name: "SetRGBA", pkg: "", typ: $funcType([$Int, $Int, color.RGBA], [], false)}, {prop: "SubImage", name: "SubImage", pkg: "", typ: $funcType([Rectangle], [Image], false)}, {prop: "Opaque", name: "Opaque", pkg: "", typ: $funcType([], [$Bool], false)}];
+	ptrType$9.methods = [{prop: "ColorModel", name: "ColorModel", pkg: "", typ: $funcType([], [color.Model], false)}, {prop: "Bounds", name: "Bounds", pkg: "", typ: $funcType([], [Rectangle], false)}, {prop: "At", name: "At", pkg: "", typ: $funcType([$Int, $Int], [color.Color], false)}, {prop: "PixOffset", name: "PixOffset", pkg: "", typ: $funcType([$Int, $Int], [$Int], false)}, {prop: "Set", name: "Set", pkg: "", typ: $funcType([$Int, $Int, color.Color], [], false)}, {prop: "ColorIndexAt", name: "ColorIndexAt", pkg: "", typ: $funcType([$Int, $Int], [$Uint8], false)}, {prop: "SetColorIndex", name: "SetColorIndex", pkg: "", typ: $funcType([$Int, $Int, $Uint8], [], false)}, {prop: "SubImage", name: "SubImage", pkg: "", typ: $funcType([Rectangle], [Image], false)}, {prop: "Opaque", name: "Opaque", pkg: "", typ: $funcType([], [$Bool], false)}];
+	ptrType$10.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}, {prop: "ColorModel", name: "ColorModel", pkg: "", typ: $funcType([], [color.Model], false)}, {prop: "Convert", name: "Convert", pkg: "", typ: $funcType([color.Color], [color.Color], false)}, {prop: "Bounds", name: "Bounds", pkg: "", typ: $funcType([], [Rectangle], false)}, {prop: "At", name: "At", pkg: "", typ: $funcType([$Int, $Int], [color.Color], false)}, {prop: "Opaque", name: "Opaque", pkg: "", typ: $funcType([], [$Bool], false)}];
+	Point.init([{prop: "X", name: "X", pkg: "", typ: $Int, tag: ""}, {prop: "Y", name: "Y", pkg: "", typ: $Int, tag: ""}]);
+	Rectangle.init([{prop: "Min", name: "Min", pkg: "", typ: Point, tag: ""}, {prop: "Max", name: "Max", pkg: "", typ: Point, tag: ""}]);
+	Image.init([{prop: "At", name: "At", pkg: "", typ: $funcType([$Int, $Int], [color.Color], false)}, {prop: "Bounds", name: "Bounds", pkg: "", typ: $funcType([], [Rectangle], false)}, {prop: "ColorModel", name: "ColorModel", pkg: "", typ: $funcType([], [color.Model], false)}]);
+	RGBA.init([{prop: "Pix", name: "Pix", pkg: "", typ: sliceType$1, tag: ""}, {prop: "Stride", name: "Stride", pkg: "", typ: $Int, tag: ""}, {prop: "Rect", name: "Rect", pkg: "", typ: Rectangle, tag: ""}]);
+	Paletted.init([{prop: "Pix", name: "Pix", pkg: "", typ: sliceType$1, tag: ""}, {prop: "Stride", name: "Stride", pkg: "", typ: $Int, tag: ""}, {prop: "Rect", name: "Rect", pkg: "", typ: Rectangle, tag: ""}, {prop: "Palette", name: "Palette", pkg: "", typ: color.Palette, tag: ""}]);
+	Uniform.init([{prop: "C", name: "C", pkg: "", typ: color.Color, tag: ""}]);
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = bufio.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = errors.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = color.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = io.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = strconv.$init(); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$pkg.ZR = new Rectangle.ptr(new Point.ptr(0, 0), new Point.ptr(0, 0));
+		$pkg.ErrFormat = errors.New("image: unknown format");
+		$pkg.Black = NewUniform((x = color.Black, new x.constructor.elem(x)));
+		$pkg.White = NewUniform((x$1 = color.White, new x$1.constructor.elem(x$1)));
+		$pkg.Transparent = NewUniform((x$2 = color.Transparent, new x$2.constructor.elem(x$2)));
+		$pkg.Opaque = NewUniform((x$3 = color.Opaque, new x$3.constructor.elem(x$3)));
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["image/internal/imageutil"] = (function() {
+	var $pkg = {}, $init, image;
+	image = $packages["image"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = image.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["image/draw"] = (function() {
+	var $pkg = {}, $init, image, color, imageutil;
+	image = $packages["image"];
+	color = $packages["image/color"];
+	imageutil = $packages["image/internal/imageutil"];
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = image.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = color.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = imageutil.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
+$packages["github.com/andreas-jonsson/octatron/trace"] = (function() {
+	var $pkg = {}, $init, errors, pack, quaternion, vec3, image, color, draw, io, math, runtime, sync, atomic, Reconstruct;
+	errors = $packages["errors"];
+	pack = $packages["github.com/andreas-jonsson/octatron/pack"];
+	quaternion = $packages["github.com/ungerik/go3d/quaternion"];
+	vec3 = $packages["github.com/ungerik/go3d/vec3"];
+	image = $packages["image"];
+	color = $packages["image/color"];
+	draw = $packages["image/draw"];
+	io = $packages["io"];
+	math = $packages["math"];
+	runtime = $packages["runtime"];
+	sync = $packages["sync"];
+	atomic = $packages["sync/atomic"];
+	Reconstruct = function(a, b, out) {
+		var $ptr, _arg, _arg$1, _arg$2, _arg$3, _arg$4, _arg$5, _q, _r, _r$1, _r$2, _r$3, _r$4, _r$5, _r$6, _tmp, _tmp$1, a, b, img, inputSize, left, out, outputSize, right, x, x$1, x$2, y, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _arg = $f._arg; _arg$1 = $f._arg$1; _arg$2 = $f._arg$2; _arg$3 = $f._arg$3; _arg$4 = $f._arg$4; _arg$5 = $f._arg$5; _q = $f._q; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; _r$4 = $f._r$4; _r$5 = $f._r$5; _r$6 = $f._r$6; _tmp = $f._tmp; _tmp$1 = $f._tmp$1; a = $f.a; b = $f.b; img = $f.img; inputSize = $f.inputSize; left = $f.left; out = $f.out; outputSize = $f.outputSize; right = $f.right; x = $f.x; x$1 = $f.x$1; x$2 = $f.x$2; y = $f.y; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_r = out.Bounds(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		outputSize = $clone(_r.Max, image.Point);
+		_r$1 = a.Bounds(); /* */ $s = 2; case 2: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+		inputSize = $clone(_r$1.Max, image.Point);
+		_r$2 = b.Bounds(); /* */ $s = 5; case 5: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
+		/* */ if (!($equal(inputSize, _r$2.Max, image.Point))) { $s = 3; continue; }
+		/* */ $s = 4; continue;
+		/* if (!($equal(inputSize, _r$2.Max, image.Point))) { */ case 3:
+			return $pkg.InvalidSizeError;
+		/* } */ case 4:
+		if (!((inputSize.X === (_q = outputSize.X / 2, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >> 0 : $throwRuntimeError("integer divide by zero")))) || !((inputSize.Y === outputSize.Y))) {
+			return $pkg.InvalidSizeError;
+		}
+		img = $toNativeArray($kindInterface, [a, b]);
+		y = 0;
+		/* while (true) { */ case 6:
+			/* if (!(y < inputSize.Y)) { break; } */ if(!(y < inputSize.Y)) { $s = 7; continue; }
+			x = 0;
+			/* while (true) { */ case 8:
+				/* if (!(x < inputSize.X)) { break; } */ if(!(x < inputSize.X)) { $s = 9; continue; }
+				_tmp = (x$1 = (_r$3 = y % 2, _r$3 === _r$3 ? _r$3 : $throwRuntimeError("integer divide by zero")), ((x$1 < 0 || x$1 >= img.length) ? $throwRuntimeError("index out of range") : img[x$1]));
+				_tmp$1 = (x$2 = (_r$4 = ((y + 1 >> 0)) % 2, _r$4 === _r$4 ? _r$4 : $throwRuntimeError("integer divide by zero")), ((x$2 < 0 || x$2 >= img.length) ? $throwRuntimeError("index out of range") : img[x$2]));
+				left = _tmp;
+				right = _tmp$1;
+				_arg = $imul(x, 2);
+				_arg$1 = y;
+				_r$5 = left.At(x, y); /* */ $s = 10; case 10: if($c) { $c = false; _r$5 = _r$5.$blk(); } if (_r$5 && _r$5.$blk !== undefined) { break s; }
+				_arg$2 = _r$5;
+				$r = out.Set(_arg, _arg$1, _arg$2); /* */ $s = 11; case 11: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+				_arg$3 = ($imul(x, 2)) + 1 >> 0;
+				_arg$4 = y;
+				_r$6 = right.At(x, y); /* */ $s = 12; case 12: if($c) { $c = false; _r$6 = _r$6.$blk(); } if (_r$6 && _r$6.$blk !== undefined) { break s; }
+				_arg$5 = _r$6;
+				$r = out.Set(_arg$3, _arg$4, _arg$5); /* */ $s = 13; case 13: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+				x = x + (1) >> 0;
+			/* } */ $s = 8; continue; case 9:
+			y = y + (1) >> 0;
+		/* } */ $s = 6; continue; case 7:
+		return $ifaceNil;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Reconstruct }; } $f.$ptr = $ptr; $f._arg = _arg; $f._arg$1 = _arg$1; $f._arg$2 = _arg$2; $f._arg$3 = _arg$3; $f._arg$4 = _arg$4; $f._arg$5 = _arg$5; $f._q = _q; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._r$5 = _r$5; $f._r$6 = _r$6; $f._tmp = _tmp; $f._tmp$1 = _tmp$1; $f.a = a; $f.b = b; $f.img = img; $f.inputSize = inputSize; $f.left = left; $f.out = out; $f.outputSize = outputSize; $f.right = right; $f.x = x; $f.x$1 = x$1; $f.x$2 = x$2; $f.y = y; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.Reconstruct = Reconstruct;
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = errors.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = pack.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = quaternion.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = vec3.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = image.$init(); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = color.$init(); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = draw.$init(); /* */ $s = 7; case 7: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = io.$init(); /* */ $s = 8; case 8: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = math.$init(); /* */ $s = 9; case 9: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = runtime.$init(); /* */ $s = 10; case 10: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = sync.$init(); /* */ $s = 11; case 11: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = atomic.$init(); /* */ $s = 12; case 12: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$pkg.InvalidSizeError = errors.New("invalid size");
+		$pkg.Uint28OverflowError = errors.New("uint28 overflow");
 		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
 	};
 	$pkg.$init = $init;
@@ -26546,690 +27115,6 @@ $packages["github.com/gopherjs/websocket"] = (function() {
 	$pkg.$init = $init;
 	return $pkg;
 })();
-$packages["image/color"] = (function() {
-	var $pkg = {}, $init, Color, RGBA, RGBA64, NRGBA, NRGBA64, Alpha, Alpha16, Gray, Gray16, modelFunc, YCbCr, NYCbCrA, CMYK, ptrType, funcType, ModelFunc, rgbaModel, rgba64Model, nrgbaModel, nrgba64Model, alphaModel, alpha16Model, grayModel, gray16Model, RGBToYCbCr, yCbCrModel, nYCbCrAModel, RGBToCMYK, cmykModel;
-	Color = $pkg.Color = $newType(8, $kindInterface, "color.Color", "Color", "image/color", null);
-	RGBA = $pkg.RGBA = $newType(0, $kindStruct, "color.RGBA", "RGBA", "image/color", function(R_, G_, B_, A_) {
-		this.$val = this;
-		if (arguments.length === 0) {
-			this.R = 0;
-			this.G = 0;
-			this.B = 0;
-			this.A = 0;
-			return;
-		}
-		this.R = R_;
-		this.G = G_;
-		this.B = B_;
-		this.A = A_;
-	});
-	RGBA64 = $pkg.RGBA64 = $newType(0, $kindStruct, "color.RGBA64", "RGBA64", "image/color", function(R_, G_, B_, A_) {
-		this.$val = this;
-		if (arguments.length === 0) {
-			this.R = 0;
-			this.G = 0;
-			this.B = 0;
-			this.A = 0;
-			return;
-		}
-		this.R = R_;
-		this.G = G_;
-		this.B = B_;
-		this.A = A_;
-	});
-	NRGBA = $pkg.NRGBA = $newType(0, $kindStruct, "color.NRGBA", "NRGBA", "image/color", function(R_, G_, B_, A_) {
-		this.$val = this;
-		if (arguments.length === 0) {
-			this.R = 0;
-			this.G = 0;
-			this.B = 0;
-			this.A = 0;
-			return;
-		}
-		this.R = R_;
-		this.G = G_;
-		this.B = B_;
-		this.A = A_;
-	});
-	NRGBA64 = $pkg.NRGBA64 = $newType(0, $kindStruct, "color.NRGBA64", "NRGBA64", "image/color", function(R_, G_, B_, A_) {
-		this.$val = this;
-		if (arguments.length === 0) {
-			this.R = 0;
-			this.G = 0;
-			this.B = 0;
-			this.A = 0;
-			return;
-		}
-		this.R = R_;
-		this.G = G_;
-		this.B = B_;
-		this.A = A_;
-	});
-	Alpha = $pkg.Alpha = $newType(0, $kindStruct, "color.Alpha", "Alpha", "image/color", function(A_) {
-		this.$val = this;
-		if (arguments.length === 0) {
-			this.A = 0;
-			return;
-		}
-		this.A = A_;
-	});
-	Alpha16 = $pkg.Alpha16 = $newType(0, $kindStruct, "color.Alpha16", "Alpha16", "image/color", function(A_) {
-		this.$val = this;
-		if (arguments.length === 0) {
-			this.A = 0;
-			return;
-		}
-		this.A = A_;
-	});
-	Gray = $pkg.Gray = $newType(0, $kindStruct, "color.Gray", "Gray", "image/color", function(Y_) {
-		this.$val = this;
-		if (arguments.length === 0) {
-			this.Y = 0;
-			return;
-		}
-		this.Y = Y_;
-	});
-	Gray16 = $pkg.Gray16 = $newType(0, $kindStruct, "color.Gray16", "Gray16", "image/color", function(Y_) {
-		this.$val = this;
-		if (arguments.length === 0) {
-			this.Y = 0;
-			return;
-		}
-		this.Y = Y_;
-	});
-	modelFunc = $pkg.modelFunc = $newType(0, $kindStruct, "color.modelFunc", "modelFunc", "image/color", function(f_) {
-		this.$val = this;
-		if (arguments.length === 0) {
-			this.f = $throwNilPointerError;
-			return;
-		}
-		this.f = f_;
-	});
-	YCbCr = $pkg.YCbCr = $newType(0, $kindStruct, "color.YCbCr", "YCbCr", "image/color", function(Y_, Cb_, Cr_) {
-		this.$val = this;
-		if (arguments.length === 0) {
-			this.Y = 0;
-			this.Cb = 0;
-			this.Cr = 0;
-			return;
-		}
-		this.Y = Y_;
-		this.Cb = Cb_;
-		this.Cr = Cr_;
-	});
-	NYCbCrA = $pkg.NYCbCrA = $newType(0, $kindStruct, "color.NYCbCrA", "NYCbCrA", "image/color", function(YCbCr_, A_) {
-		this.$val = this;
-		if (arguments.length === 0) {
-			this.YCbCr = new YCbCr.ptr(0, 0, 0);
-			this.A = 0;
-			return;
-		}
-		this.YCbCr = YCbCr_;
-		this.A = A_;
-	});
-	CMYK = $pkg.CMYK = $newType(0, $kindStruct, "color.CMYK", "CMYK", "image/color", function(C_, M_, Y_, K_) {
-		this.$val = this;
-		if (arguments.length === 0) {
-			this.C = 0;
-			this.M = 0;
-			this.Y = 0;
-			this.K = 0;
-			return;
-		}
-		this.C = C_;
-		this.M = M_;
-		this.Y = Y_;
-		this.K = K_;
-	});
-	ptrType = $ptrType(modelFunc);
-	funcType = $funcType([Color], [Color], false);
-	RGBA.ptr.prototype.RGBA = function() {
-		var $ptr, a, b, c, g, r;
-		r = 0;
-		g = 0;
-		b = 0;
-		a = 0;
-		c = $clone(this, RGBA);
-		r = (c.R >>> 0);
-		r = (r | ((r << 8 >>> 0))) >>> 0;
-		g = (c.G >>> 0);
-		g = (g | ((g << 8 >>> 0))) >>> 0;
-		b = (c.B >>> 0);
-		b = (b | ((b << 8 >>> 0))) >>> 0;
-		a = (c.A >>> 0);
-		a = (a | ((a << 8 >>> 0))) >>> 0;
-		return [r, g, b, a];
-	};
-	RGBA.prototype.RGBA = function() { return this.$val.RGBA(); };
-	RGBA64.ptr.prototype.RGBA = function() {
-		var $ptr, _tmp, _tmp$1, _tmp$2, _tmp$3, a, b, c, g, r;
-		r = 0;
-		g = 0;
-		b = 0;
-		a = 0;
-		c = $clone(this, RGBA64);
-		_tmp = (c.R >>> 0);
-		_tmp$1 = (c.G >>> 0);
-		_tmp$2 = (c.B >>> 0);
-		_tmp$3 = (c.A >>> 0);
-		r = _tmp;
-		g = _tmp$1;
-		b = _tmp$2;
-		a = _tmp$3;
-		return [r, g, b, a];
-	};
-	RGBA64.prototype.RGBA = function() { return this.$val.RGBA(); };
-	NRGBA.ptr.prototype.RGBA = function() {
-		var $ptr, _q, _q$1, _q$2, a, b, c, g, r;
-		r = 0;
-		g = 0;
-		b = 0;
-		a = 0;
-		c = $clone(this, NRGBA);
-		r = (c.R >>> 0);
-		r = (r | ((r << 8 >>> 0))) >>> 0;
-		r = $imul(r, ((c.A >>> 0))) >>> 0;
-		r = (_q = r / (255), (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
-		g = (c.G >>> 0);
-		g = (g | ((g << 8 >>> 0))) >>> 0;
-		g = $imul(g, ((c.A >>> 0))) >>> 0;
-		g = (_q$1 = g / (255), (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero"));
-		b = (c.B >>> 0);
-		b = (b | ((b << 8 >>> 0))) >>> 0;
-		b = $imul(b, ((c.A >>> 0))) >>> 0;
-		b = (_q$2 = b / (255), (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero"));
-		a = (c.A >>> 0);
-		a = (a | ((a << 8 >>> 0))) >>> 0;
-		return [r, g, b, a];
-	};
-	NRGBA.prototype.RGBA = function() { return this.$val.RGBA(); };
-	NRGBA64.ptr.prototype.RGBA = function() {
-		var $ptr, _q, _q$1, _q$2, a, b, c, g, r;
-		r = 0;
-		g = 0;
-		b = 0;
-		a = 0;
-		c = $clone(this, NRGBA64);
-		r = (c.R >>> 0);
-		r = $imul(r, ((c.A >>> 0))) >>> 0;
-		r = (_q = r / (65535), (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
-		g = (c.G >>> 0);
-		g = $imul(g, ((c.A >>> 0))) >>> 0;
-		g = (_q$1 = g / (65535), (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero"));
-		b = (c.B >>> 0);
-		b = $imul(b, ((c.A >>> 0))) >>> 0;
-		b = (_q$2 = b / (65535), (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero"));
-		a = (c.A >>> 0);
-		return [r, g, b, a];
-	};
-	NRGBA64.prototype.RGBA = function() { return this.$val.RGBA(); };
-	Alpha.ptr.prototype.RGBA = function() {
-		var $ptr, _tmp, _tmp$1, _tmp$2, _tmp$3, a, b, c, g, r;
-		r = 0;
-		g = 0;
-		b = 0;
-		a = 0;
-		c = $clone(this, Alpha);
-		a = (c.A >>> 0);
-		a = (a | ((a << 8 >>> 0))) >>> 0;
-		_tmp = a;
-		_tmp$1 = a;
-		_tmp$2 = a;
-		_tmp$3 = a;
-		r = _tmp;
-		g = _tmp$1;
-		b = _tmp$2;
-		a = _tmp$3;
-		return [r, g, b, a];
-	};
-	Alpha.prototype.RGBA = function() { return this.$val.RGBA(); };
-	Alpha16.ptr.prototype.RGBA = function() {
-		var $ptr, _tmp, _tmp$1, _tmp$2, _tmp$3, a, b, c, g, r;
-		r = 0;
-		g = 0;
-		b = 0;
-		a = 0;
-		c = $clone(this, Alpha16);
-		a = (c.A >>> 0);
-		_tmp = a;
-		_tmp$1 = a;
-		_tmp$2 = a;
-		_tmp$3 = a;
-		r = _tmp;
-		g = _tmp$1;
-		b = _tmp$2;
-		a = _tmp$3;
-		return [r, g, b, a];
-	};
-	Alpha16.prototype.RGBA = function() { return this.$val.RGBA(); };
-	Gray.ptr.prototype.RGBA = function() {
-		var $ptr, _tmp, _tmp$1, _tmp$2, _tmp$3, a, b, c, g, r, y;
-		r = 0;
-		g = 0;
-		b = 0;
-		a = 0;
-		c = $clone(this, Gray);
-		y = (c.Y >>> 0);
-		y = (y | ((y << 8 >>> 0))) >>> 0;
-		_tmp = y;
-		_tmp$1 = y;
-		_tmp$2 = y;
-		_tmp$3 = 65535;
-		r = _tmp;
-		g = _tmp$1;
-		b = _tmp$2;
-		a = _tmp$3;
-		return [r, g, b, a];
-	};
-	Gray.prototype.RGBA = function() { return this.$val.RGBA(); };
-	Gray16.ptr.prototype.RGBA = function() {
-		var $ptr, _tmp, _tmp$1, _tmp$2, _tmp$3, a, b, c, g, r, y;
-		r = 0;
-		g = 0;
-		b = 0;
-		a = 0;
-		c = $clone(this, Gray16);
-		y = (c.Y >>> 0);
-		_tmp = y;
-		_tmp$1 = y;
-		_tmp$2 = y;
-		_tmp$3 = 65535;
-		r = _tmp;
-		g = _tmp$1;
-		b = _tmp$2;
-		a = _tmp$3;
-		return [r, g, b, a];
-	};
-	Gray16.prototype.RGBA = function() { return this.$val.RGBA(); };
-	ModelFunc = function(f) {
-		var $ptr, f;
-		return new modelFunc.ptr(f);
-	};
-	$pkg.ModelFunc = ModelFunc;
-	modelFunc.ptr.prototype.Convert = function(c) {
-		var $ptr, _r, c, m, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; c = $f.c; m = $f.m; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		m = this;
-		_r = m.f(c); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-		/* */ $s = 2; case 2:
-		return _r;
-		/* */ } return; } if ($f === undefined) { $f = { $blk: modelFunc.ptr.prototype.Convert }; } $f.$ptr = $ptr; $f._r = _r; $f.c = c; $f.m = m; $f.$s = $s; $f.$r = $r; return $f;
-	};
-	modelFunc.prototype.Convert = function(c) { return this.$val.Convert(c); };
-	rgbaModel = function(c) {
-		var $ptr, _r, _tuple, _tuple$1, a, b, c, g, ok, r, x, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; a = $f.a; b = $f.b; c = $f.c; g = $f.g; ok = $f.ok; r = $f.r; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		_tuple = $assertType(c, RGBA, true);
-		ok = _tuple[1];
-		if (ok) {
-			return c;
-		}
-		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-		_tuple$1 = _r;
-		r = _tuple$1[0];
-		g = _tuple$1[1];
-		b = _tuple$1[2];
-		a = _tuple$1[3];
-		return (x = new RGBA.ptr(((r >>> 8 >>> 0) << 24 >>> 24), ((g >>> 8 >>> 0) << 24 >>> 24), ((b >>> 8 >>> 0) << 24 >>> 24), ((a >>> 8 >>> 0) << 24 >>> 24)), new x.constructor.elem(x));
-		/* */ } return; } if ($f === undefined) { $f = { $blk: rgbaModel }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.a = a; $f.b = b; $f.c = c; $f.g = g; $f.ok = ok; $f.r = r; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
-	};
-	rgba64Model = function(c) {
-		var $ptr, _r, _tuple, _tuple$1, a, b, c, g, ok, r, x, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; a = $f.a; b = $f.b; c = $f.c; g = $f.g; ok = $f.ok; r = $f.r; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		_tuple = $assertType(c, RGBA64, true);
-		ok = _tuple[1];
-		if (ok) {
-			return c;
-		}
-		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-		_tuple$1 = _r;
-		r = _tuple$1[0];
-		g = _tuple$1[1];
-		b = _tuple$1[2];
-		a = _tuple$1[3];
-		return (x = new RGBA64.ptr((r << 16 >>> 16), (g << 16 >>> 16), (b << 16 >>> 16), (a << 16 >>> 16)), new x.constructor.elem(x));
-		/* */ } return; } if ($f === undefined) { $f = { $blk: rgba64Model }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.a = a; $f.b = b; $f.c = c; $f.g = g; $f.ok = ok; $f.r = r; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
-	};
-	nrgbaModel = function(c) {
-		var $ptr, _q, _q$1, _q$2, _r, _tuple, _tuple$1, a, b, c, g, ok, r, x, x$1, x$2, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _q = $f._q; _q$1 = $f._q$1; _q$2 = $f._q$2; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; a = $f.a; b = $f.b; c = $f.c; g = $f.g; ok = $f.ok; r = $f.r; x = $f.x; x$1 = $f.x$1; x$2 = $f.x$2; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		_tuple = $assertType(c, NRGBA, true);
-		ok = _tuple[1];
-		if (ok) {
-			return c;
-		}
-		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-		_tuple$1 = _r;
-		r = _tuple$1[0];
-		g = _tuple$1[1];
-		b = _tuple$1[2];
-		a = _tuple$1[3];
-		if (a === 65535) {
-			return (x = new NRGBA.ptr(((r >>> 8 >>> 0) << 24 >>> 24), ((g >>> 8 >>> 0) << 24 >>> 24), ((b >>> 8 >>> 0) << 24 >>> 24), 255), new x.constructor.elem(x));
-		}
-		if (a === 0) {
-			return (x$1 = new NRGBA.ptr(0, 0, 0, 0), new x$1.constructor.elem(x$1));
-		}
-		r = (_q = (($imul(r, 65535) >>> 0)) / a, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
-		g = (_q$1 = (($imul(g, 65535) >>> 0)) / a, (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero"));
-		b = (_q$2 = (($imul(b, 65535) >>> 0)) / a, (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero"));
-		return (x$2 = new NRGBA.ptr(((r >>> 8 >>> 0) << 24 >>> 24), ((g >>> 8 >>> 0) << 24 >>> 24), ((b >>> 8 >>> 0) << 24 >>> 24), ((a >>> 8 >>> 0) << 24 >>> 24)), new x$2.constructor.elem(x$2));
-		/* */ } return; } if ($f === undefined) { $f = { $blk: nrgbaModel }; } $f.$ptr = $ptr; $f._q = _q; $f._q$1 = _q$1; $f._q$2 = _q$2; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.a = a; $f.b = b; $f.c = c; $f.g = g; $f.ok = ok; $f.r = r; $f.x = x; $f.x$1 = x$1; $f.x$2 = x$2; $f.$s = $s; $f.$r = $r; return $f;
-	};
-	nrgba64Model = function(c) {
-		var $ptr, _q, _q$1, _q$2, _r, _tuple, _tuple$1, a, b, c, g, ok, r, x, x$1, x$2, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _q = $f._q; _q$1 = $f._q$1; _q$2 = $f._q$2; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; a = $f.a; b = $f.b; c = $f.c; g = $f.g; ok = $f.ok; r = $f.r; x = $f.x; x$1 = $f.x$1; x$2 = $f.x$2; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		_tuple = $assertType(c, NRGBA64, true);
-		ok = _tuple[1];
-		if (ok) {
-			return c;
-		}
-		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-		_tuple$1 = _r;
-		r = _tuple$1[0];
-		g = _tuple$1[1];
-		b = _tuple$1[2];
-		a = _tuple$1[3];
-		if (a === 65535) {
-			return (x = new NRGBA64.ptr((r << 16 >>> 16), (g << 16 >>> 16), (b << 16 >>> 16), 65535), new x.constructor.elem(x));
-		}
-		if (a === 0) {
-			return (x$1 = new NRGBA64.ptr(0, 0, 0, 0), new x$1.constructor.elem(x$1));
-		}
-		r = (_q = (($imul(r, 65535) >>> 0)) / a, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
-		g = (_q$1 = (($imul(g, 65535) >>> 0)) / a, (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero"));
-		b = (_q$2 = (($imul(b, 65535) >>> 0)) / a, (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero"));
-		return (x$2 = new NRGBA64.ptr((r << 16 >>> 16), (g << 16 >>> 16), (b << 16 >>> 16), (a << 16 >>> 16)), new x$2.constructor.elem(x$2));
-		/* */ } return; } if ($f === undefined) { $f = { $blk: nrgba64Model }; } $f.$ptr = $ptr; $f._q = _q; $f._q$1 = _q$1; $f._q$2 = _q$2; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.a = a; $f.b = b; $f.c = c; $f.g = g; $f.ok = ok; $f.r = r; $f.x = x; $f.x$1 = x$1; $f.x$2 = x$2; $f.$s = $s; $f.$r = $r; return $f;
-	};
-	alphaModel = function(c) {
-		var $ptr, _r, _tuple, _tuple$1, a, c, ok, x, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; a = $f.a; c = $f.c; ok = $f.ok; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		_tuple = $assertType(c, Alpha, true);
-		ok = _tuple[1];
-		if (ok) {
-			return c;
-		}
-		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-		_tuple$1 = _r;
-		a = _tuple$1[3];
-		return (x = new Alpha.ptr(((a >>> 8 >>> 0) << 24 >>> 24)), new x.constructor.elem(x));
-		/* */ } return; } if ($f === undefined) { $f = { $blk: alphaModel }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.a = a; $f.c = c; $f.ok = ok; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
-	};
-	alpha16Model = function(c) {
-		var $ptr, _r, _tuple, _tuple$1, a, c, ok, x, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; a = $f.a; c = $f.c; ok = $f.ok; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		_tuple = $assertType(c, Alpha16, true);
-		ok = _tuple[1];
-		if (ok) {
-			return c;
-		}
-		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-		_tuple$1 = _r;
-		a = _tuple$1[3];
-		return (x = new Alpha16.ptr((a << 16 >>> 16)), new x.constructor.elem(x));
-		/* */ } return; } if ($f === undefined) { $f = { $blk: alpha16Model }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.a = a; $f.c = c; $f.ok = ok; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
-	};
-	grayModel = function(c) {
-		var $ptr, _q, _r, _tuple, _tuple$1, b, c, g, ok, r, x, y, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _q = $f._q; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; b = $f.b; c = $f.c; g = $f.g; ok = $f.ok; r = $f.r; x = $f.x; y = $f.y; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		_tuple = $assertType(c, Gray, true);
-		ok = _tuple[1];
-		if (ok) {
-			return c;
-		}
-		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-		_tuple$1 = _r;
-		r = _tuple$1[0];
-		g = _tuple$1[1];
-		b = _tuple$1[2];
-		y = (_q = ((((($imul(299, r) >>> 0) + ($imul(587, g) >>> 0) >>> 0) + ($imul(114, b) >>> 0) >>> 0) + 500 >>> 0)) / 1000, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
-		return (x = new Gray.ptr(((y >>> 8 >>> 0) << 24 >>> 24)), new x.constructor.elem(x));
-		/* */ } return; } if ($f === undefined) { $f = { $blk: grayModel }; } $f.$ptr = $ptr; $f._q = _q; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.b = b; $f.c = c; $f.g = g; $f.ok = ok; $f.r = r; $f.x = x; $f.y = y; $f.$s = $s; $f.$r = $r; return $f;
-	};
-	gray16Model = function(c) {
-		var $ptr, _q, _r, _tuple, _tuple$1, b, c, g, ok, r, x, y, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _q = $f._q; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; b = $f.b; c = $f.c; g = $f.g; ok = $f.ok; r = $f.r; x = $f.x; y = $f.y; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		_tuple = $assertType(c, Gray16, true);
-		ok = _tuple[1];
-		if (ok) {
-			return c;
-		}
-		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-		_tuple$1 = _r;
-		r = _tuple$1[0];
-		g = _tuple$1[1];
-		b = _tuple$1[2];
-		y = (_q = ((((($imul(299, r) >>> 0) + ($imul(587, g) >>> 0) >>> 0) + ($imul(114, b) >>> 0) >>> 0) + 500 >>> 0)) / 1000, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
-		return (x = new Gray16.ptr((y << 16 >>> 16)), new x.constructor.elem(x));
-		/* */ } return; } if ($f === undefined) { $f = { $blk: gray16Model }; } $f.$ptr = $ptr; $f._q = _q; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.b = b; $f.c = c; $f.g = g; $f.ok = ok; $f.r = r; $f.x = x; $f.y = y; $f.$s = $s; $f.$r = $r; return $f;
-	};
-	RGBToYCbCr = function(r, g, b) {
-		var $ptr, b, b1, cb, cr, g, g1, r, r1, yy;
-		r1 = (r >> 0);
-		g1 = (g >> 0);
-		b1 = (b >> 0);
-		yy = ((((($imul(19595, r1)) + ($imul(38470, g1)) >> 0) + ($imul(7471, b1)) >> 0) + 32768 >> 0)) >> 16 >> 0;
-		cb = ((((($imul(-11056, r1)) - ($imul(21712, g1)) >> 0) + ($imul(32768, b1)) >> 0) + 8421376 >> 0)) >> 16 >> 0;
-		cr = ((((($imul(32768, r1)) - ($imul(27440, g1)) >> 0) - ($imul(5328, b1)) >> 0) + 8421376 >> 0)) >> 16 >> 0;
-		if (yy < 0) {
-			yy = 0;
-		} else if (yy > 255) {
-			yy = 255;
-		}
-		if (cb < 0) {
-			cb = 0;
-		} else if (cb > 255) {
-			cb = 255;
-		}
-		if (cr < 0) {
-			cr = 0;
-		} else if (cr > 255) {
-			cr = 255;
-		}
-		return [(yy << 24 >>> 24), (cb << 24 >>> 24), (cr << 24 >>> 24)];
-	};
-	$pkg.RGBToYCbCr = RGBToYCbCr;
-	YCbCr.ptr.prototype.RGBA = function() {
-		var $ptr, b, c, cb1, cr1, g, r, yy1;
-		c = $clone(this, YCbCr);
-		yy1 = $imul((c.Y >> 0), 65792);
-		cb1 = (c.Cb >> 0) - 128 >> 0;
-		cr1 = (c.Cr >> 0) - 128 >> 0;
-		r = ((yy1 + ($imul(91881, cr1)) >> 0)) >> 8 >> 0;
-		g = (((yy1 - ($imul(22554, cb1)) >> 0) - ($imul(46802, cr1)) >> 0)) >> 8 >> 0;
-		b = ((yy1 + ($imul(116130, cb1)) >> 0)) >> 8 >> 0;
-		if (r < 0) {
-			r = 0;
-		} else if (r > 65535) {
-			r = 65535;
-		}
-		if (g < 0) {
-			g = 0;
-		} else if (g > 65535) {
-			g = 65535;
-		}
-		if (b < 0) {
-			b = 0;
-		} else if (b > 65535) {
-			b = 65535;
-		}
-		return [(r >>> 0), (g >>> 0), (b >>> 0), 65535];
-	};
-	YCbCr.prototype.RGBA = function() { return this.$val.RGBA(); };
-	yCbCrModel = function(c) {
-		var $ptr, _r, _tuple, _tuple$1, _tuple$2, b, c, g, ok, r, u, v, x, y, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; _tuple$2 = $f._tuple$2; b = $f.b; c = $f.c; g = $f.g; ok = $f.ok; r = $f.r; u = $f.u; v = $f.v; x = $f.x; y = $f.y; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		_tuple = $assertType(c, YCbCr, true);
-		ok = _tuple[1];
-		if (ok) {
-			return c;
-		}
-		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-		_tuple$1 = _r;
-		r = _tuple$1[0];
-		g = _tuple$1[1];
-		b = _tuple$1[2];
-		_tuple$2 = RGBToYCbCr(((r >>> 8 >>> 0) << 24 >>> 24), ((g >>> 8 >>> 0) << 24 >>> 24), ((b >>> 8 >>> 0) << 24 >>> 24));
-		y = _tuple$2[0];
-		u = _tuple$2[1];
-		v = _tuple$2[2];
-		return (x = new YCbCr.ptr(y, u, v), new x.constructor.elem(x));
-		/* */ } return; } if ($f === undefined) { $f = { $blk: yCbCrModel }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f._tuple$2 = _tuple$2; $f.b = b; $f.c = c; $f.g = g; $f.ok = ok; $f.r = r; $f.u = u; $f.v = v; $f.x = x; $f.y = y; $f.$s = $s; $f.$r = $r; return $f;
-	};
-	NYCbCrA.ptr.prototype.RGBA = function() {
-		var $ptr, _q, _q$1, _q$2, a, b, c, cb1, cr1, g, r, yy1;
-		c = $clone(this, NYCbCrA);
-		yy1 = $imul((c.YCbCr.Y >> 0), 65792);
-		cb1 = (c.YCbCr.Cb >> 0) - 128 >> 0;
-		cr1 = (c.YCbCr.Cr >> 0) - 128 >> 0;
-		r = ((yy1 + ($imul(91881, cr1)) >> 0)) >> 8 >> 0;
-		g = (((yy1 - ($imul(22554, cb1)) >> 0) - ($imul(46802, cr1)) >> 0)) >> 8 >> 0;
-		b = ((yy1 + ($imul(116130, cb1)) >> 0)) >> 8 >> 0;
-		if (r < 0) {
-			r = 0;
-		} else if (r > 65535) {
-			r = 65535;
-		}
-		if (g < 0) {
-			g = 0;
-		} else if (g > 65535) {
-			g = 65535;
-		}
-		if (b < 0) {
-			b = 0;
-		} else if (b > 65535) {
-			b = 65535;
-		}
-		a = $imul((c.A >>> 0), 257) >>> 0;
-		return [(_q = ($imul((r >>> 0), a) >>> 0) / 65535, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero")), (_q$1 = ($imul((g >>> 0), a) >>> 0) / 65535, (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero")), (_q$2 = ($imul((b >>> 0), a) >>> 0) / 65535, (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero")), a];
-	};
-	NYCbCrA.prototype.RGBA = function() { return this.$val.RGBA(); };
-	nYCbCrAModel = function(c) {
-		var $ptr, _q, _q$1, _q$2, _r, _ref, _tuple, _tuple$1, a, b, c, c$1, c$2, g, r, u, v, x, x$1, y, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _q = $f._q; _q$1 = $f._q$1; _q$2 = $f._q$2; _r = $f._r; _ref = $f._ref; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; a = $f.a; b = $f.b; c = $f.c; c$1 = $f.c$1; c$2 = $f.c$2; g = $f.g; r = $f.r; u = $f.u; v = $f.v; x = $f.x; x$1 = $f.x$1; y = $f.y; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		_ref = c;
-		if ($assertType(_ref, NYCbCrA, true)[1]) {
-			c$1 = _ref.$val;
-			return new c$1.constructor.elem(c$1);
-		} else if ($assertType(_ref, YCbCr, true)[1]) {
-			c$2 = _ref.$val;
-			return (x = new NYCbCrA.ptr($clone(c$2, YCbCr), 255), new x.constructor.elem(x));
-		}
-		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-		_tuple = _r;
-		r = _tuple[0];
-		g = _tuple[1];
-		b = _tuple[2];
-		a = _tuple[3];
-		if (!((a === 0))) {
-			r = (_q = (($imul(r, 65535) >>> 0)) / a, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
-			g = (_q$1 = (($imul(g, 65535) >>> 0)) / a, (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero"));
-			b = (_q$2 = (($imul(b, 65535) >>> 0)) / a, (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero"));
-		}
-		_tuple$1 = RGBToYCbCr(((r >>> 8 >>> 0) << 24 >>> 24), ((g >>> 8 >>> 0) << 24 >>> 24), ((b >>> 8 >>> 0) << 24 >>> 24));
-		y = _tuple$1[0];
-		u = _tuple$1[1];
-		v = _tuple$1[2];
-		return (x$1 = new NYCbCrA.ptr(new YCbCr.ptr(y, u, v), ((a >>> 8 >>> 0) << 24 >>> 24)), new x$1.constructor.elem(x$1));
-		/* */ } return; } if ($f === undefined) { $f = { $blk: nYCbCrAModel }; } $f.$ptr = $ptr; $f._q = _q; $f._q$1 = _q$1; $f._q$2 = _q$2; $f._r = _r; $f._ref = _ref; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.a = a; $f.b = b; $f.c = c; $f.c$1 = c$1; $f.c$2 = c$2; $f.g = g; $f.r = r; $f.u = u; $f.v = v; $f.x = x; $f.x$1 = x$1; $f.y = y; $f.$s = $s; $f.$r = $r; return $f;
-	};
-	RGBToCMYK = function(r, g, b) {
-		var $ptr, _q, _q$1, _q$2, b, bb, c, g, gg, m, r, rr, w, y;
-		rr = (r >>> 0);
-		gg = (g >>> 0);
-		bb = (b >>> 0);
-		w = rr;
-		if (w < gg) {
-			w = gg;
-		}
-		if (w < bb) {
-			w = bb;
-		}
-		if (w === 0) {
-			return [0, 0, 0, 255];
-		}
-		c = (_q = ($imul(((w - rr >>> 0)), 255) >>> 0) / w, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
-		m = (_q$1 = ($imul(((w - gg >>> 0)), 255) >>> 0) / w, (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero"));
-		y = (_q$2 = ($imul(((w - bb >>> 0)), 255) >>> 0) / w, (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero"));
-		return [(c << 24 >>> 24), (m << 24 >>> 24), (y << 24 >>> 24), ((255 - w >>> 0) << 24 >>> 24)];
-	};
-	$pkg.RGBToCMYK = RGBToCMYK;
-	CMYK.ptr.prototype.RGBA = function() {
-		var $ptr, _q, _q$1, _q$2, b, c, g, r, w;
-		c = $clone(this, CMYK);
-		w = (65535 - ($imul((c.K >>> 0), 257) >>> 0) >>> 0);
-		r = (_q = ($imul((65535 - ($imul((c.C >>> 0), 257) >>> 0) >>> 0), w) >>> 0) / 65535, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >>> 0 : $throwRuntimeError("integer divide by zero"));
-		g = (_q$1 = ($imul((65535 - ($imul((c.M >>> 0), 257) >>> 0) >>> 0), w) >>> 0) / 65535, (_q$1 === _q$1 && _q$1 !== 1/0 && _q$1 !== -1/0) ? _q$1 >>> 0 : $throwRuntimeError("integer divide by zero"));
-		b = (_q$2 = ($imul((65535 - ($imul((c.Y >>> 0), 257) >>> 0) >>> 0), w) >>> 0) / 65535, (_q$2 === _q$2 && _q$2 !== 1/0 && _q$2 !== -1/0) ? _q$2 >>> 0 : $throwRuntimeError("integer divide by zero"));
-		return [r, g, b, 65535];
-	};
-	CMYK.prototype.RGBA = function() { return this.$val.RGBA(); };
-	cmykModel = function(c) {
-		var $ptr, _r, _tuple, _tuple$1, _tuple$2, b, c, cc, g, kk, mm, ok, r, x, yy, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; _tuple$2 = $f._tuple$2; b = $f.b; c = $f.c; cc = $f.cc; g = $f.g; kk = $f.kk; mm = $f.mm; ok = $f.ok; r = $f.r; x = $f.x; yy = $f.yy; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		_tuple = $assertType(c, CMYK, true);
-		ok = _tuple[1];
-		if (ok) {
-			return c;
-		}
-		_r = c.RGBA(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-		_tuple$1 = _r;
-		r = _tuple$1[0];
-		g = _tuple$1[1];
-		b = _tuple$1[2];
-		_tuple$2 = RGBToCMYK(((r >>> 8 >>> 0) << 24 >>> 24), ((g >>> 8 >>> 0) << 24 >>> 24), ((b >>> 8 >>> 0) << 24 >>> 24));
-		cc = _tuple$2[0];
-		mm = _tuple$2[1];
-		yy = _tuple$2[2];
-		kk = _tuple$2[3];
-		return (x = new CMYK.ptr(cc, mm, yy, kk), new x.constructor.elem(x));
-		/* */ } return; } if ($f === undefined) { $f = { $blk: cmykModel }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f._tuple$2 = _tuple$2; $f.b = b; $f.c = c; $f.cc = cc; $f.g = g; $f.kk = kk; $f.mm = mm; $f.ok = ok; $f.r = r; $f.x = x; $f.yy = yy; $f.$s = $s; $f.$r = $r; return $f;
-	};
-	RGBA.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
-	RGBA64.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
-	NRGBA.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
-	NRGBA64.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
-	Alpha.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
-	Alpha16.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
-	Gray.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
-	Gray16.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
-	ptrType.methods = [{prop: "Convert", name: "Convert", pkg: "", typ: $funcType([Color], [Color], false)}];
-	YCbCr.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
-	NYCbCrA.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
-	CMYK.methods = [{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}];
-	Color.init([{prop: "RGBA", name: "RGBA", pkg: "", typ: $funcType([], [$Uint32, $Uint32, $Uint32, $Uint32], false)}]);
-	RGBA.init([{prop: "R", name: "R", pkg: "", typ: $Uint8, tag: ""}, {prop: "G", name: "G", pkg: "", typ: $Uint8, tag: ""}, {prop: "B", name: "B", pkg: "", typ: $Uint8, tag: ""}, {prop: "A", name: "A", pkg: "", typ: $Uint8, tag: ""}]);
-	RGBA64.init([{prop: "R", name: "R", pkg: "", typ: $Uint16, tag: ""}, {prop: "G", name: "G", pkg: "", typ: $Uint16, tag: ""}, {prop: "B", name: "B", pkg: "", typ: $Uint16, tag: ""}, {prop: "A", name: "A", pkg: "", typ: $Uint16, tag: ""}]);
-	NRGBA.init([{prop: "R", name: "R", pkg: "", typ: $Uint8, tag: ""}, {prop: "G", name: "G", pkg: "", typ: $Uint8, tag: ""}, {prop: "B", name: "B", pkg: "", typ: $Uint8, tag: ""}, {prop: "A", name: "A", pkg: "", typ: $Uint8, tag: ""}]);
-	NRGBA64.init([{prop: "R", name: "R", pkg: "", typ: $Uint16, tag: ""}, {prop: "G", name: "G", pkg: "", typ: $Uint16, tag: ""}, {prop: "B", name: "B", pkg: "", typ: $Uint16, tag: ""}, {prop: "A", name: "A", pkg: "", typ: $Uint16, tag: ""}]);
-	Alpha.init([{prop: "A", name: "A", pkg: "", typ: $Uint8, tag: ""}]);
-	Alpha16.init([{prop: "A", name: "A", pkg: "", typ: $Uint16, tag: ""}]);
-	Gray.init([{prop: "Y", name: "Y", pkg: "", typ: $Uint8, tag: ""}]);
-	Gray16.init([{prop: "Y", name: "Y", pkg: "", typ: $Uint16, tag: ""}]);
-	modelFunc.init([{prop: "f", name: "f", pkg: "image/color", typ: funcType, tag: ""}]);
-	YCbCr.init([{prop: "Y", name: "Y", pkg: "", typ: $Uint8, tag: ""}, {prop: "Cb", name: "Cb", pkg: "", typ: $Uint8, tag: ""}, {prop: "Cr", name: "Cr", pkg: "", typ: $Uint8, tag: ""}]);
-	NYCbCrA.init([{prop: "YCbCr", name: "", pkg: "", typ: YCbCr, tag: ""}, {prop: "A", name: "A", pkg: "", typ: $Uint8, tag: ""}]);
-	CMYK.init([{prop: "C", name: "C", pkg: "", typ: $Uint8, tag: ""}, {prop: "M", name: "M", pkg: "", typ: $Uint8, tag: ""}, {prop: "Y", name: "Y", pkg: "", typ: $Uint8, tag: ""}, {prop: "K", name: "K", pkg: "", typ: $Uint8, tag: ""}]);
-	$init = function() {
-		$pkg.$init = function() {};
-		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		$pkg.RGBAModel = ModelFunc(rgbaModel);
-		$pkg.RGBA64Model = ModelFunc(rgba64Model);
-		$pkg.NRGBAModel = ModelFunc(nrgbaModel);
-		$pkg.NRGBA64Model = ModelFunc(nrgba64Model);
-		$pkg.AlphaModel = ModelFunc(alphaModel);
-		$pkg.Alpha16Model = ModelFunc(alpha16Model);
-		$pkg.GrayModel = ModelFunc(grayModel);
-		$pkg.Gray16Model = ModelFunc(gray16Model);
-		$pkg.YCbCrModel = ModelFunc(yCbCrModel);
-		$pkg.NYCbCrAModel = ModelFunc(nYCbCrAModel);
-		$pkg.CMYKModel = ModelFunc(cmykModel);
-		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
-	};
-	$pkg.$init = $init;
-	return $pkg;
-})();
 $packages["image/color/palette"] = (function() {
 	var $pkg = {}, $init, color, sliceType, x, x$1, x$2, x$3, x$4, x$5, x$6, x$7, x$8, x$9, x$10, x$11, x$12, x$13, x$14, x$15, x$16, x$17, x$18, x$19, x$20, x$21, x$22, x$23, x$24, x$25, x$26, x$27, x$28, x$29, x$30, x$31, x$32, x$33, x$34, x$35, x$36, x$37, x$38, x$39, x$40, x$41, x$42, x$43, x$44, x$45, x$46, x$47, x$48, x$49, x$50, x$51, x$52, x$53, x$54, x$55, x$56, x$57, x$58, x$59, x$60, x$61, x$62, x$63, x$64, x$65, x$66, x$67, x$68, x$69, x$70, x$71, x$72, x$73, x$74, x$75, x$76, x$77, x$78, x$79, x$80, x$81, x$82, x$83, x$84, x$85, x$86, x$87, x$88, x$89, x$90, x$91, x$92, x$93, x$94, x$95, x$96, x$97, x$98, x$99, x$100, x$101, x$102, x$103, x$104, x$105, x$106, x$107, x$108, x$109, x$110, x$111, x$112, x$113, x$114, x$115, x$116, x$117, x$118, x$119, x$120, x$121, x$122, x$123, x$124, x$125, x$126, x$127, x$128, x$129, x$130, x$131, x$132, x$133, x$134, x$135, x$136, x$137, x$138, x$139, x$140, x$141, x$142, x$143, x$144, x$145, x$146, x$147, x$148, x$149, x$150, x$151, x$152, x$153, x$154, x$155, x$156, x$157, x$158, x$159, x$160, x$161, x$162, x$163, x$164, x$165, x$166, x$167, x$168, x$169, x$170, x$171, x$172, x$173, x$174, x$175, x$176, x$177, x$178, x$179, x$180, x$181, x$182, x$183, x$184, x$185, x$186, x$187, x$188, x$189, x$190, x$191, x$192, x$193, x$194, x$195, x$196, x$197, x$198, x$199, x$200, x$201, x$202, x$203, x$204, x$205, x$206, x$207, x$208, x$209, x$210, x$211, x$212, x$213, x$214, x$215, x$216, x$217, x$218, x$219, x$220, x$221, x$222, x$223, x$224, x$225, x$226, x$227, x$228, x$229, x$230, x$231, x$232, x$233, x$234, x$235, x$236, x$237, x$238, x$239, x$240, x$241, x$242, x$243, x$244, x$245, x$246, x$247, x$248, x$249, x$250, x$251, x$252, x$253, x$254, x$255;
 	color = $packages["image/color"];
@@ -27245,28 +27130,32 @@ $packages["image/color/palette"] = (function() {
 	return $pkg;
 })();
 $packages["main"] = (function() {
-	var $pkg = {}, $init, json, errors, fmt, js, webgl, websocket, palette, time, setupMessage, updateMessage, sliceType, arrayType, structType, sliceType$1, sliceType$2, ptrType, funcType, funcType$1, keys, sizeLocation, frameId, numFrames, vsSource, psSource, throw$1, assert, glAssert, setupConnection, updateCamera, setupShaders, buildArrays, setupGeometry, setupTextures, setupGL, updateTitle, load, main;
+	var $pkg = {}, $init, json, errors, fmt, trace, js, websocket, image, palette, strconv, time, setupMessage, updateMessage, ptrType, ptrType$1, sliceType, sliceType$1, arrayType, structType, ptrType$2, funcType, funcType$1, keys, imgRect, palImages, rgbaImages, finalImage, frameId, numFrames, x, x$1, throw$1, assert, setupConnection, updateCamera, updateTitle, load, main;
 	json = $packages["encoding/json"];
 	errors = $packages["errors"];
 	fmt = $packages["fmt"];
+	trace = $packages["github.com/andreas-jonsson/octatron/trace"];
 	js = $packages["github.com/gopherjs/gopherjs/js"];
-	webgl = $packages["github.com/gopherjs/webgl"];
 	websocket = $packages["github.com/gopherjs/websocket"];
+	image = $packages["image"];
 	palette = $packages["image/color/palette"];
+	strconv = $packages["strconv"];
 	time = $packages["time"];
-	setupMessage = $pkg.setupMessage = $newType(0, $kindStruct, "main.setupMessage", "setupMessage", "main", function(Width_, Height_, FieldOfView_, ViewDist_) {
+	setupMessage = $pkg.setupMessage = $newType(0, $kindStruct, "main.setupMessage", "setupMessage", "main", function(Width_, Height_, FieldOfView_, ViewDist_, ColorFormat_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Width = 0;
 			this.Height = 0;
 			this.FieldOfView = 0;
 			this.ViewDist = 0;
+			this.ColorFormat = "";
 			return;
 		}
 		this.Width = Width_;
 		this.Height = Height_;
 		this.FieldOfView = FieldOfView_;
 		this.ViewDist = ViewDist_;
+		this.ColorFormat = ColorFormat_;
 	});
 	updateMessage = $pkg.updateMessage = $newType(0, $kindStruct, "main.updateMessage", "updateMessage", "main", function(Camera_) {
 		this.$val = this;
@@ -27276,13 +27165,14 @@ $packages["main"] = (function() {
 		}
 		this.Camera = Camera_;
 	});
+	ptrType = $ptrType(image.Paletted);
+	ptrType$1 = $ptrType(image.RGBA);
 	sliceType = $sliceType($emptyInterface);
+	sliceType$1 = $sliceType($Uint8);
 	arrayType = $arrayType($Float32, 3);
 	structType = $structType([{prop: "Position", name: "Position", pkg: "", typ: arrayType, tag: "position"}, {prop: "XRot", name: "XRot", pkg: "", typ: $Float32, tag: "x_rot"}, {prop: "YRot", name: "YRot", pkg: "", typ: $Float32, tag: "y_rot"}]);
-	sliceType$1 = $sliceType($Float32);
-	sliceType$2 = $sliceType($Uint8);
-	ptrType = $ptrType(js.Object);
-	funcType = $funcType([ptrType], [], false);
+	ptrType$2 = $ptrType(js.Object);
+	funcType = $funcType([ptrType$2], [], false);
 	funcType$1 = $funcType([], [], false);
 	throw$1 = function(err) {
 		var $ptr, _r, err, $s, $r;
@@ -27302,33 +27192,29 @@ $packages["main"] = (function() {
 		/* } */ case 2:
 		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: assert }; } $f.$ptr = $ptr; $f.err = err; $f.$s = $s; $f.$r = $r; return $f;
 	};
-	glAssert = function(gl) {
-		var $ptr, _r, err, gl, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; err = $f.err; gl = $f.gl; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		err = gl.GetError();
-		/* */ if (!((err === ($parseInt(gl.Object.NO_ERROR) >> 0)))) { $s = 1; continue; }
-		/* */ $s = 2; continue;
-		/* if (!((err === ($parseInt(gl.Object.NO_ERROR) >> 0)))) { */ case 1:
-			_r = fmt.Errorf("GL Error: %v", new sliceType([new $Int(err)])); /* */ $s = 3; case 3: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-			$r = throw$1(_r); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		/* } */ case 2:
-		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: glAssert }; } $f.$ptr = $ptr; $f._r = _r; $f.err = err; $f.gl = gl; $f.$s = $s; $f.$r = $r; return $f;
-	};
-	setupConnection = function(gl) {
-		var $ptr, _r, _r$1, _tuple, err, gl, onMessage, onOpen, ws, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _tuple = $f._tuple; err = $f.err; gl = $f.gl; onMessage = $f.onMessage; onOpen = $f.onOpen; ws = $f.ws; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		gl = [gl];
+	setupConnection = function(canvas) {
+		var $ptr, _r, _r$1, _tuple, canvas, ctx, err, img, onMessage, onOpen, ws, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _tuple = $f._tuple; canvas = $f.canvas; ctx = $f.ctx; err = $f.err; img = $f.img; onMessage = $f.onMessage; onOpen = $f.onOpen; ws = $f.ws; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		ctx = [ctx];
+		img = [img];
 		ws = [ws];
-		_r = fmt.Sprintf("ws://%s:8080/render", new sliceType([new $String("localhost")])); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-		_r$1 = websocket.New(_r); /* */ $s = 2; case 2: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+		ctx[0] = canvas.getContext($externalize("2d", $String));
+		img[0] = ctx[0].getImageData(0, 0, 320, 180);
+		/* */ if (!(($parseInt(img[0].data.length) === finalImage.Pix.$length))) { $s = 1; continue; }
+		/* */ $s = 2; continue;
+		/* if (!(($parseInt(img[0].data.length) === finalImage.Pix.$length))) { */ case 1:
+			$r = throw$1(errors.New("data size of images do not match")); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* } */ case 2:
+		_r = fmt.Sprintf("ws://%s:8080/render", new sliceType([new $String("localhost")])); /* */ $s = 4; case 4: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_r$1 = websocket.New(_r); /* */ $s = 5; case 5: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
 		_tuple = _r$1;
 		ws[0] = _tuple[0];
 		err = _tuple[1];
-		$r = assert(err); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		onOpen = (function(gl, ws) { return function $b(ev) {
+		$r = assert(err); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		onOpen = (function(ctx, img, ws) { return function $b(ev) {
 			var $ptr, _r$2, _tuple$1, err$1, ev, msg, setup, $s, $r;
 			/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r$2 = $f._r$2; _tuple$1 = $f._tuple$1; err$1 = $f.err$1; ev = $f.ev; msg = $f.msg; setup = $f.setup; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-			setup = new setupMessage.ptr(512, 256, 45, 20);
+			setup = new setupMessage.ptr(320, 180, 45, 20, "PALETTE");
 			_r$2 = json.Marshal(new setup.constructor.elem(setup)); /* */ $s = 1; case 1: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
 			_tuple$1 = _r$2;
 			msg = _tuple$1[0];
@@ -27337,20 +27223,35 @@ $packages["main"] = (function() {
 			$r = assert(ws[0].Send(new $String($bytesToString(msg)))); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 			$go(updateCamera, [ws[0]]);
 			/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._r$2 = _r$2; $f._tuple$1 = _tuple$1; $f.err$1 = err$1; $f.ev = ev; $f.msg = msg; $f.setup = setup; $f.$s = $s; $f.$r = $r; return $f;
-		}; })(gl, ws);
-		onMessage = (function(gl, ws) { return function(ev) {
-			var $ptr, _r$2, data, ev;
-			data = new ($global.Uint8Array)(ev.data);
-			gl[0].Object.texImage2D($parseInt(gl[0].Object.TEXTURE_2D) >> 0, 0, $parseInt(gl[0].Object.LUMINANCE) >> 0, 256, 256, 0, $parseInt(gl[0].Object.LUMINANCE) >> 0, $parseInt(gl[0].Object.UNSIGNED_BYTE) >> 0, data);
-			gl[0].Uniform3i(sizeLocation, 256, 256, (_r$2 = frameId % 2, _r$2 === _r$2 ? _r$2 : $throwRuntimeError("integer divide by zero")));
-			gl[0].DrawArrays($parseInt(gl[0].Object.TRIANGLES) >> 0, 0, 6);
+		}; })(ctx, img, ws);
+		onMessage = (function(ctx, img, ws) { return function $b(ev) {
+			var $ptr, _r$2, _r$3, _tmp, _tmp$1, arrBuf, buf, data, ev, idx, imageA, imageB, $s, $r;
+			/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r$2 = $f._r$2; _r$3 = $f._r$3; _tmp = $f._tmp; _tmp$1 = $f._tmp$1; arrBuf = $f.arrBuf; buf = $f.buf; data = $f.data; ev = $f.ev; idx = $f.idx; imageA = $f.imageA; imageB = $f.imageB; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+			idx = (_r$2 = frameId % 2, _r$2 === _r$2 ? _r$2 : $throwRuntimeError("integer divide by zero"));
+			data = $assertType($internalize(new ($global.Uint8Array)(ev.data), $emptyInterface), sliceType$1);
+			_tmp = $ifaceNil;
+			_tmp$1 = $ifaceNil;
+			imageA = _tmp;
+			imageB = _tmp$1;
+			{
+				((idx < 0 || idx >= palImages.length) ? $throwRuntimeError("index out of range") : palImages[idx]).Pix = data;
+				imageA = palImages[0];
+				imageB = palImages[1];
+			}
+			_r$3 = trace.Reconstruct(imageA, imageB, finalImage); /* */ $s = 1; case 1: if($c) { $c = false; _r$3 = _r$3.$blk(); } if (_r$3 && _r$3.$blk !== undefined) { break s; }
+			$r = assert(_r$3); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+			arrBuf = js.NewArrayBuffer(finalImage.Pix);
+			buf = new ($global.Uint8ClampedArray)(arrBuf);
+			img[0].data.set(buf);
+			ctx[0].putImageData(img[0], 0, 0);
 			numFrames = numFrames + (1) >> 0;
 			frameId = frameId + (1) >> 0;
-		}; })(gl, ws);
+			/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._tmp = _tmp; $f._tmp$1 = _tmp$1; $f.arrBuf = arrBuf; $f.buf = buf; $f.data = data; $f.ev = ev; $f.idx = idx; $f.imageA = imageA; $f.imageB = imageB; $f.$s = $s; $f.$r = $r; return $f;
+		}; })(ctx, img, ws);
 		ws[0].Object.binaryType = $externalize("arraybuffer", $String);
 		ws[0].EventTarget.AddEventListener("open", false, onOpen);
 		ws[0].EventTarget.AddEventListener("message", false, onMessage);
-		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: setupConnection }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._tuple = _tuple; $f.err = err; $f.gl = gl; $f.onMessage = onMessage; $f.onOpen = onOpen; $f.ws = ws; $f.$s = $s; $f.$r = $r; return $f;
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: setupConnection }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._tuple = _tuple; $f.canvas = canvas; $f.ctx = ctx; $f.err = err; $f.img = img; $f.onMessage = onMessage; $f.onOpen = onOpen; $f.ws = ws; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	updateCamera = function(ws) {
 		var $ptr, _entry, _entry$1, _entry$2, _entry$3, _ok, _r, _r$1, _ref, _tuple, _tuple$1, err, msg, msg$1, ws, $s, $r;
@@ -27386,141 +27287,6 @@ $packages["main"] = (function() {
 		/* } */ $s = 1; continue; case 2:
 		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: updateCamera }; } $f.$ptr = $ptr; $f._entry = _entry; $f._entry$1 = _entry$1; $f._entry$2 = _entry$2; $f._entry$3 = _entry$3; $f._ok = _ok; $f._r = _r; $f._r$1 = _r$1; $f._ref = _ref; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.err = err; $f.msg = msg; $f.msg$1 = msg$1; $f.ws = ws; $f.$s = $s; $f.$r = $r; return $f;
 	};
-	setupShaders = function(gl) {
-		var $ptr, gl, program, ps, vs, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; gl = $f.gl; program = $f.program; ps = $f.ps; vs = $f.vs; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		vs = gl.CreateShader($parseInt(gl.Object.VERTEX_SHADER) >> 0);
-		gl.ShaderSource(vs, vsSource);
-		gl.CompileShader(vs);
-		/* */ if (!!(gl.GetShaderParameter(vs, $parseInt(gl.Object.COMPILE_STATUS) >> 0)) === false) { $s = 1; continue; }
-		/* */ $s = 2; continue;
-		/* if (!!(gl.GetShaderParameter(vs, $parseInt(gl.Object.COMPILE_STATUS) >> 0)) === false) { */ case 1:
-			$r = throw$1(errors.New(gl.GetShaderInfoLog(vs))); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		/* } */ case 2:
-		ps = gl.CreateShader($parseInt(gl.Object.FRAGMENT_SHADER) >> 0);
-		gl.ShaderSource(ps, psSource);
-		gl.CompileShader(ps);
-		/* */ if (!!(gl.GetShaderParameter(ps, $parseInt(gl.Object.COMPILE_STATUS) >> 0)) === false) { $s = 4; continue; }
-		/* */ $s = 5; continue;
-		/* if (!!(gl.GetShaderParameter(ps, $parseInt(gl.Object.COMPILE_STATUS) >> 0)) === false) { */ case 4:
-			$r = throw$1(errors.New(gl.GetShaderInfoLog(ps))); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		/* } */ case 5:
-		program = gl.CreateProgram();
-		gl.AttachShader(program, vs);
-		gl.AttachShader(program, ps);
-		gl.LinkProgram(program);
-		gl.UseProgram(program);
-		return program;
-		/* */ } return; } if ($f === undefined) { $f = { $blk: setupShaders }; } $f.$ptr = $ptr; $f.gl = gl; $f.program = program; $f.ps = ps; $f.vs = vs; $f.$s = $s; $f.$r = $r; return $f;
-	};
-	buildArrays = function() {
-		var $ptr, _i, _i$1, _ref, _ref$1, i, i$1, jsPosArray, jsUVArray, posArray, posData, uvArray, uvData, v, v$1;
-		jsPosArray = new ($global.Float32Array)(12);
-		posArray = $assertType($internalize(jsPosArray, $emptyInterface), sliceType$1);
-		posData = new sliceType$1([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]);
-		_ref = posData;
-		_i = 0;
-		while (true) {
-			if (!(_i < _ref.$length)) { break; }
-			i = _i;
-			v = ((_i < 0 || _i >= _ref.$length) ? $throwRuntimeError("index out of range") : _ref.$array[_ref.$offset + _i]);
-			((i < 0 || i >= posArray.$length) ? $throwRuntimeError("index out of range") : posArray.$array[posArray.$offset + i] = v);
-			_i++;
-		}
-		jsUVArray = new ($global.Float32Array)(12);
-		uvArray = $assertType($internalize(jsUVArray, $emptyInterface), sliceType$1);
-		uvData = new sliceType$1([0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1]);
-		_ref$1 = uvData;
-		_i$1 = 0;
-		while (true) {
-			if (!(_i$1 < _ref$1.$length)) { break; }
-			i$1 = _i$1;
-			v$1 = ((_i$1 < 0 || _i$1 >= _ref$1.$length) ? $throwRuntimeError("index out of range") : _ref$1.$array[_ref$1.$offset + _i$1]);
-			((i$1 < 0 || i$1 >= uvArray.$length) ? $throwRuntimeError("index out of range") : uvArray.$array[uvArray.$offset + i$1] = v$1);
-			_i$1++;
-		}
-		return [jsPosArray, jsUVArray];
-	};
-	setupGeometry = function(gl, program) {
-		var $ptr, _tuple, gl, posArray, positionLocation, program, texCoordLocation, uvArray, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _tuple = $f._tuple; gl = $f.gl; posArray = $f.posArray; positionLocation = $f.positionLocation; program = $f.program; texCoordLocation = $f.texCoordLocation; uvArray = $f.uvArray; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		_tuple = buildArrays();
-		posArray = _tuple[0];
-		uvArray = _tuple[1];
-		gl.BindBuffer($parseInt(gl.Object.ARRAY_BUFFER) >> 0, gl.CreateBuffer());
-		gl.BufferData($parseInt(gl.Object.ARRAY_BUFFER) >> 0, new $jsObjectPtr(posArray), $parseInt(gl.Object.STATIC_DRAW) >> 0);
-		positionLocation = gl.GetAttribLocation(program, "a_position");
-		gl.EnableVertexAttribArray(positionLocation);
-		gl.VertexAttribPointer(positionLocation, 2, $parseInt(gl.Object.FLOAT) >> 0, false, 0, 0);
-		gl.BindBuffer($parseInt(gl.Object.ARRAY_BUFFER) >> 0, gl.CreateBuffer());
-		gl.BufferData($parseInt(gl.Object.ARRAY_BUFFER) >> 0, new $jsObjectPtr(uvArray), $parseInt(gl.Object.STATIC_DRAW) >> 0);
-		texCoordLocation = gl.GetAttribLocation(program, "a_texCoord");
-		gl.EnableVertexAttribArray(texCoordLocation);
-		gl.VertexAttribPointer(texCoordLocation, 2, $parseInt(gl.Object.FLOAT) >> 0, false, 0, 0);
-		$r = glAssert(gl); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: setupGeometry }; } $f.$ptr = $ptr; $f._tuple = _tuple; $f.gl = gl; $f.posArray = posArray; $f.positionLocation = positionLocation; $f.program = program; $f.texCoordLocation = texCoordLocation; $f.uvArray = uvArray; $f.$s = $s; $f.$r = $r; return $f;
-	};
-	setupTextures = function(gl, program) {
-		var $ptr, _i, _r, _ref, _tuple, a, b, c, data, g, gl, i, offset, program, r, rawPalette, x, x$1, x$2, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _i = $f._i; _r = $f._r; _ref = $f._ref; _tuple = $f._tuple; a = $f.a; b = $f.b; c = $f.c; data = $f.data; g = $f.g; gl = $f.gl; i = $f.i; offset = $f.offset; program = $f.program; r = $f.r; rawPalette = $f.rawPalette; x = $f.x; x$1 = $f.x$1; x$2 = $f.x$2; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		gl.ActiveTexture($parseInt(gl.Object.TEXTURE1) >> 0);
-		gl.BindTexture($parseInt(gl.Object.TEXTURE_2D) >> 0, gl.CreateTexture());
-		gl.TexParameteri($parseInt(gl.Object.TEXTURE_2D) >> 0, $parseInt(gl.Object.TEXTURE_WRAP_S) >> 0, $parseInt(gl.Object.CLAMP_TO_EDGE) >> 0);
-		gl.TexParameteri($parseInt(gl.Object.TEXTURE_2D) >> 0, $parseInt(gl.Object.TEXTURE_WRAP_T) >> 0, $parseInt(gl.Object.CLAMP_TO_EDGE) >> 0);
-		gl.TexParameteri($parseInt(gl.Object.TEXTURE_2D) >> 0, $parseInt(gl.Object.TEXTURE_MIN_FILTER) >> 0, $parseInt(gl.Object.NEAREST) >> 0);
-		gl.TexParameteri($parseInt(gl.Object.TEXTURE_2D) >> 0, $parseInt(gl.Object.TEXTURE_MAG_FILTER) >> 0, $parseInt(gl.Object.NEAREST) >> 0);
-		rawPalette = $makeSlice(sliceType$2, 1024);
-		_ref = palette.Plan9;
-		_i = 0;
-		/* while (true) { */ case 1:
-			/* if (!(_i < _ref.$length)) { break; } */ if(!(_i < _ref.$length)) { $s = 2; continue; }
-			i = _i;
-			c = ((_i < 0 || _i >= _ref.$length) ? $throwRuntimeError("index out of range") : _ref.$array[_ref.$offset + _i]);
-			_r = c.RGBA(); /* */ $s = 3; case 3: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-			_tuple = _r;
-			r = _tuple[0];
-			g = _tuple[1];
-			b = _tuple[2];
-			a = _tuple[3];
-			offset = $imul(i, 4);
-			((offset < 0 || offset >= rawPalette.$length) ? $throwRuntimeError("index out of range") : rawPalette.$array[rawPalette.$offset + offset] = (r << 24 >>> 24));
-			(x = offset + 1 >> 0, ((x < 0 || x >= rawPalette.$length) ? $throwRuntimeError("index out of range") : rawPalette.$array[rawPalette.$offset + x] = (g << 24 >>> 24)));
-			(x$1 = offset + 2 >> 0, ((x$1 < 0 || x$1 >= rawPalette.$length) ? $throwRuntimeError("index out of range") : rawPalette.$array[rawPalette.$offset + x$1] = (b << 24 >>> 24)));
-			(x$2 = offset + 3 >> 0, ((x$2 < 0 || x$2 >= rawPalette.$length) ? $throwRuntimeError("index out of range") : rawPalette.$array[rawPalette.$offset + x$2] = (a << 24 >>> 24)));
-			_i++;
-		/* } */ $s = 1; continue; case 2:
-		data = new ($global.Uint8Array)(js.NewArrayBuffer(rawPalette));
-		gl.Object.texImage2D($parseInt(gl.Object.TEXTURE_2D) >> 0, 0, $parseInt(gl.Object.RGBA) >> 0, 16, 16, 0, $parseInt(gl.Object.RGBA) >> 0, $parseInt(gl.Object.UNSIGNED_BYTE) >> 0, data);
-		gl.ActiveTexture($parseInt(gl.Object.TEXTURE0) >> 0);
-		gl.BindTexture($parseInt(gl.Object.TEXTURE_2D) >> 0, gl.CreateTexture());
-		gl.TexParameteri($parseInt(gl.Object.TEXTURE_2D) >> 0, $parseInt(gl.Object.TEXTURE_WRAP_S) >> 0, $parseInt(gl.Object.CLAMP_TO_EDGE) >> 0);
-		gl.TexParameteri($parseInt(gl.Object.TEXTURE_2D) >> 0, $parseInt(gl.Object.TEXTURE_WRAP_T) >> 0, $parseInt(gl.Object.CLAMP_TO_EDGE) >> 0);
-		gl.TexParameteri($parseInt(gl.Object.TEXTURE_2D) >> 0, $parseInt(gl.Object.TEXTURE_MIN_FILTER) >> 0, $parseInt(gl.Object.NEAREST) >> 0);
-		gl.TexParameteri($parseInt(gl.Object.TEXTURE_2D) >> 0, $parseInt(gl.Object.TEXTURE_MAG_FILTER) >> 0, $parseInt(gl.Object.NEAREST) >> 0);
-		gl.Uniform1i(gl.GetUniformLocation(program, "s_texture"), 0);
-		gl.Uniform1i(gl.GetUniformLocation(program, "s_palette"), 1);
-		sizeLocation = gl.GetUniformLocation(program, "u_imageSize");
-		$r = glAssert(gl); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: setupTextures }; } $f.$ptr = $ptr; $f._i = _i; $f._r = _r; $f._ref = _ref; $f._tuple = _tuple; $f.a = a; $f.b = b; $f.c = c; $f.data = data; $f.g = g; $f.gl = gl; $f.i = i; $f.offset = offset; $f.program = program; $f.r = r; $f.rawPalette = rawPalette; $f.x = x; $f.x$1 = x$1; $f.x$2 = x$2; $f.$s = $s; $f.$r = $r; return $f;
-	};
-	setupGL = function(canvas) {
-		var $ptr, _r, _tuple, canvas, err, gl, program, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; canvas = $f.canvas; err = $f.err; gl = $f.gl; program = $f.program; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		_tuple = webgl.NewContext(canvas, webgl.DefaultAttributes());
-		gl = _tuple[0];
-		err = _tuple[1];
-		$r = assert(err); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		_r = setupShaders(gl); /* */ $s = 2; case 2: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-		program = _r;
-		$r = setupGeometry(gl, program); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		$r = setupTextures(gl, program); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		$r = glAssert(gl); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		gl.ClearColor(0, 0, 0, 1);
-		gl.Clear($parseInt(gl.Object.COLOR_BUFFER_BIT) >> 0);
-		$r = glAssert(gl); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		return gl;
-		/* */ } return; } if ($f === undefined) { $f = { $blk: setupGL }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f.canvas = canvas; $f.err = err; $f.gl = gl; $f.program = program; $f.$s = $s; $f.$r = $r; return $f;
-	};
 	updateTitle = function() {
 		var $ptr, _r, title, $s, $r;
 		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; title = $f.title; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
@@ -27530,8 +27296,8 @@ $packages["main"] = (function() {
 		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: updateTitle }; } $f.$ptr = $ptr; $f._r = _r; $f.title = title; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	load = function() {
-		var $ptr, _r, canvas, document, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; canvas = $f.canvas; document = $f.document; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		var $ptr, canvas, document, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; canvas = $f.canvas; document = $f.document; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		document = $global.document;
 		$go((function $b() {
 			var $ptr, _ok, _r, _ref, _tuple, $s, $r;
@@ -27558,10 +27324,13 @@ $packages["main"] = (function() {
 			_key = $parseInt(e.keyCode) >> 0; (keys || $throwRuntimeError("assignment to entry in nil map"))[$Int.keyFor(_key)] = { k: _key, v: false };
 		}), funcType);
 		canvas = document.createElement($externalize("canvas", $String));
+		canvas.setAttribute($externalize("width", $String), $externalize(strconv.Itoa(320), $String));
+		canvas.setAttribute($externalize("height", $String), $externalize(strconv.Itoa(180), $String));
+		canvas.style.width = $externalize(strconv.Itoa(640) + "px", $String);
+		canvas.style.height = $externalize(strconv.Itoa(360) + "px", $String);
 		document.body.appendChild(canvas);
-		_r = setupGL(canvas); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-		$r = setupConnection(_r); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: load }; } $f.$ptr = $ptr; $f._r = _r; $f.canvas = canvas; $f.document = document; $f.$s = $s; $f.$r = $r; return $f;
+		$r = setupConnection(canvas); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: load }; } $f.$ptr = $ptr; $f.canvas = canvas; $f.document = document; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	main = function() {
 		var $ptr;
@@ -27570,7 +27339,7 @@ $packages["main"] = (function() {
 			$go(load, []);
 		}), funcType$1));
 	};
-	setupMessage.init([{prop: "Width", name: "Width", pkg: "", typ: $Int, tag: "width"}, {prop: "Height", name: "Height", pkg: "", typ: $Int, tag: "height"}, {prop: "FieldOfView", name: "FieldOfView", pkg: "", typ: $Float32, tag: "field_of_view"}, {prop: "ViewDist", name: "ViewDist", pkg: "", typ: $Float32, tag: "view_dist"}]);
+	setupMessage.init([{prop: "Width", name: "Width", pkg: "", typ: $Int, tag: "width"}, {prop: "Height", name: "Height", pkg: "", typ: $Int, tag: "height"}, {prop: "FieldOfView", name: "FieldOfView", pkg: "", typ: $Float32, tag: "field_of_view"}, {prop: "ViewDist", name: "ViewDist", pkg: "", typ: $Float32, tag: "view_dist"}, {prop: "ColorFormat", name: "ColorFormat", pkg: "", typ: $String, tag: "color_format"}]);
 	updateMessage.init([{prop: "Camera", name: "Camera", pkg: "", typ: structType, tag: "camera"}]);
 	$init = function() {
 		$pkg.$init = function() {};
@@ -27578,17 +27347,20 @@ $packages["main"] = (function() {
 		$r = json.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		$r = errors.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		$r = fmt.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		$r = js.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		$r = webgl.$init(); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = trace.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = js.$init(); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		$r = websocket.$init(); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		$r = palette.$init(); /* */ $s = 7; case 7: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		$r = time.$init(); /* */ $s = 8; case 8: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		sizeLocation = null;
+		$r = image.$init(); /* */ $s = 7; case 7: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = palette.$init(); /* */ $s = 8; case 8: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = strconv.$init(); /* */ $s = 9; case 9: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = time.$init(); /* */ $s = 10; case 10: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		frameId = 0;
 		numFrames = 0;
 		keys = {};
-		vsSource = "\n\tattribute vec2 a_position;\n\tattribute vec2 a_texCoord;\n\n\tvarying vec2 v_texCoord;\n\n\tvoid main() {\n\t\tgl_Position = vec4(a_position, 0, 1);\n\t\tv_texCoord = a_texCoord;\n\t}\n";
-		psSource = "\n\tprecision highp float;\n\n\tvarying vec2 v_texCoord;\n\n\tuniform ivec3 u_imageSize;\n\tuniform sampler2D s_texture;\n\tuniform sampler2D s_palette;\n\n\tvoid main() {\n\t\tif ((u_imageSize.z == 0 && mod(v_texCoord.x, 2.0) == 0.0) || (u_imageSize.z == 1 && mod(v_texCoord.x, 2.0) > 0.0)) {\n\t\t\tfloat index = texture2D(s_texture, v_texCoord).r * 255.0;\n\t\t\tvec2 uv = vec2(mod(index, 16.0) / 16.0, (index / 16.0) / 16.0);\n\t\t\tgl_FragColor = texture2D(s_palette, uv);\n\t\t} else {\n\t\t\tgl_FragColor = vec4(0,0,0,0);\n\t\t}\n\t}\n";
+		imgRect = $clone(image.Rect(0, 0, 160, 180), image.Rectangle);
+		palImages = $toNativeArray($kindPtr, [image.NewPaletted(imgRect, (x = palette.Plan9, $subslice(new $packages["image/color"].Palette(x.$array), x.$offset, x.$offset + x.$length))), image.NewPaletted(imgRect, (x$1 = palette.Plan9, $subslice(new $packages["image/color"].Palette(x$1.$array), x$1.$offset, x$1.$offset + x$1.$length)))]);
+		rgbaImages = $toNativeArray($kindPtr, [image.NewRGBA(imgRect), image.NewRGBA(imgRect)]);
+		finalImage = image.NewRGBA(image.Rect(0, 0, 320, 180));
 		if ($pkg === $mainPkg) {
 			main();
 			$mainFinished = true;
