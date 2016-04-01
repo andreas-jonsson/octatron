@@ -27205,7 +27205,7 @@ $packages["main"] = (function() {
 		/* if (!(($parseInt(img[0].data.length) === finalImage.Pix.$length))) { */ case 1:
 			$r = throw$1(errors.New("data size of images do not match")); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		/* } */ case 2:
-		_r = fmt.Sprintf("ws://%s:8080/render", new sliceType([new $String("localhost")])); /* */ $s = 4; case 4: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_r = fmt.Sprintf("ws://%s:8080/render", new sliceType([new $String("server.andreasjonsson.se")])); /* */ $s = 4; case 4: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
 		_r$1 = websocket.New(_r); /* */ $s = 5; case 5: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
 		_tuple = _r$1;
 		ws[0] = _tuple[0];
