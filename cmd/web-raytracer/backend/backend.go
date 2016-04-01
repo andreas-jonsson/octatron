@@ -153,7 +153,7 @@ func renderServer(ws *websocket.Conn) {
 
 	raytracer := trace.NewRaytracer(cfg)
 	raytracer.SetClearColor(color.RGBA{127, 127, 127, 255})
-	updateChan := make(chan updateMessage, 1)
+	updateChan := make(chan updateMessage, 2)
 
 	go func() {
 		var update updateMessage

@@ -34,9 +34,10 @@ import (
 )
 
 const (
-	imgWidth  = 320
-	imgHeight = 180
-	imgScale  = 2
+	imgWidth    = 320
+	imgHeight   = 180
+	imgScale    = 2
+	cameraSpeed = 0.1
 	//colorFormat = "RGBA"
 	colorFormat = "PALETTE"
 )
@@ -94,6 +95,8 @@ func setupConnection(canvas *js.Object) {
 	ws, err := websocket.New(fmt.Sprintf("ws://%s/render", location.Get("host")))
 	assert(err)
 
+	renderChan := make(chan struct{}, 2)
+
 	onOpen := func(ev *js.Object) {
 		setup := setupMessage{
 			Width:       imgWidth,
@@ -108,10 +111,12 @@ func setupConnection(canvas *js.Object) {
 
 		assert(ws.Send(string(msg)))
 
-		go updateCamera(ws)
+		go updateCamera(ws, renderChan)
 	}
 
 	onMessage := func(ev *js.Object) {
+		<-renderChan
+
 		idx := frameId % 2
 		data := js.Global.Get("Uint8Array").New(ev.Get("data")).Interface().([]uint8)
 
@@ -133,7 +138,7 @@ func setupConnection(canvas *js.Object) {
 		assert(trace.Reconstruct(imageA, imageB, finalImage))
 
 		arrBuf := js.NewArrayBuffer(finalImage.Pix)
-		buf := js.Global.Get("Uint8ClampedArray").New(arrBuf)
+		buf := js.Global.Get("Uint8Array").New(arrBuf)
 		img.Get("data").Call("set", buf)
 		ctx.Call("putImageData", img, 0, 0)
 
@@ -146,21 +151,15 @@ func setupConnection(canvas *js.Object) {
 	ws.AddEventListener("message", false, onMessage)
 }
 
-func updateCamera(ws *websocket.WebSocket) {
-	const (
-		cameraSpeed = 0.1
-		tick30hz    = (1000 / 30) * time.Millisecond
-	)
+func updateCamera(ws *websocket.WebSocket, renderChan chan<- struct{}) {
+	const tick30hz = (1000 / 30) * time.Millisecond
 
 	var (
-		pressed bool
-		msg     updateMessage
-		camera  trace.FreeFlightCamera
+		msg    updateMessage
+		camera trace.FreeFlightCamera
 	)
 
 	for _ = range time.Tick(tick30hz) {
-		pressed = true
-
 		switch {
 		case keys[38]: // Up
 			camera.YRot += cameraSpeed
@@ -182,20 +181,17 @@ func updateCamera(ws *websocket.WebSocket) {
 			camera.Lift(cameraSpeed)
 		case keys[81]: // Q
 			camera.Lift(-cameraSpeed)
-		default:
-			//pressed = false
 		}
 
-		if pressed {
-			msg.Camera.Position = camera.Pos
-			msg.Camera.XRot = camera.XRot
-			msg.Camera.YRot = camera.YRot
+		msg.Camera.Position = camera.Pos
+		msg.Camera.XRot = camera.XRot
+		msg.Camera.YRot = camera.YRot
 
-			msg, err := json.Marshal(msg)
-			assert(err)
+		m, err := json.Marshal(msg)
+		assert(err)
 
-			assert(ws.Send(string(msg)))
-		}
+		renderChan <- struct{}{}
+		assert(ws.Send(string(m)))
 	}
 }
 
