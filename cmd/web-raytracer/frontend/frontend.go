@@ -39,9 +39,6 @@ const (
 	imgScale  = 2
 	//colorFormat = "RGBA"
 	colorFormat = "PALETTE"
-
-	//hostAddress = "localhost"
-	hostAddress = "server.andreasjonsson.se"
 )
 
 type (
@@ -91,7 +88,10 @@ func setupConnection(canvas *js.Object) {
 		throw(errors.New("data size of images do not match"))
 	}
 
-	ws, err := websocket.New(fmt.Sprintf("ws://%s:8080/render", hostAddress))
+	document := js.Global.Get("document")
+	location := document.Get("location")
+
+	ws, err := websocket.New(fmt.Sprintf("ws://%s/render", location.Get("host")))
 	assert(err)
 
 	onOpen := func(ev *js.Object) {
@@ -153,36 +153,49 @@ func updateCamera(ws *websocket.WebSocket) {
 	)
 
 	var (
-		//pressed bool
-		msg updateMessage
+		pressed bool
+		msg     updateMessage
+		camera  trace.FreeFlightCamera
 	)
 
-	msg.Camera.Position = [3]float32{0.666, 0, 1.131}
-	msg.Camera.XRot = 0.46938998
-	msg.Camera.YRot = 0.26761
-
 	for _ = range time.Tick(tick30hz) {
-		//pressed = true
+		pressed = true
 
 		switch {
 		case keys[38]: // Up
-			msg.Camera.Position[2] -= cameraSpeed
+			camera.YRot += cameraSpeed
 		case keys[40]: // Down
-			msg.Camera.Position[2] += cameraSpeed
+			camera.YRot -= cameraSpeed
 		case keys[37]: // Left
-			msg.Camera.Position[0] += cameraSpeed
+			camera.XRot += cameraSpeed
 		case keys[39]: // Right
-			msg.Camera.Position[0] -= cameraSpeed
+			camera.XRot -= cameraSpeed
+		case keys[87]: // W
+			camera.Move(cameraSpeed)
+		case keys[83]: // S
+			camera.Move(-cameraSpeed)
+		case keys[65]: // A
+			camera.Strafe(cameraSpeed)
+		case keys[68]: // D
+			camera.Strafe(-cameraSpeed)
+		case keys[69]: // E
+			camera.Lift(cameraSpeed)
+		case keys[81]: // Q
+			camera.Lift(-cameraSpeed)
 		default:
 			//pressed = false
 		}
 
-		//if pressed {
-		msg, err := json.Marshal(msg)
-		assert(err)
+		if pressed {
+			msg.Camera.Position = camera.Pos
+			msg.Camera.XRot = camera.XRot
+			msg.Camera.YRot = camera.YRot
 
-		assert(ws.Send(string(msg)))
-		//}
+			msg, err := json.Marshal(msg)
+			assert(err)
+
+			assert(ws.Send(string(msg)))
+		}
 	}
 }
 

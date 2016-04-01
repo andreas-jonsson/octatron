@@ -4084,13 +4084,23 @@ $packages["encoding"] = (function() {
 	return $pkg;
 })();
 $packages["math"] = (function() {
-	var $pkg = {}, $init, js, arrayType, arrayType$1, arrayType$2, structType, arrayType$3, math, zero, posInf, negInf, nan, buf, pow10tab, Exp, Inf, IsInf, IsNaN, Log, NaN, init, Float32bits, Float32frombits, Float64bits, Float64frombits, init$1;
+	var $pkg = {}, $init, js, arrayType, arrayType$1, arrayType$2, structType, arrayType$3, math, zero, posInf, negInf, nan, buf, pow10tab, Acos, Cos, Exp, Inf, IsInf, IsNaN, Log, NaN, Sin, Sqrt, init, Float32bits, Float32frombits, Float64bits, Float64frombits, Abs, init$1;
 	js = $packages["github.com/gopherjs/gopherjs/js"];
 	arrayType = $arrayType($Uint32, 2);
 	arrayType$1 = $arrayType($Float32, 2);
 	arrayType$2 = $arrayType($Float64, 1);
 	structType = $structType([{prop: "uint32array", name: "uint32array", pkg: "math", typ: arrayType, tag: ""}, {prop: "float32array", name: "float32array", pkg: "math", typ: arrayType$1, tag: ""}, {prop: "float64array", name: "float64array", pkg: "math", typ: arrayType$2, tag: ""}]);
 	arrayType$3 = $arrayType($Float64, 70);
+	Acos = function(x) {
+		var $ptr, x;
+		return $parseFloat(math.acos(x));
+	};
+	$pkg.Acos = Acos;
+	Cos = function(x) {
+		var $ptr, x;
+		return $parseFloat(math.cos(x));
+	};
+	$pkg.Cos = Cos;
 	Exp = function(x) {
 		var $ptr, x;
 		return $parseFloat(math.exp(x));
@@ -4136,6 +4146,16 @@ $packages["math"] = (function() {
 		return nan;
 	};
 	$pkg.NaN = NaN;
+	Sin = function(x) {
+		var $ptr, x;
+		return $parseFloat(math.sin(x));
+	};
+	$pkg.Sin = Sin;
+	Sqrt = function(x) {
+		var $ptr, x;
+		return $parseFloat(math.sqrt(x));
+	};
+	$pkg.Sqrt = Sqrt;
 	init = function() {
 		var $ptr, ab;
 		ab = new ($global.ArrayBuffer)(8);
@@ -4168,6 +4188,17 @@ $packages["math"] = (function() {
 		return buf.float64array[0];
 	};
 	$pkg.Float64frombits = Float64frombits;
+	Abs = function(x) {
+		var $ptr, x;
+		if (x < 0) {
+			return -x;
+		}
+		if (x === 0) {
+			return 0;
+		}
+		return x;
+	};
+	$pkg.Abs = Abs;
 	init$1 = function() {
 		var $ptr, _q, i, m, x;
 		pow10tab[0] = 1;
@@ -16209,7 +16240,7 @@ $packages["reflect"] = (function() {
 	return $pkg;
 })();
 $packages["fmt"] = (function() {
-	var $pkg = {}, $init, errors, io, math, os, reflect, strconv, sync, utf8, fmtFlags, fmt, State, Formatter, Stringer, GoStringer, buffer, pp, runeUnreader, scanError, ss, ssave, sliceType, sliceType$1, ptrType, arrayType, arrayType$1, ptrType$1, arrayType$2, sliceType$2, ptrType$2, ptrType$5, ptrType$25, funcType, padZeroBytes, padSpaceBytes, trueBytes, falseBytes, commaSpaceBytes, nilAngleBytes, nilParenBytes, nilBytes, mapBytes, percentBangBytes, missingBytes, badIndexBytes, panicBytes, extraBytes, irparenBytes, bytesBytes, badWidthBytes, badPrecBytes, noVerbBytes, ppFree, intBits, uintptrBits, byteType, space, ssFree, complexError, boolError, _r, _r$1, init, doPrec, newPrinter, Fprintf, Sprintf, Errorf, Fprint, Fprintln, getField, tooLarge, parsenum, intFromArg, parseArgNumber, isSpace, notSpace, indexRune;
+	var $pkg = {}, $init, errors, io, math, os, reflect, strconv, sync, utf8, fmtFlags, fmt, State, Formatter, Stringer, GoStringer, buffer, pp, runeUnreader, scanError, ss, ssave, sliceType, sliceType$1, ptrType, arrayType, arrayType$1, ptrType$1, arrayType$2, sliceType$2, ptrType$2, ptrType$5, ptrType$25, funcType, padZeroBytes, padSpaceBytes, trueBytes, falseBytes, commaSpaceBytes, nilAngleBytes, nilParenBytes, nilBytes, mapBytes, percentBangBytes, missingBytes, badIndexBytes, panicBytes, extraBytes, irparenBytes, bytesBytes, badWidthBytes, badPrecBytes, noVerbBytes, ppFree, intBits, uintptrBits, byteType, space, ssFree, complexError, boolError, _r, _r$1, init, doPrec, newPrinter, Fprintf, Sprintf, Errorf, Fprint, Sprint, Fprintln, getField, tooLarge, parsenum, intFromArg, parseArgNumber, isSpace, notSpace, indexRune;
 	errors = $packages["errors"];
 	io = $packages["io"];
 	math = $packages["math"];
@@ -17074,6 +17105,18 @@ $packages["fmt"] = (function() {
 		/* */ } return; } if ($f === undefined) { $f = { $blk: Fprint }; } $f.$ptr = $ptr; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._tuple = _tuple; $f.a = a; $f.err = err; $f.n = n; $f.p = p; $f.w = w; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	$pkg.Fprint = Fprint;
+	Sprint = function(a) {
+		var $ptr, _r$2, a, p, s, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r$2 = $f._r$2; a = $f.a; p = $f.p; s = $f.s; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_r$2 = newPrinter(); /* */ $s = 1; case 1: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
+		p = _r$2;
+		$r = p.doPrint(a, false, false); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		s = $bytesToString(p.buf);
+		p.free();
+		return s;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Sprint }; } $f.$ptr = $ptr; $f._r$2 = _r$2; $f.a = a; $f.p = p; $f.s = s; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.Sprint = Sprint;
 	Fprintln = function(w, a) {
 		var $ptr, _r$2, _r$3, _tuple, a, err, n, p, w, x, $s, $r;
 		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r$2 = $f._r$2; _r$3 = $f._r$3; _tuple = $f._tuple; a = $f.a; err = $f.err; n = $f.n; p = $f.p; w = $f.w; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
@@ -23079,8 +23122,33 @@ $packages["github.com/andreas-jonsson/octatron/pack"] = (function() {
 	return $pkg;
 })();
 $packages["github.com/barnex/fmath"] = (function() {
-	var $pkg = {}, $init, math;
+	var $pkg = {}, $init, math, Abs, Acos, Cos, Sin, Sqrt;
 	math = $packages["math"];
+	Abs = function(x) {
+		var $ptr, x;
+		return $fround(math.Abs(x));
+	};
+	$pkg.Abs = Abs;
+	Acos = function(x) {
+		var $ptr, x;
+		return $fround(math.Acos(x));
+	};
+	$pkg.Acos = Acos;
+	Cos = function(x) {
+		var $ptr, x;
+		return $fround(math.Cos(x));
+	};
+	$pkg.Cos = Cos;
+	Sin = function(x) {
+		var $ptr, x;
+		return $fround(math.Sin(x));
+	};
+	$pkg.Sin = Sin;
+	Sqrt = function(x) {
+		var $ptr, x;
+		return $fround(math.Sqrt(x));
+	};
+	$pkg.Sqrt = Sqrt;
 	$init = function() {
 		$pkg.$init = function() {};
 		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
@@ -23101,27 +23169,513 @@ $packages["github.com/ungerik/go3d/generic"] = (function() {
 	return $pkg;
 })();
 $packages["github.com/ungerik/go3d/vec3"] = (function() {
-	var $pkg = {}, $init, fmt, fmath, generic;
+	var $pkg = {}, $init, fmt, fmath, generic, T, arrayType, sliceType, ptrType$1, sliceType$1, Add, Sub, Cross;
 	fmt = $packages["fmt"];
 	fmath = $packages["github.com/barnex/fmath"];
 	generic = $packages["github.com/ungerik/go3d/generic"];
+	T = $pkg.T = $newType(12, $kindArray, "vec3.T", "T", "github.com/ungerik/go3d/vec3", null);
+	arrayType = $arrayType($Float32, 3);
+	sliceType = $sliceType($emptyInterface);
+	ptrType$1 = $ptrType(T);
+	sliceType$1 = $sliceType($Float32);
+	T.prototype.String = function() {
+		var $ptr, _r, vec, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; vec = $f.vec; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		vec = this.$val;
+		_r = fmt.Sprint(new sliceType([new $Float32((vec.nilCheck, vec[0])), new $Float32((vec.nilCheck, vec[1])), new $Float32((vec.nilCheck, vec[2]))])); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		/* */ $s = 2; case 2:
+		return _r;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: T.prototype.String }; } $f.$ptr = $ptr; $f._r = _r; $f.vec = vec; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$ptrType(T).prototype.String = function() { return (new T(this.$get())).String(); };
+	T.prototype.Rows = function() {
+		var $ptr, vec;
+		vec = this.$val;
+		return 3;
+	};
+	$ptrType(T).prototype.Rows = function() { return (new T(this.$get())).Rows(); };
+	T.prototype.Cols = function() {
+		var $ptr, vec;
+		vec = this.$val;
+		return 1;
+	};
+	$ptrType(T).prototype.Cols = function() { return (new T(this.$get())).Cols(); };
+	T.prototype.Size = function() {
+		var $ptr, vec;
+		vec = this.$val;
+		return 3;
+	};
+	$ptrType(T).prototype.Size = function() { return (new T(this.$get())).Size(); };
+	T.prototype.Slice = function() {
+		var $ptr, vec;
+		vec = this.$val;
+		return new sliceType$1(vec);
+	};
+	$ptrType(T).prototype.Slice = function() { return (new T(this.$get())).Slice(); };
+	T.prototype.Get = function(col, row) {
+		var $ptr, col, row, vec;
+		vec = this.$val;
+		return (vec.nilCheck, ((row < 0 || row >= vec.length) ? $throwRuntimeError("index out of range") : vec[row]));
+	};
+	$ptrType(T).prototype.Get = function(col, row) { return (new T(this.$get())).Get(col, row); };
+	T.prototype.IsZero = function() {
+		var $ptr, vec;
+		vec = this.$val;
+		return ((vec.nilCheck, vec[0]) === 0) && ((vec.nilCheck, vec[1]) === 0) && ((vec.nilCheck, vec[2]) === 0);
+	};
+	$ptrType(T).prototype.IsZero = function() { return (new T(this.$get())).IsZero(); };
+	T.prototype.Length = function() {
+		var $ptr, vec;
+		vec = this.$val;
+		return fmath.Sqrt(new ptrType$1(vec).LengthSqr());
+	};
+	$ptrType(T).prototype.Length = function() { return (new T(this.$get())).Length(); };
+	T.prototype.LengthSqr = function() {
+		var $ptr, vec;
+		vec = this.$val;
+		return $fround($fround($fround((vec.nilCheck, vec[0]) * (vec.nilCheck, vec[0])) + $fround((vec.nilCheck, vec[1]) * (vec.nilCheck, vec[1]))) + $fround((vec.nilCheck, vec[2]) * (vec.nilCheck, vec[2])));
+	};
+	$ptrType(T).prototype.LengthSqr = function() { return (new T(this.$get())).LengthSqr(); };
+	T.prototype.Scale = function(f) {
+		var $ptr, f, vec;
+		vec = this.$val;
+		vec.nilCheck, vec[0] = $fround((vec.nilCheck, vec[0]) * (f));
+		vec.nilCheck, vec[1] = $fround((vec.nilCheck, vec[1]) * (f));
+		vec.nilCheck, vec[2] = $fround((vec.nilCheck, vec[2]) * (f));
+		return vec;
+	};
+	$ptrType(T).prototype.Scale = function(f) { return (new T(this.$get())).Scale(f); };
+	T.prototype.Scaled = function(f) {
+		var $ptr, f, vec;
+		vec = this.$val;
+		return $toNativeArray($kindFloat32, [$fround((vec.nilCheck, vec[0]) * f), $fround((vec.nilCheck, vec[1]) * f), $fround((vec.nilCheck, vec[2]) * f)]);
+	};
+	$ptrType(T).prototype.Scaled = function(f) { return (new T(this.$get())).Scaled(f); };
+	T.prototype.Invert = function() {
+		var $ptr, vec;
+		vec = this.$val;
+		vec.nilCheck, vec[0] = -(vec.nilCheck, vec[0]);
+		vec.nilCheck, vec[1] = -(vec.nilCheck, vec[1]);
+		vec.nilCheck, vec[2] = -(vec.nilCheck, vec[2]);
+		return vec;
+	};
+	$ptrType(T).prototype.Invert = function() { return (new T(this.$get())).Invert(); };
+	T.prototype.Inverted = function() {
+		var $ptr, vec;
+		vec = this.$val;
+		return $toNativeArray($kindFloat32, [-(vec.nilCheck, vec[0]), -(vec.nilCheck, vec[1]), -(vec.nilCheck, vec[2])]);
+	};
+	$ptrType(T).prototype.Inverted = function() { return (new T(this.$get())).Inverted(); };
+	T.prototype.Abs = function() {
+		var $ptr, vec;
+		vec = this.$val;
+		vec.nilCheck, vec[0] = fmath.Abs((vec.nilCheck, vec[0]));
+		vec.nilCheck, vec[1] = fmath.Abs((vec.nilCheck, vec[1]));
+		vec.nilCheck, vec[2] = fmath.Abs((vec.nilCheck, vec[2]));
+		return vec;
+	};
+	$ptrType(T).prototype.Abs = function() { return (new T(this.$get())).Abs(); };
+	T.prototype.Absed = function() {
+		var $ptr, vec;
+		vec = this.$val;
+		return $toNativeArray($kindFloat32, [fmath.Abs((vec.nilCheck, vec[0])), fmath.Abs((vec.nilCheck, vec[1])), fmath.Abs((vec.nilCheck, vec[2]))]);
+	};
+	$ptrType(T).prototype.Absed = function() { return (new T(this.$get())).Absed(); };
+	T.prototype.Normalize = function() {
+		var $ptr, sl, vec;
+		vec = this.$val;
+		sl = new ptrType$1(vec).LengthSqr();
+		if ((sl === 0) || (sl === 1)) {
+			return vec;
+		}
+		new ptrType$1(vec).Scale($fround(1 / fmath.Sqrt(sl)));
+		return vec;
+	};
+	$ptrType(T).prototype.Normalize = function() { return (new T(this.$get())).Normalize(); };
+	T.prototype.Normalized = function() {
+		var $ptr, v, vec;
+		vec = this.$val;
+		v = $clone(vec, T);
+		new ptrType$1(v).Normalize();
+		return v;
+	};
+	$ptrType(T).prototype.Normalized = function() { return (new T(this.$get())).Normalized(); };
+	T.prototype.Normal = function() {
+		var $ptr, n, vec;
+		vec = this.$val;
+		n = $clone(Cross(vec, $pkg.UnitZ), T);
+		if (new ptrType$1(n).IsZero()) {
+			return $pkg.UnitX;
+		}
+		return new ptrType$1(n).Normalized();
+	};
+	$ptrType(T).prototype.Normal = function() { return (new T(this.$get())).Normal(); };
+	T.prototype.Add = function(v) {
+		var $ptr, v, vec;
+		vec = this.$val;
+		vec.nilCheck, vec[0] = $fround((vec.nilCheck, vec[0]) + ((v.nilCheck, v[0])));
+		vec.nilCheck, vec[1] = $fround((vec.nilCheck, vec[1]) + ((v.nilCheck, v[1])));
+		vec.nilCheck, vec[2] = $fround((vec.nilCheck, vec[2]) + ((v.nilCheck, v[2])));
+		return vec;
+	};
+	$ptrType(T).prototype.Add = function(v) { return (new T(this.$get())).Add(v); };
+	T.prototype.Sub = function(v) {
+		var $ptr, v, vec;
+		vec = this.$val;
+		vec.nilCheck, vec[0] = $fround((vec.nilCheck, vec[0]) - ((v.nilCheck, v[0])));
+		vec.nilCheck, vec[1] = $fround((vec.nilCheck, vec[1]) - ((v.nilCheck, v[1])));
+		vec.nilCheck, vec[2] = $fround((vec.nilCheck, vec[2]) - ((v.nilCheck, v[2])));
+		return vec;
+	};
+	$ptrType(T).prototype.Sub = function(v) { return (new T(this.$get())).Sub(v); };
+	T.prototype.Mul = function(v) {
+		var $ptr, v, vec;
+		vec = this.$val;
+		vec.nilCheck, vec[0] = $fround((vec.nilCheck, vec[0]) * ((v.nilCheck, v[0])));
+		vec.nilCheck, vec[1] = $fround((vec.nilCheck, vec[1]) * ((v.nilCheck, v[1])));
+		vec.nilCheck, vec[2] = $fround((vec.nilCheck, vec[2]) * ((v.nilCheck, v[2])));
+		return vec;
+	};
+	$ptrType(T).prototype.Mul = function(v) { return (new T(this.$get())).Mul(v); };
+	Add = function(a, b) {
+		var $ptr, a, b;
+		return $toNativeArray($kindFloat32, [$fround((a.nilCheck, a[0]) + (b.nilCheck, b[0])), $fround((a.nilCheck, a[1]) + (b.nilCheck, b[1])), $fround((a.nilCheck, a[2]) + (b.nilCheck, b[2]))]);
+	};
+	$pkg.Add = Add;
+	Sub = function(a, b) {
+		var $ptr, a, b;
+		return $toNativeArray($kindFloat32, [$fround((a.nilCheck, a[0]) - (b.nilCheck, b[0])), $fround((a.nilCheck, a[1]) - (b.nilCheck, b[1])), $fround((a.nilCheck, a[2]) - (b.nilCheck, b[2]))]);
+	};
+	$pkg.Sub = Sub;
+	Cross = function(a, b) {
+		var $ptr, a, b;
+		return $toNativeArray($kindFloat32, [$fround($fround((a.nilCheck, a[1]) * (b.nilCheck, b[2])) - $fround((a.nilCheck, a[2]) * (b.nilCheck, b[1]))), $fround($fround((a.nilCheck, a[2]) * (b.nilCheck, b[0])) - $fround((a.nilCheck, a[0]) * (b.nilCheck, b[2]))), $fround($fround((a.nilCheck, a[0]) * (b.nilCheck, b[1])) - $fround((a.nilCheck, a[1]) * (b.nilCheck, b[0])))]);
+	};
+	$pkg.Cross = Cross;
+	T.prototype.Clamp = function(min, max) {
+		var $ptr, _i, _ref, i, max, min, vec;
+		vec = this.$val;
+		_ref = vec;
+		_i = 0;
+		while (true) {
+			if (!(_i < 3)) { break; }
+			i = _i;
+			if ((vec.nilCheck, ((i < 0 || i >= vec.length) ? $throwRuntimeError("index out of range") : vec[i])) < (min.nilCheck, ((i < 0 || i >= min.length) ? $throwRuntimeError("index out of range") : min[i]))) {
+				vec.nilCheck, ((i < 0 || i >= vec.length) ? $throwRuntimeError("index out of range") : vec[i] = (min.nilCheck, ((i < 0 || i >= min.length) ? $throwRuntimeError("index out of range") : min[i])));
+			} else if ((vec.nilCheck, ((i < 0 || i >= vec.length) ? $throwRuntimeError("index out of range") : vec[i])) > (max.nilCheck, ((i < 0 || i >= max.length) ? $throwRuntimeError("index out of range") : max[i]))) {
+				vec.nilCheck, ((i < 0 || i >= vec.length) ? $throwRuntimeError("index out of range") : vec[i] = (max.nilCheck, ((i < 0 || i >= max.length) ? $throwRuntimeError("index out of range") : max[i])));
+			}
+			_i++;
+		}
+		return vec;
+	};
+	$ptrType(T).prototype.Clamp = function(min, max) { return (new T(this.$get())).Clamp(min, max); };
+	T.prototype.Clamped = function(min, max) {
+		var $ptr, max, min, result, vec;
+		vec = this.$val;
+		result = $clone(vec, T);
+		new ptrType$1(result).Clamp(min, max);
+		return result;
+	};
+	$ptrType(T).prototype.Clamped = function(min, max) { return (new T(this.$get())).Clamped(min, max); };
+	T.prototype.Clamp01 = function() {
+		var $ptr, vec;
+		vec = this.$val;
+		return new ptrType$1(vec).Clamp($pkg.Zero, $pkg.UnitXYZ);
+	};
+	$ptrType(T).prototype.Clamp01 = function() { return (new T(this.$get())).Clamp01(); };
+	T.prototype.Clamped01 = function() {
+		var $ptr, result, vec;
+		vec = this.$val;
+		result = $clone(vec, T);
+		new ptrType$1(result).Clamp01();
+		return result;
+	};
+	$ptrType(T).prototype.Clamped01 = function() { return (new T(this.$get())).Clamped01(); };
+	ptrType$1.methods = [{prop: "String", name: "String", pkg: "", typ: $funcType([], [$String], false)}, {prop: "Rows", name: "Rows", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "Cols", name: "Cols", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "Size", name: "Size", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "Slice", name: "Slice", pkg: "", typ: $funcType([], [sliceType$1], false)}, {prop: "Get", name: "Get", pkg: "", typ: $funcType([$Int, $Int], [$Float32], false)}, {prop: "IsZero", name: "IsZero", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "Length", name: "Length", pkg: "", typ: $funcType([], [$Float32], false)}, {prop: "LengthSqr", name: "LengthSqr", pkg: "", typ: $funcType([], [$Float32], false)}, {prop: "Scale", name: "Scale", pkg: "", typ: $funcType([$Float32], [ptrType$1], false)}, {prop: "Scaled", name: "Scaled", pkg: "", typ: $funcType([$Float32], [T], false)}, {prop: "Invert", name: "Invert", pkg: "", typ: $funcType([], [ptrType$1], false)}, {prop: "Inverted", name: "Inverted", pkg: "", typ: $funcType([], [T], false)}, {prop: "Abs", name: "Abs", pkg: "", typ: $funcType([], [ptrType$1], false)}, {prop: "Absed", name: "Absed", pkg: "", typ: $funcType([], [T], false)}, {prop: "Normalize", name: "Normalize", pkg: "", typ: $funcType([], [ptrType$1], false)}, {prop: "Normalized", name: "Normalized", pkg: "", typ: $funcType([], [T], false)}, {prop: "Normal", name: "Normal", pkg: "", typ: $funcType([], [T], false)}, {prop: "Add", name: "Add", pkg: "", typ: $funcType([ptrType$1], [ptrType$1], false)}, {prop: "Sub", name: "Sub", pkg: "", typ: $funcType([ptrType$1], [ptrType$1], false)}, {prop: "Mul", name: "Mul", pkg: "", typ: $funcType([ptrType$1], [ptrType$1], false)}, {prop: "Clamp", name: "Clamp", pkg: "", typ: $funcType([ptrType$1, ptrType$1], [ptrType$1], false)}, {prop: "Clamped", name: "Clamped", pkg: "", typ: $funcType([ptrType$1, ptrType$1], [T], false)}, {prop: "Clamp01", name: "Clamp01", pkg: "", typ: $funcType([], [ptrType$1], false)}, {prop: "Clamped01", name: "Clamped01", pkg: "", typ: $funcType([], [T], false)}];
+	T.init($Float32, 3);
 	$init = function() {
 		$pkg.$init = function() {};
 		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		$r = fmt.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		$r = fmath.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		$r = generic.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$pkg.Zero = arrayType.zero();
+		$pkg.UnitX = $toNativeArray($kindFloat32, [1, 0, 0]);
+		$pkg.UnitZ = $toNativeArray($kindFloat32, [0, 0, 1]);
+		$pkg.UnitXYZ = $toNativeArray($kindFloat32, [1, 1, 1]);
 		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
 	};
 	$pkg.$init = $init;
 	return $pkg;
 })();
 $packages["github.com/ungerik/go3d/vec4"] = (function() {
-	var $pkg = {}, $init, fmt, fmath, generic, vec3;
+	var $pkg = {}, $init, fmt, fmath, generic, vec3, ShuffleMask, T, arrayType, sliceType, sliceType$1, ptrType$1, ptrType$2;
 	fmt = $packages["fmt"];
 	fmath = $packages["github.com/barnex/fmath"];
 	generic = $packages["github.com/ungerik/go3d/generic"];
 	vec3 = $packages["github.com/ungerik/go3d/vec3"];
+	ShuffleMask = $pkg.ShuffleMask = $newType(4, $kindInt, "vec4.ShuffleMask", "ShuffleMask", "github.com/ungerik/go3d/vec4", null);
+	T = $pkg.T = $newType(16, $kindArray, "vec4.T", "T", "github.com/ungerik/go3d/vec4", null);
+	arrayType = $arrayType($Float32, 4);
+	sliceType = $sliceType($emptyInterface);
+	sliceType$1 = $sliceType($Float32);
+	ptrType$1 = $ptrType(T);
+	ptrType$2 = $ptrType(vec3.T);
+	T.prototype.String = function() {
+		var $ptr, _r, vec, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; vec = $f.vec; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		vec = this.$val;
+		_r = fmt.Sprint(new sliceType([new $Float32((vec.nilCheck, vec[0])), new $Float32((vec.nilCheck, vec[1])), new $Float32((vec.nilCheck, vec[2])), new $Float32((vec.nilCheck, vec[3]))])); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		/* */ $s = 2; case 2:
+		return _r;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: T.prototype.String }; } $f.$ptr = $ptr; $f._r = _r; $f.vec = vec; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$ptrType(T).prototype.String = function() { return (new T(this.$get())).String(); };
+	T.prototype.Rows = function() {
+		var $ptr, vec;
+		vec = this.$val;
+		return 4;
+	};
+	$ptrType(T).prototype.Rows = function() { return (new T(this.$get())).Rows(); };
+	T.prototype.Cols = function() {
+		var $ptr, vec;
+		vec = this.$val;
+		return 1;
+	};
+	$ptrType(T).prototype.Cols = function() { return (new T(this.$get())).Cols(); };
+	T.prototype.Size = function() {
+		var $ptr, vec;
+		vec = this.$val;
+		return 4;
+	};
+	$ptrType(T).prototype.Size = function() { return (new T(this.$get())).Size(); };
+	T.prototype.Slice = function() {
+		var $ptr, vec;
+		vec = this.$val;
+		return new sliceType$1(vec);
+	};
+	$ptrType(T).prototype.Slice = function() { return (new T(this.$get())).Slice(); };
+	T.prototype.Get = function(col, row) {
+		var $ptr, col, row, vec;
+		vec = this.$val;
+		return (vec.nilCheck, ((row < 0 || row >= vec.length) ? $throwRuntimeError("index out of range") : vec[row]));
+	};
+	$ptrType(T).prototype.Get = function(col, row) { return (new T(this.$get())).Get(col, row); };
+	T.prototype.IsZero = function() {
+		var $ptr, vec;
+		vec = this.$val;
+		return ((vec.nilCheck, vec[0]) === 0) && ((vec.nilCheck, vec[1]) === 0) && ((vec.nilCheck, vec[2]) === 0) && ((vec.nilCheck, vec[3]) === 0);
+	};
+	$ptrType(T).prototype.IsZero = function() { return (new T(this.$get())).IsZero(); };
+	T.prototype.Shuffle = function(mask) {
+		var $ptr, mask, vec;
+		vec = this.$val;
+		T.copy(vec, new ptrType$1(vec).Shuffled(mask));
+		return vec;
+	};
+	$ptrType(T).prototype.Shuffle = function(mask) { return (new T(this.$get())).Shuffle(mask); };
+	T.prototype.Shuffled = function(mask) {
+		var $ptr, mask, result, vec, x, x$1, x$2, x$3;
+		result = arrayType.zero();
+		vec = this.$val;
+		result[0] = (x = mask & 3, (vec.nilCheck, ((x < 0 || x >= vec.length) ? $throwRuntimeError("index out of range") : vec[x])));
+		result[1] = (x$1 = ((mask >> 2 >> 0)) & 3, (vec.nilCheck, ((x$1 < 0 || x$1 >= vec.length) ? $throwRuntimeError("index out of range") : vec[x$1])));
+		result[2] = (x$2 = ((mask >> 4 >> 0)) & 3, (vec.nilCheck, ((x$2 < 0 || x$2 >= vec.length) ? $throwRuntimeError("index out of range") : vec[x$2])));
+		result[3] = (x$3 = ((mask >> 6 >> 0)) & 3, (vec.nilCheck, ((x$3 < 0 || x$3 >= vec.length) ? $throwRuntimeError("index out of range") : vec[x$3])));
+		T.copy(result, result);
+		return result;
+	};
+	$ptrType(T).prototype.Shuffled = function(mask) { return (new T(this.$get())).Shuffled(mask); };
+	T.prototype.Length = function() {
+		var $ptr, v3, vec;
+		vec = this.$val;
+		v3 = $clone(new ptrType$1(vec).Vec3DividedByW(), vec3.T);
+		return new ptrType$2(v3).Length();
+	};
+	$ptrType(T).prototype.Length = function() { return (new T(this.$get())).Length(); };
+	T.prototype.LengthSqr = function() {
+		var $ptr, v3, vec;
+		vec = this.$val;
+		v3 = $clone(new ptrType$1(vec).Vec3DividedByW(), vec3.T);
+		return new ptrType$2(v3).LengthSqr();
+	};
+	$ptrType(T).prototype.LengthSqr = function() { return (new T(this.$get())).LengthSqr(); };
+	T.prototype.Scale = function(f) {
+		var $ptr, f, vec;
+		vec = this.$val;
+		vec.nilCheck, vec[0] = $fround((vec.nilCheck, vec[0]) * (f));
+		vec.nilCheck, vec[1] = $fround((vec.nilCheck, vec[1]) * (f));
+		vec.nilCheck, vec[2] = $fround((vec.nilCheck, vec[2]) * (f));
+		return vec;
+	};
+	$ptrType(T).prototype.Scale = function(f) { return (new T(this.$get())).Scale(f); };
+	T.prototype.Scaled = function(f) {
+		var $ptr, f, vec;
+		vec = this.$val;
+		return $toNativeArray($kindFloat32, [$fround((vec.nilCheck, vec[0]) * f), $fround((vec.nilCheck, vec[1]) * f), $fround((vec.nilCheck, vec[2]) * f), (vec.nilCheck, vec[3])]);
+	};
+	$ptrType(T).prototype.Scaled = function(f) { return (new T(this.$get())).Scaled(f); };
+	T.prototype.Invert = function() {
+		var $ptr, vec;
+		vec = this.$val;
+		vec.nilCheck, vec[0] = -(vec.nilCheck, vec[0]);
+		vec.nilCheck, vec[1] = -(vec.nilCheck, vec[1]);
+		vec.nilCheck, vec[2] = -(vec.nilCheck, vec[2]);
+		return vec;
+	};
+	$ptrType(T).prototype.Invert = function() { return (new T(this.$get())).Invert(); };
+	T.prototype.Inverted = function() {
+		var $ptr, vec;
+		vec = this.$val;
+		return $toNativeArray($kindFloat32, [-(vec.nilCheck, vec[0]), -(vec.nilCheck, vec[1]), -(vec.nilCheck, vec[2]), (vec.nilCheck, vec[3])]);
+	};
+	$ptrType(T).prototype.Inverted = function() { return (new T(this.$get())).Inverted(); };
+	T.prototype.Normalize = function() {
+		var $ptr, v3, vec;
+		vec = this.$val;
+		v3 = $clone(new ptrType$1(vec).Vec3DividedByW(), vec3.T);
+		new ptrType$2(v3).Normalize();
+		vec.nilCheck, vec[0] = v3[0];
+		vec.nilCheck, vec[1] = v3[1];
+		vec.nilCheck, vec[2] = v3[2];
+		vec.nilCheck, vec[3] = 1;
+		return vec;
+	};
+	$ptrType(T).prototype.Normalize = function() { return (new T(this.$get())).Normalize(); };
+	T.prototype.Normalized = function() {
+		var $ptr, v, vec;
+		vec = this.$val;
+		v = $clone(vec, T);
+		new ptrType$1(v).Normalize();
+		return v;
+	};
+	$ptrType(T).prototype.Normalized = function() { return (new T(this.$get())).Normalized(); };
+	T.prototype.Normal = function() {
+		var $ptr, n3, v3, vec;
+		vec = this.$val;
+		v3 = $clone(new ptrType$1(vec).Vec3(), vec3.T);
+		n3 = $clone(new ptrType$2(v3).Normal(), vec3.T);
+		return $toNativeArray($kindFloat32, [n3[0], n3[1], n3[2], 1]);
+	};
+	$ptrType(T).prototype.Normal = function() { return (new T(this.$get())).Normal(); };
+	T.prototype.DivideByW = function() {
+		var $ptr, oow, vec;
+		vec = this.$val;
+		oow = $fround(1 / (vec.nilCheck, vec[3]));
+		vec.nilCheck, vec[0] = $fround((vec.nilCheck, vec[0]) * (oow));
+		vec.nilCheck, vec[1] = $fround((vec.nilCheck, vec[1]) * (oow));
+		vec.nilCheck, vec[2] = $fround((vec.nilCheck, vec[2]) * (oow));
+		vec.nilCheck, vec[3] = 1;
+		return vec;
+	};
+	$ptrType(T).prototype.DivideByW = function() { return (new T(this.$get())).DivideByW(); };
+	T.prototype.DividedByW = function() {
+		var $ptr, oow, vec;
+		vec = this.$val;
+		oow = $fround(1 / (vec.nilCheck, vec[3]));
+		return $toNativeArray($kindFloat32, [$fround((vec.nilCheck, vec[0]) * oow), $fround((vec.nilCheck, vec[1]) * oow), $fround((vec.nilCheck, vec[2]) * oow), 1]);
+	};
+	$ptrType(T).prototype.DividedByW = function() { return (new T(this.$get())).DividedByW(); };
+	T.prototype.Vec3DividedByW = function() {
+		var $ptr, oow, vec;
+		vec = this.$val;
+		oow = $fround(1 / (vec.nilCheck, vec[3]));
+		return $toNativeArray($kindFloat32, [$fround((vec.nilCheck, vec[0]) * oow), $fround((vec.nilCheck, vec[1]) * oow), $fround((vec.nilCheck, vec[2]) * oow)]);
+	};
+	$ptrType(T).prototype.Vec3DividedByW = function() { return (new T(this.$get())).Vec3DividedByW(); };
+	T.prototype.Vec3 = function() {
+		var $ptr, vec;
+		vec = this.$val;
+		return $toNativeArray($kindFloat32, [(vec.nilCheck, vec[0]), (vec.nilCheck, vec[1]), (vec.nilCheck, vec[2])]);
+	};
+	$ptrType(T).prototype.Vec3 = function() { return (new T(this.$get())).Vec3(); };
+	T.prototype.AssignVec3 = function(v) {
+		var $ptr, v, vec;
+		vec = this.$val;
+		vec.nilCheck, vec[0] = (v.nilCheck, v[0]);
+		vec.nilCheck, vec[1] = (v.nilCheck, v[1]);
+		vec.nilCheck, vec[2] = (v.nilCheck, v[2]);
+		vec.nilCheck, vec[3] = 1;
+		return vec;
+	};
+	$ptrType(T).prototype.AssignVec3 = function(v) { return (new T(this.$get())).AssignVec3(v); };
+	T.prototype.Add = function(v) {
+		var $ptr, v, v3, vec;
+		vec = this.$val;
+		if ((v.nilCheck, v[3]) === (vec.nilCheck, vec[3])) {
+			vec.nilCheck, vec[0] = $fround((vec.nilCheck, vec[0]) + ((v.nilCheck, v[0])));
+			vec.nilCheck, vec[1] = $fround((vec.nilCheck, vec[1]) + ((v.nilCheck, v[1])));
+			vec.nilCheck, vec[2] = $fround((vec.nilCheck, vec[2]) + ((v.nilCheck, v[2])));
+		} else {
+			new ptrType$1(vec).DividedByW();
+			v3 = $clone(new ptrType$1(v).Vec3DividedByW(), vec3.T);
+			vec.nilCheck, vec[0] = $fround((vec.nilCheck, vec[0]) + (v3[0]));
+			vec.nilCheck, vec[1] = $fround((vec.nilCheck, vec[1]) + (v3[1]));
+			vec.nilCheck, vec[2] = $fround((vec.nilCheck, vec[2]) + (v3[2]));
+		}
+		return vec;
+	};
+	$ptrType(T).prototype.Add = function(v) { return (new T(this.$get())).Add(v); };
+	T.prototype.Sub = function(v) {
+		var $ptr, v, v3, vec;
+		vec = this.$val;
+		if ((v.nilCheck, v[3]) === (vec.nilCheck, vec[3])) {
+			vec.nilCheck, vec[0] = $fround((vec.nilCheck, vec[0]) - ((v.nilCheck, v[0])));
+			vec.nilCheck, vec[1] = $fround((vec.nilCheck, vec[1]) - ((v.nilCheck, v[1])));
+			vec.nilCheck, vec[2] = $fround((vec.nilCheck, vec[2]) - ((v.nilCheck, v[2])));
+		} else {
+			new ptrType$1(vec).DividedByW();
+			v3 = $clone(new ptrType$1(v).Vec3DividedByW(), vec3.T);
+			vec.nilCheck, vec[0] = $fround((vec.nilCheck, vec[0]) - (v3[0]));
+			vec.nilCheck, vec[1] = $fround((vec.nilCheck, vec[1]) - (v3[1]));
+			vec.nilCheck, vec[2] = $fround((vec.nilCheck, vec[2]) - (v3[2]));
+		}
+		return vec;
+	};
+	$ptrType(T).prototype.Sub = function(v) { return (new T(this.$get())).Sub(v); };
+	T.prototype.Clamp = function(min, max) {
+		var $ptr, _i, _ref, i, max, min, vec;
+		vec = this.$val;
+		_ref = vec;
+		_i = 0;
+		while (true) {
+			if (!(_i < 4)) { break; }
+			i = _i;
+			if ((vec.nilCheck, ((i < 0 || i >= vec.length) ? $throwRuntimeError("index out of range") : vec[i])) < (min.nilCheck, ((i < 0 || i >= min.length) ? $throwRuntimeError("index out of range") : min[i]))) {
+				vec.nilCheck, ((i < 0 || i >= vec.length) ? $throwRuntimeError("index out of range") : vec[i] = (min.nilCheck, ((i < 0 || i >= min.length) ? $throwRuntimeError("index out of range") : min[i])));
+			} else if ((vec.nilCheck, ((i < 0 || i >= vec.length) ? $throwRuntimeError("index out of range") : vec[i])) > (max.nilCheck, ((i < 0 || i >= max.length) ? $throwRuntimeError("index out of range") : max[i]))) {
+				vec.nilCheck, ((i < 0 || i >= vec.length) ? $throwRuntimeError("index out of range") : vec[i] = (max.nilCheck, ((i < 0 || i >= max.length) ? $throwRuntimeError("index out of range") : max[i])));
+			}
+			_i++;
+		}
+		return vec;
+	};
+	$ptrType(T).prototype.Clamp = function(min, max) { return (new T(this.$get())).Clamp(min, max); };
+	T.prototype.Clamped = function(min, max) {
+		var $ptr, max, min, result, vec;
+		vec = this.$val;
+		result = $clone(vec, T);
+		new ptrType$1(result).Clamp(min, max);
+		return result;
+	};
+	$ptrType(T).prototype.Clamped = function(min, max) { return (new T(this.$get())).Clamped(min, max); };
+	T.prototype.Clamp01 = function() {
+		var $ptr, vec;
+		vec = this.$val;
+		return new ptrType$1(vec).Clamp($pkg.Zero, $pkg.UnitXYZW);
+	};
+	$ptrType(T).prototype.Clamp01 = function() { return (new T(this.$get())).Clamp01(); };
+	T.prototype.Clamped01 = function() {
+		var $ptr, result, vec;
+		vec = this.$val;
+		result = $clone(vec, T);
+		new ptrType$1(result).Clamp01();
+		return result;
+	};
+	$ptrType(T).prototype.Clamped01 = function() { return (new T(this.$get())).Clamped01(); };
+	ptrType$1.methods = [{prop: "String", name: "String", pkg: "", typ: $funcType([], [$String], false)}, {prop: "Rows", name: "Rows", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "Cols", name: "Cols", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "Size", name: "Size", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "Slice", name: "Slice", pkg: "", typ: $funcType([], [sliceType$1], false)}, {prop: "Get", name: "Get", pkg: "", typ: $funcType([$Int, $Int], [$Float32], false)}, {prop: "IsZero", name: "IsZero", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "Shuffle", name: "Shuffle", pkg: "", typ: $funcType([ShuffleMask], [ptrType$1], false)}, {prop: "Shuffled", name: "Shuffled", pkg: "", typ: $funcType([ShuffleMask], [T], false)}, {prop: "Length", name: "Length", pkg: "", typ: $funcType([], [$Float32], false)}, {prop: "LengthSqr", name: "LengthSqr", pkg: "", typ: $funcType([], [$Float32], false)}, {prop: "Scale", name: "Scale", pkg: "", typ: $funcType([$Float32], [ptrType$1], false)}, {prop: "Scaled", name: "Scaled", pkg: "", typ: $funcType([$Float32], [T], false)}, {prop: "Invert", name: "Invert", pkg: "", typ: $funcType([], [ptrType$1], false)}, {prop: "Inverted", name: "Inverted", pkg: "", typ: $funcType([], [T], false)}, {prop: "Normalize", name: "Normalize", pkg: "", typ: $funcType([], [ptrType$1], false)}, {prop: "Normalized", name: "Normalized", pkg: "", typ: $funcType([], [T], false)}, {prop: "Normal", name: "Normal", pkg: "", typ: $funcType([], [T], false)}, {prop: "DivideByW", name: "DivideByW", pkg: "", typ: $funcType([], [ptrType$1], false)}, {prop: "DividedByW", name: "DividedByW", pkg: "", typ: $funcType([], [T], false)}, {prop: "Vec3DividedByW", name: "Vec3DividedByW", pkg: "", typ: $funcType([], [vec3.T], false)}, {prop: "Vec3", name: "Vec3", pkg: "", typ: $funcType([], [vec3.T], false)}, {prop: "AssignVec3", name: "AssignVec3", pkg: "", typ: $funcType([ptrType$2], [ptrType$1], false)}, {prop: "Add", name: "Add", pkg: "", typ: $funcType([ptrType$1], [ptrType$1], false)}, {prop: "Sub", name: "Sub", pkg: "", typ: $funcType([ptrType$1], [ptrType$1], false)}, {prop: "Clamp", name: "Clamp", pkg: "", typ: $funcType([ptrType$1, ptrType$1], [ptrType$1], false)}, {prop: "Clamped", name: "Clamped", pkg: "", typ: $funcType([ptrType$1, ptrType$1], [T], false)}, {prop: "Clamp01", name: "Clamp01", pkg: "", typ: $funcType([], [ptrType$1], false)}, {prop: "Clamped01", name: "Clamped01", pkg: "", typ: $funcType([], [T], false)}];
+	T.init($Float32, 4);
 	$init = function() {
 		$pkg.$init = function() {};
 		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
@@ -23129,17 +23683,213 @@ $packages["github.com/ungerik/go3d/vec4"] = (function() {
 		$r = fmath.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		$r = generic.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		$r = vec3.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$pkg.Zero = arrayType.zero();
+		$pkg.UnitXYZW = $toNativeArray($kindFloat32, [1, 1, 1, 1]);
 		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
 	};
 	$pkg.$init = $init;
 	return $pkg;
 })();
 $packages["github.com/ungerik/go3d/quaternion"] = (function() {
-	var $pkg = {}, $init, fmt, fmath, vec3, vec4;
+	var $pkg = {}, $init, fmt, fmath, vec3, vec4, T, ptrType, sliceType, arrayType$1, ptrType$2, FromXAxisAngle, FromYAxisAngle, FromZAxisAngle, FromEulerAngles, IsShortestRotation, Dot, Mul, Mul3;
 	fmt = $packages["fmt"];
 	fmath = $packages["github.com/barnex/fmath"];
 	vec3 = $packages["github.com/ungerik/go3d/vec3"];
 	vec4 = $packages["github.com/ungerik/go3d/vec4"];
+	T = $pkg.T = $newType(16, $kindArray, "quaternion.T", "T", "github.com/ungerik/go3d/quaternion", null);
+	ptrType = $ptrType(T);
+	sliceType = $sliceType($emptyInterface);
+	arrayType$1 = $arrayType($Float32, 3);
+	ptrType$2 = $ptrType(vec3.T);
+	FromXAxisAngle = function(angle) {
+		var $ptr, angle;
+		angle = $fround(angle * (0.5));
+		return $toNativeArray($kindFloat32, [fmath.Sin(angle), 0, 0, fmath.Cos(angle)]);
+	};
+	$pkg.FromXAxisAngle = FromXAxisAngle;
+	FromYAxisAngle = function(angle) {
+		var $ptr, angle;
+		angle = $fround(angle * (0.5));
+		return $toNativeArray($kindFloat32, [0, fmath.Sin(angle), 0, fmath.Cos(angle)]);
+	};
+	$pkg.FromYAxisAngle = FromYAxisAngle;
+	FromZAxisAngle = function(angle) {
+		var $ptr, angle;
+		angle = $fround(angle * (0.5));
+		return $toNativeArray($kindFloat32, [0, 0, fmath.Sin(angle), fmath.Cos(angle)]);
+	};
+	$pkg.FromZAxisAngle = FromZAxisAngle;
+	FromEulerAngles = function(yHead, xPitch, zRoll) {
+		var $ptr, qx, qy, qz, xPitch, yHead, zRoll;
+		qy = $clone(FromYAxisAngle(yHead), T);
+		qx = $clone(FromXAxisAngle(xPitch), T);
+		qz = $clone(FromZAxisAngle(zRoll), T);
+		return Mul3(qy, qx, qz);
+	};
+	$pkg.FromEulerAngles = FromEulerAngles;
+	T.prototype.Vec4 = function() {
+		var $ptr, quat;
+		quat = this.$val;
+		return $clone(quat, vec4.T);
+	};
+	$ptrType(T).prototype.Vec4 = function() { return (new T(this.$get())).Vec4(); };
+	T.prototype.String = function() {
+		var $ptr, _r, quat, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; quat = $f.quat; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		quat = this.$val;
+		_r = fmt.Sprint(new sliceType([new $Float32((quat.nilCheck, quat[0])), new $Float32((quat.nilCheck, quat[1])), new $Float32((quat.nilCheck, quat[2])), new $Float32((quat.nilCheck, quat[3]))])); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		/* */ $s = 2; case 2:
+		return _r;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: T.prototype.String }; } $f.$ptr = $ptr; $f._r = _r; $f.quat = quat; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$ptrType(T).prototype.String = function() { return (new T(this.$get())).String(); };
+	T.prototype.AxisAngle = function() {
+		var $ptr, _tmp, _tmp$1, angle, axis, cos, ooSin, quat, sin;
+		axis = arrayType$1.zero();
+		angle = 0;
+		quat = this.$val;
+		cos = (quat.nilCheck, quat[3]);
+		sin = fmath.Sqrt($fround(1 - $fround(cos * cos)));
+		angle = fmath.Acos(cos);
+		ooSin = 0;
+		if (fmath.Abs(sin) < 0.0005000000237487257) {
+			ooSin = 1;
+		} else {
+			ooSin = $fround(1 / sin);
+		}
+		axis[0] = $fround((quat.nilCheck, quat[0]) * ooSin);
+		axis[1] = $fround((quat.nilCheck, quat[1]) * ooSin);
+		axis[2] = $fround((quat.nilCheck, quat[2]) * ooSin);
+		_tmp = $clone(axis, vec3.T);
+		_tmp$1 = angle;
+		vec3.T.copy(axis, _tmp);
+		angle = _tmp$1;
+		return [axis, angle];
+	};
+	$ptrType(T).prototype.AxisAngle = function() { return (new T(this.$get())).AxisAngle(); };
+	T.prototype.Norm = function() {
+		var $ptr, quat;
+		quat = this.$val;
+		return $fround($fround($fround($fround((quat.nilCheck, quat[0]) * (quat.nilCheck, quat[0])) + $fround((quat.nilCheck, quat[1]) * (quat.nilCheck, quat[1]))) + $fround((quat.nilCheck, quat[2]) * (quat.nilCheck, quat[2]))) + $fround((quat.nilCheck, quat[3]) * (quat.nilCheck, quat[3])));
+	};
+	$ptrType(T).prototype.Norm = function() { return (new T(this.$get())).Norm(); };
+	T.prototype.Normalize = function() {
+		var $ptr, norm, ool, quat;
+		quat = this.$val;
+		norm = new ptrType(quat).Norm();
+		if (!((norm === 1)) && !((norm === 0))) {
+			ool = $fround(1 / fmath.Sqrt(norm));
+			quat.nilCheck, quat[0] = $fround((quat.nilCheck, quat[0]) * (ool));
+			quat.nilCheck, quat[1] = $fround((quat.nilCheck, quat[1]) * (ool));
+			quat.nilCheck, quat[2] = $fround((quat.nilCheck, quat[2]) * (ool));
+			quat.nilCheck, quat[3] = $fround((quat.nilCheck, quat[3]) * (ool));
+		}
+		return quat;
+	};
+	$ptrType(T).prototype.Normalize = function() { return (new T(this.$get())).Normalize(); };
+	T.prototype.Normalized = function() {
+		var $ptr, norm, ool, quat;
+		quat = this.$val;
+		norm = new ptrType(quat).Norm();
+		if (!((norm === 1)) && !((norm === 0))) {
+			ool = $fround(1 / fmath.Sqrt(norm));
+			return $toNativeArray($kindFloat32, [$fround((quat.nilCheck, quat[0]) * ool), $fround((quat.nilCheck, quat[1]) * ool), $fround((quat.nilCheck, quat[2]) * ool), $fround((quat.nilCheck, quat[3]) * ool)]);
+		} else {
+			return quat;
+		}
+	};
+	$ptrType(T).prototype.Normalized = function() { return (new T(this.$get())).Normalized(); };
+	T.prototype.Negate = function() {
+		var $ptr, quat;
+		quat = this.$val;
+		quat.nilCheck, quat[0] = -(quat.nilCheck, quat[0]);
+		quat.nilCheck, quat[1] = -(quat.nilCheck, quat[1]);
+		quat.nilCheck, quat[2] = -(quat.nilCheck, quat[2]);
+		quat.nilCheck, quat[3] = -(quat.nilCheck, quat[3]);
+		return quat;
+	};
+	$ptrType(T).prototype.Negate = function() { return (new T(this.$get())).Negate(); };
+	T.prototype.Negated = function() {
+		var $ptr, quat;
+		quat = this.$val;
+		return $toNativeArray($kindFloat32, [-(quat.nilCheck, quat[0]), -(quat.nilCheck, quat[1]), -(quat.nilCheck, quat[2]), -(quat.nilCheck, quat[3])]);
+	};
+	$ptrType(T).prototype.Negated = function() { return (new T(this.$get())).Negated(); };
+	T.prototype.Invert = function() {
+		var $ptr, quat;
+		quat = this.$val;
+		quat.nilCheck, quat[0] = -(quat.nilCheck, quat[0]);
+		quat.nilCheck, quat[1] = -(quat.nilCheck, quat[1]);
+		quat.nilCheck, quat[2] = -(quat.nilCheck, quat[2]);
+		return quat;
+	};
+	$ptrType(T).prototype.Invert = function() { return (new T(this.$get())).Invert(); };
+	T.prototype.Inverted = function() {
+		var $ptr, quat;
+		quat = this.$val;
+		return $toNativeArray($kindFloat32, [-(quat.nilCheck, quat[0]), -(quat.nilCheck, quat[1]), -(quat.nilCheck, quat[2]), (quat.nilCheck, quat[3])]);
+	};
+	$ptrType(T).prototype.Inverted = function() { return (new T(this.$get())).Inverted(); };
+	T.prototype.SetShortestRotation = function(other) {
+		var $ptr, other, quat;
+		quat = this.$val;
+		if (!IsShortestRotation(quat, other)) {
+			new ptrType(quat).Negate();
+		}
+		return quat;
+	};
+	$ptrType(T).prototype.SetShortestRotation = function(other) { return (new T(this.$get())).SetShortestRotation(other); };
+	IsShortestRotation = function(a, b) {
+		var $ptr, a, b;
+		return Dot(a, b) >= 0;
+	};
+	$pkg.IsShortestRotation = IsShortestRotation;
+	T.prototype.IsUnitQuat = function(tolerance) {
+		var $ptr, norm, quat, tolerance;
+		quat = this.$val;
+		norm = new ptrType(quat).Norm();
+		return norm >= ($fround(1 - tolerance)) && norm <= ($fround(1 + tolerance));
+	};
+	$ptrType(T).prototype.IsUnitQuat = function(tolerance) { return (new T(this.$get())).IsUnitQuat(tolerance); };
+	T.prototype.RotateVec3 = function(v) {
+		var $ptr, inv, q, quat, qv, v;
+		quat = this.$val;
+		qv = $toNativeArray($kindFloat32, [(v.nilCheck, v[0]), (v.nilCheck, v[1]), (v.nilCheck, v[2]), 0]);
+		inv = $clone(new ptrType(quat).Inverted(), T);
+		q = $clone(Mul3(quat, qv, inv), T);
+		v.nilCheck, v[0] = q[0];
+		v.nilCheck, v[1] = q[1];
+		v.nilCheck, v[2] = q[2];
+	};
+	$ptrType(T).prototype.RotateVec3 = function(v) { return (new T(this.$get())).RotateVec3(v); };
+	T.prototype.RotatedVec3 = function(v) {
+		var $ptr, inv, q, quat, qv, v;
+		quat = this.$val;
+		qv = $toNativeArray($kindFloat32, [(v.nilCheck, v[0]), (v.nilCheck, v[1]), (v.nilCheck, v[2]), 0]);
+		inv = $clone(new ptrType(quat).Inverted(), T);
+		q = $clone(Mul3(quat, qv, inv), T);
+		return $toNativeArray($kindFloat32, [q[0], q[1], q[2]]);
+	};
+	$ptrType(T).prototype.RotatedVec3 = function(v) { return (new T(this.$get())).RotatedVec3(v); };
+	Dot = function(a, b) {
+		var $ptr, a, b;
+		return $fround($fround($fround($fround((a.nilCheck, a[0]) * (b.nilCheck, b[0])) + $fround((a.nilCheck, a[1]) * (b.nilCheck, b[1]))) + $fround((a.nilCheck, a[2]) * (b.nilCheck, b[2]))) + $fround((a.nilCheck, a[3]) * (b.nilCheck, b[3])));
+	};
+	$pkg.Dot = Dot;
+	Mul = function(a, b) {
+		var $ptr, a, b, q;
+		q = $toNativeArray($kindFloat32, [$fround($fround($fround($fround((a.nilCheck, a[3]) * (b.nilCheck, b[0])) + $fround((a.nilCheck, a[0]) * (b.nilCheck, b[3]))) + $fround((a.nilCheck, a[1]) * (b.nilCheck, b[2]))) - $fround((a.nilCheck, a[2]) * (b.nilCheck, b[1]))), $fround($fround($fround($fround((a.nilCheck, a[3]) * (b.nilCheck, b[1])) + $fround((a.nilCheck, a[1]) * (b.nilCheck, b[3]))) + $fround((a.nilCheck, a[2]) * (b.nilCheck, b[0]))) - $fround((a.nilCheck, a[0]) * (b.nilCheck, b[2]))), $fround($fround($fround($fround((a.nilCheck, a[3]) * (b.nilCheck, b[2])) + $fround((a.nilCheck, a[2]) * (b.nilCheck, b[3]))) + $fround((a.nilCheck, a[0]) * (b.nilCheck, b[1]))) - $fround((a.nilCheck, a[1]) * (b.nilCheck, b[0]))), $fround($fround($fround($fround((a.nilCheck, a[3]) * (b.nilCheck, b[3])) - $fround((a.nilCheck, a[0]) * (b.nilCheck, b[0]))) - $fround((a.nilCheck, a[1]) * (b.nilCheck, b[1]))) - $fround((a.nilCheck, a[2]) * (b.nilCheck, b[2])))]);
+		return new ptrType(q).Normalized();
+	};
+	$pkg.Mul = Mul;
+	Mul3 = function(a, b, c) {
+		var $ptr, a, b, c, q;
+		q = $clone(Mul(a, b), T);
+		return Mul(q, c);
+	};
+	$pkg.Mul3 = Mul3;
+	ptrType.methods = [{prop: "Vec4", name: "Vec4", pkg: "", typ: $funcType([], [vec4.T], false)}, {prop: "String", name: "String", pkg: "", typ: $funcType([], [$String], false)}, {prop: "AxisAngle", name: "AxisAngle", pkg: "", typ: $funcType([], [vec3.T, $Float32], false)}, {prop: "Norm", name: "Norm", pkg: "", typ: $funcType([], [$Float32], false)}, {prop: "Normalize", name: "Normalize", pkg: "", typ: $funcType([], [ptrType], false)}, {prop: "Normalized", name: "Normalized", pkg: "", typ: $funcType([], [T], false)}, {prop: "Negate", name: "Negate", pkg: "", typ: $funcType([], [ptrType], false)}, {prop: "Negated", name: "Negated", pkg: "", typ: $funcType([], [T], false)}, {prop: "Invert", name: "Invert", pkg: "", typ: $funcType([], [ptrType], false)}, {prop: "Inverted", name: "Inverted", pkg: "", typ: $funcType([], [T], false)}, {prop: "SetShortestRotation", name: "SetShortestRotation", pkg: "", typ: $funcType([ptrType], [ptrType], false)}, {prop: "IsUnitQuat", name: "IsUnitQuat", pkg: "", typ: $funcType([$Float32], [$Bool], false)}, {prop: "RotateVec3", name: "RotateVec3", pkg: "", typ: $funcType([ptrType$2], [], false)}, {prop: "RotatedVec3", name: "RotatedVec3", pkg: "", typ: $funcType([ptrType$2], [vec3.T], false)}];
+	T.init($Float32, 4);
 	$init = function() {
 		$pkg.$init = function() {};
 		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
@@ -24603,7 +25353,7 @@ $packages["image/draw"] = (function() {
 	return $pkg;
 })();
 $packages["github.com/andreas-jonsson/octatron/trace"] = (function() {
-	var $pkg = {}, $init, errors, pack, quaternion, vec3, image, color, draw, io, math, runtime, sync, atomic, Reconstruct;
+	var $pkg = {}, $init, errors, pack, quaternion, vec3, image, color, draw, io, math, runtime, sync, atomic, Vec3, FreeFlightCamera, arrayType, ptrType, ptrType$1, ptrType$11, Reconstruct;
 	errors = $packages["errors"];
 	pack = $packages["github.com/andreas-jonsson/octatron/pack"];
 	quaternion = $packages["github.com/ungerik/go3d/quaternion"];
@@ -24616,6 +25366,90 @@ $packages["github.com/andreas-jonsson/octatron/trace"] = (function() {
 	runtime = $packages["runtime"];
 	sync = $packages["sync"];
 	atomic = $packages["sync/atomic"];
+	Vec3 = $pkg.Vec3 = $newType(12, $kindArray, "trace.Vec3", "Vec3", "github.com/andreas-jonsson/octatron/trace", null);
+	FreeFlightCamera = $pkg.FreeFlightCamera = $newType(0, $kindStruct, "trace.FreeFlightCamera", "FreeFlightCamera", "github.com/andreas-jonsson/octatron/trace", function(Pos_, XRot_, YRot_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.Pos = arrayType.zero();
+			this.XRot = 0;
+			this.YRot = 0;
+			return;
+		}
+		this.Pos = Pos_;
+		this.XRot = XRot_;
+		this.YRot = YRot_;
+	});
+	arrayType = $arrayType($Float32, 3);
+	ptrType = $ptrType(quaternion.T);
+	ptrType$1 = $ptrType(vec3.T);
+	ptrType$11 = $ptrType(FreeFlightCamera);
+	FreeFlightCamera.ptr.prototype.Up = function() {
+		var $ptr, c;
+		c = this;
+		return $toNativeArray($kindFloat32, [0, 1, 0]);
+	};
+	FreeFlightCamera.prototype.Up = function() { return this.$val.Up(); };
+	FreeFlightCamera.ptr.prototype.Forward = function() {
+		var $ptr, c, lookAt, position;
+		c = this;
+		lookAt = $clone($clone(c.LookAt(), vec3.T), vec3.T);
+		position = $clone($clone(c.Pos, vec3.T), vec3.T);
+		return $clone(vec3.Sub(lookAt, position), Vec3);
+	};
+	FreeFlightCamera.prototype.Forward = function() { return this.$val.Forward(); };
+	FreeFlightCamera.ptr.prototype.Right = function() {
+		var $ptr, c, forward, up;
+		c = this;
+		up = $clone($clone(c.Up(), vec3.T), vec3.T);
+		forward = $clone($clone(c.Forward(), vec3.T), vec3.T);
+		return $clone(vec3.Cross(up, forward), Vec3);
+	};
+	FreeFlightCamera.prototype.Right = function() { return this.$val.Right(); };
+	FreeFlightCamera.ptr.prototype.Position = function() {
+		var $ptr, c;
+		c = this;
+		return c.Pos;
+	};
+	FreeFlightCamera.prototype.Position = function() { return this.$val.Position(); };
+	FreeFlightCamera.ptr.prototype.LookAt = function() {
+		var $ptr, c, forward, position, quat;
+		c = this;
+		forward = $toNativeArray($kindFloat32, [0, 0, -1]);
+		position = $clone($clone(c.Pos, vec3.T), vec3.T);
+		quat = $clone(quaternion.FromEulerAngles(c.XRot, c.YRot, 0), quaternion.T);
+		new ptrType(quat).RotateVec3(forward);
+		return $clone(vec3.Add(position, forward), Vec3);
+	};
+	FreeFlightCamera.prototype.LookAt = function() { return this.$val.LookAt(); };
+	FreeFlightCamera.ptr.prototype.Move = function(dist) {
+		var $ptr, c, dist, forward, position;
+		c = this;
+		position = $clone($clone(c.Pos, vec3.T), vec3.T);
+		forward = $clone($clone(c.Forward(), vec3.T), vec3.T);
+		new ptrType$1(forward).Scale(dist);
+		Vec3.copy(c.Pos, $clone(vec3.Add(position, forward), Vec3));
+	};
+	FreeFlightCamera.prototype.Move = function(dist) { return this.$val.Move(dist); };
+	FreeFlightCamera.ptr.prototype.Lift = function(dist) {
+		var $ptr, c, dist, forward, position, right, up;
+		c = this;
+		position = $clone($clone(c.Pos, vec3.T), vec3.T);
+		forward = $clone($clone(c.Forward(), vec3.T), vec3.T);
+		right = $clone($clone(c.Right(), vec3.T), vec3.T);
+		up = $clone(vec3.Cross(forward, right), vec3.T);
+		new ptrType$1(up).Scale(dist);
+		Vec3.copy(c.Pos, $clone(vec3.Add(position, up), Vec3));
+	};
+	FreeFlightCamera.prototype.Lift = function(dist) { return this.$val.Lift(dist); };
+	FreeFlightCamera.ptr.prototype.Strafe = function(dist) {
+		var $ptr, c, dist, position, right;
+		c = this;
+		position = $clone($clone(c.Pos, vec3.T), vec3.T);
+		right = $clone($clone(c.Right(), vec3.T), vec3.T);
+		new ptrType$1(right).Scale(dist);
+		Vec3.copy(c.Pos, $clone(vec3.Add(position, right), Vec3));
+	};
+	FreeFlightCamera.prototype.Strafe = function(dist) { return this.$val.Strafe(dist); };
 	Reconstruct = function(a, b, out) {
 		var $ptr, _arg, _arg$1, _arg$2, _arg$3, _arg$4, _arg$5, _q, _r, _r$1, _r$2, _r$3, _r$4, _r$5, _r$6, _tmp, _tmp$1, a, b, img, inputSize, left, out, outputSize, right, x, x$1, x$2, y, $s, $r;
 		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _arg = $f._arg; _arg$1 = $f._arg$1; _arg$2 = $f._arg$2; _arg$3 = $f._arg$3; _arg$4 = $f._arg$4; _arg$5 = $f._arg$5; _q = $f._q; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; _r$4 = $f._r$4; _r$5 = $f._r$5; _r$6 = $f._r$6; _tmp = $f._tmp; _tmp$1 = $f._tmp$1; a = $f.a; b = $f.b; img = $f.img; inputSize = $f.inputSize; left = $f.left; out = $f.out; outputSize = $f.outputSize; right = $f.right; x = $f.x; x$1 = $f.x$1; x$2 = $f.x$2; y = $f.y; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
@@ -24661,6 +25495,9 @@ $packages["github.com/andreas-jonsson/octatron/trace"] = (function() {
 		/* */ } return; } if ($f === undefined) { $f = { $blk: Reconstruct }; } $f.$ptr = $ptr; $f._arg = _arg; $f._arg$1 = _arg$1; $f._arg$2 = _arg$2; $f._arg$3 = _arg$3; $f._arg$4 = _arg$4; $f._arg$5 = _arg$5; $f._q = _q; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._r$5 = _r$5; $f._r$6 = _r$6; $f._tmp = _tmp; $f._tmp$1 = _tmp$1; $f.a = a; $f.b = b; $f.img = img; $f.inputSize = inputSize; $f.left = left; $f.out = out; $f.outputSize = outputSize; $f.right = right; $f.x = x; $f.x$1 = x$1; $f.x$2 = x$2; $f.y = y; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	$pkg.Reconstruct = Reconstruct;
+	ptrType$11.methods = [{prop: "Up", name: "Up", pkg: "", typ: $funcType([], [Vec3], false)}, {prop: "Forward", name: "Forward", pkg: "", typ: $funcType([], [Vec3], false)}, {prop: "Right", name: "Right", pkg: "", typ: $funcType([], [Vec3], false)}, {prop: "Position", name: "Position", pkg: "", typ: $funcType([], [Vec3], false)}, {prop: "LookAt", name: "LookAt", pkg: "", typ: $funcType([], [Vec3], false)}, {prop: "Move", name: "Move", pkg: "", typ: $funcType([$Float32], [], false)}, {prop: "Lift", name: "Lift", pkg: "", typ: $funcType([$Float32], [], false)}, {prop: "Strafe", name: "Strafe", pkg: "", typ: $funcType([$Float32], [], false)}];
+	Vec3.init($Float32, 3);
+	FreeFlightCamera.init([{prop: "Pos", name: "Pos", pkg: "", typ: Vec3, tag: ""}, {prop: "XRot", name: "XRot", pkg: "", typ: $Float32, tag: ""}, {prop: "YRot", name: "YRot", pkg: "", typ: $Float32, tag: ""}]);
 	$init = function() {
 		$pkg.$init = function() {};
 		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
@@ -27193,8 +28030,8 @@ $packages["main"] = (function() {
 		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: assert }; } $f.$ptr = $ptr; $f.err = err; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	setupConnection = function(canvas) {
-		var $ptr, _r, _r$1, _tuple, canvas, ctx, err, img, onMessage, onOpen, ws, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _tuple = $f._tuple; canvas = $f.canvas; ctx = $f.ctx; err = $f.err; img = $f.img; onMessage = $f.onMessage; onOpen = $f.onOpen; ws = $f.ws; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		var $ptr, _r, _r$1, _tuple, canvas, ctx, document, err, img, location, onMessage, onOpen, ws, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _tuple = $f._tuple; canvas = $f.canvas; ctx = $f.ctx; document = $f.document; err = $f.err; img = $f.img; location = $f.location; onMessage = $f.onMessage; onOpen = $f.onOpen; ws = $f.ws; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		ctx = [ctx];
 		img = [img];
 		ws = [ws];
@@ -27205,7 +28042,9 @@ $packages["main"] = (function() {
 		/* if (!(($parseInt(img[0].data.length) === finalImage.Pix.$length))) { */ case 1:
 			$r = throw$1(errors.New("data size of images do not match")); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		/* } */ case 2:
-		_r = fmt.Sprintf("ws://%s:8080/render", new sliceType([new $String("server.andreasjonsson.se")])); /* */ $s = 4; case 4: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		document = $global.document;
+		location = document.location;
+		_r = fmt.Sprintf("ws://%s/render", new sliceType([new $jsObjectPtr(location.host)])); /* */ $s = 4; case 4: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
 		_r$1 = websocket.New(_r); /* */ $s = 5; case 5: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
 		_tuple = _r$1;
 		ws[0] = _tuple[0];
@@ -27251,15 +28090,14 @@ $packages["main"] = (function() {
 		ws[0].Object.binaryType = $externalize("arraybuffer", $String);
 		ws[0].EventTarget.AddEventListener("open", false, onOpen);
 		ws[0].EventTarget.AddEventListener("message", false, onMessage);
-		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: setupConnection }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._tuple = _tuple; $f.canvas = canvas; $f.ctx = ctx; $f.err = err; $f.img = img; $f.onMessage = onMessage; $f.onOpen = onOpen; $f.ws = ws; $f.$s = $s; $f.$r = $r; return $f;
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: setupConnection }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._tuple = _tuple; $f.canvas = canvas; $f.ctx = ctx; $f.document = document; $f.err = err; $f.img = img; $f.location = location; $f.onMessage = onMessage; $f.onOpen = onOpen; $f.ws = ws; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	updateCamera = function(ws) {
-		var $ptr, _entry, _entry$1, _entry$2, _entry$3, _ok, _r, _r$1, _ref, _tuple, _tuple$1, err, msg, msg$1, ws, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _entry = $f._entry; _entry$1 = $f._entry$1; _entry$2 = $f._entry$2; _entry$3 = $f._entry$3; _ok = $f._ok; _r = $f._r; _r$1 = $f._r$1; _ref = $f._ref; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; err = $f.err; msg = $f.msg; msg$1 = $f.msg$1; ws = $f.ws; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		var $ptr, _entry, _entry$1, _entry$2, _entry$3, _entry$4, _entry$5, _entry$6, _entry$7, _entry$8, _entry$9, _ok, _r, _r$1, _ref, _tuple, _tuple$1, camera, err, msg, msg$1, pressed, ws, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _entry = $f._entry; _entry$1 = $f._entry$1; _entry$2 = $f._entry$2; _entry$3 = $f._entry$3; _entry$4 = $f._entry$4; _entry$5 = $f._entry$5; _entry$6 = $f._entry$6; _entry$7 = $f._entry$7; _entry$8 = $f._entry$8; _entry$9 = $f._entry$9; _ok = $f._ok; _r = $f._r; _r$1 = $f._r$1; _ref = $f._ref; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; camera = $f.camera; err = $f.err; msg = $f.msg; msg$1 = $f.msg$1; pressed = $f.pressed; ws = $f.ws; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		pressed = false;
 		msg = new updateMessage.ptr(new structType.ptr(arrayType.zero(), 0, 0));
-		arrayType.copy(msg.Camera.Position, $toNativeArray($kindFloat32, [0.6660000085830688, 0, 1.13100004196167]));
-		msg.Camera.XRot = 0.46938997507095337;
-		msg.Camera.YRot = 0.26761001348495483;
+		camera = new trace.FreeFlightCamera.ptr(arrayType.zero(), 0, 0);
 		_ref = time.Tick(new time.Duration(0, 33000000));
 		/* while (true) { */ case 1:
 			_r = $recv(_ref); /* */ $s = 3; case 3: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
@@ -27268,24 +28106,44 @@ $packages["main"] = (function() {
 			if (!_ok) {
 				/* break; */ $s = 2; continue;
 			}
+			pressed = true;
 			if ((_entry = keys[$Int.keyFor(38)], _entry !== undefined ? _entry.v : false)) {
-				msg.Camera.Position[2] = $fround(msg.Camera.Position[2] - (0.10000000149011612));
+				camera.YRot = $fround(camera.YRot + (0.10000000149011612));
 			} else if ((_entry$1 = keys[$Int.keyFor(40)], _entry$1 !== undefined ? _entry$1.v : false)) {
-				msg.Camera.Position[2] = $fround(msg.Camera.Position[2] + (0.10000000149011612));
+				camera.YRot = $fround(camera.YRot - (0.10000000149011612));
 			} else if ((_entry$2 = keys[$Int.keyFor(37)], _entry$2 !== undefined ? _entry$2.v : false)) {
-				msg.Camera.Position[0] = $fround(msg.Camera.Position[0] + (0.10000000149011612));
+				camera.XRot = $fround(camera.XRot + (0.10000000149011612));
 			} else if ((_entry$3 = keys[$Int.keyFor(39)], _entry$3 !== undefined ? _entry$3.v : false)) {
-				msg.Camera.Position[0] = $fround(msg.Camera.Position[0] - (0.10000000149011612));
+				camera.XRot = $fround(camera.XRot - (0.10000000149011612));
+			} else if ((_entry$4 = keys[$Int.keyFor(87)], _entry$4 !== undefined ? _entry$4.v : false)) {
+				camera.Move(0.10000000149011612);
+			} else if ((_entry$5 = keys[$Int.keyFor(83)], _entry$5 !== undefined ? _entry$5.v : false)) {
+				camera.Move(-0.10000000149011612);
+			} else if ((_entry$6 = keys[$Int.keyFor(65)], _entry$6 !== undefined ? _entry$6.v : false)) {
+				camera.Strafe(0.10000000149011612);
+			} else if ((_entry$7 = keys[$Int.keyFor(68)], _entry$7 !== undefined ? _entry$7.v : false)) {
+				camera.Strafe(-0.10000000149011612);
+			} else if ((_entry$8 = keys[$Int.keyFor(69)], _entry$8 !== undefined ? _entry$8.v : false)) {
+				camera.Lift(0.10000000149011612);
+			} else if ((_entry$9 = keys[$Int.keyFor(81)], _entry$9 !== undefined ? _entry$9.v : false)) {
+				camera.Lift(-0.10000000149011612);
 			} else {
 			}
-			_r$1 = json.Marshal(new msg.constructor.elem(msg)); /* */ $s = 4; case 4: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
-			_tuple$1 = _r$1;
-			msg$1 = _tuple$1[0];
-			err = _tuple$1[1];
-			$r = assert(err); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-			$r = assert(ws.Send(new $String($bytesToString(msg$1)))); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+			/* */ if (pressed) { $s = 4; continue; }
+			/* */ $s = 5; continue;
+			/* if (pressed) { */ case 4:
+				arrayType.copy(msg.Camera.Position, camera.Pos);
+				msg.Camera.XRot = camera.XRot;
+				msg.Camera.YRot = camera.YRot;
+				_r$1 = json.Marshal(new msg.constructor.elem(msg)); /* */ $s = 6; case 6: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+				_tuple$1 = _r$1;
+				msg$1 = _tuple$1[0];
+				err = _tuple$1[1];
+				$r = assert(err); /* */ $s = 7; case 7: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+				$r = assert(ws.Send(new $String($bytesToString(msg$1)))); /* */ $s = 8; case 8: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+			/* } */ case 5:
 		/* } */ $s = 1; continue; case 2:
-		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: updateCamera }; } $f.$ptr = $ptr; $f._entry = _entry; $f._entry$1 = _entry$1; $f._entry$2 = _entry$2; $f._entry$3 = _entry$3; $f._ok = _ok; $f._r = _r; $f._r$1 = _r$1; $f._ref = _ref; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.err = err; $f.msg = msg; $f.msg$1 = msg$1; $f.ws = ws; $f.$s = $s; $f.$r = $r; return $f;
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: updateCamera }; } $f.$ptr = $ptr; $f._entry = _entry; $f._entry$1 = _entry$1; $f._entry$2 = _entry$2; $f._entry$3 = _entry$3; $f._entry$4 = _entry$4; $f._entry$5 = _entry$5; $f._entry$6 = _entry$6; $f._entry$7 = _entry$7; $f._entry$8 = _entry$8; $f._entry$9 = _entry$9; $f._ok = _ok; $f._r = _r; $f._r$1 = _r$1; $f._ref = _ref; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.camera = camera; $f.err = err; $f.msg = msg; $f.msg$1 = msg$1; $f.pressed = pressed; $f.ws = ws; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	updateTitle = function() {
 		var $ptr, _r, title, $s, $r;
