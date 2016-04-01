@@ -38,8 +38,6 @@ const (
 	imgHeight   = 180
 	imgScale    = 2
 	cameraSpeed = 0.1
-	//colorFormat = "RGBA"
-	colorFormat = "PALETTE"
 )
 
 type (
@@ -61,13 +59,16 @@ type (
 )
 
 var (
-	keys       = make(map[int]bool)
-	imgRect    = image.Rect(0, 0, imgWidth/2, imgHeight)
-	palImages  = [2]*image.Paletted{image.NewPaletted(imgRect, palette.Plan9), image.NewPaletted(imgRect, palette.Plan9)}
-	rgbaImages = [2]*image.RGBA{image.NewRGBA(imgRect), image.NewRGBA(imgRect)}
-	finalImage = image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
+	keys        = make(map[int]bool)
+	colorFormat = "PALETTE"
+	imgRect     = image.Rect(0, 0, imgWidth/2, imgHeight)
+	palImages   = [2]*image.Paletted{image.NewPaletted(imgRect, palette.Plan9), image.NewPaletted(imgRect, palette.Plan9)}
+	rgbaImages  = [2]*image.RGBA{image.NewRGBA(imgRect), image.NewRGBA(imgRect)}
+	finalImage  = image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
 
 	frameId, numFrames int
+	canvas             *js.Object
+	camera             trace.FreeFlightCamera
 )
 
 func throw(err error) {
@@ -81,7 +82,7 @@ func assert(err error) {
 	}
 }
 
-func setupConnection(canvas *js.Object) {
+func setupConnection() {
 	ctx := canvas.Call("getContext", "2d")
 	img := ctx.Call("getImageData", 0, 0, imgWidth, imgHeight)
 
@@ -138,7 +139,7 @@ func setupConnection(canvas *js.Object) {
 		assert(trace.Reconstruct(imageA, imageB, finalImage))
 
 		arrBuf := js.NewArrayBuffer(finalImage.Pix)
-		buf := js.Global.Get("Uint8Array").New(arrBuf)
+		buf := js.Global.Get("Uint8ClampedArray").New(arrBuf)
 		img.Get("data").Call("set", buf)
 		ctx.Call("putImageData", img, 0, 0)
 
@@ -154,11 +155,7 @@ func setupConnection(canvas *js.Object) {
 func updateCamera(ws *websocket.WebSocket, renderChan chan<- struct{}) {
 	const tick30hz = (1000 / 30) * time.Millisecond
 
-	var (
-		msg    updateMessage
-		camera trace.FreeFlightCamera
-	)
-
+	var msg updateMessage
 	for _ = range time.Tick(tick30hz) {
 		switch {
 		case keys[38]: // Up
@@ -181,6 +178,18 @@ func updateCamera(ws *websocket.WebSocket, renderChan chan<- struct{}) {
 			camera.Lift(cameraSpeed)
 		case keys[81]: // Q
 			camera.Lift(-cameraSpeed)
+		case keys[67]: // C
+			ws.Close()
+
+			if colorFormat == "RGBA" {
+				colorFormat = "PALETTED"
+			} else {
+				colorFormat = "RGBA"
+			}
+
+			frameId = 0
+			setupConnection()
+			return
 		}
 
 		msg.Camera.Position = camera.Pos
@@ -218,14 +227,14 @@ func load() {
 		keys[e.Get("keyCode").Int()] = false
 	})
 
-	canvas := document.Call("createElement", "canvas")
+	canvas = document.Call("createElement", "canvas")
 	canvas.Call("setAttribute", "width", strconv.Itoa(imgWidth))
 	canvas.Call("setAttribute", "height", strconv.Itoa(imgHeight))
 	canvas.Get("style").Set("width", strconv.Itoa(imgWidth*imgScale)+"px")
 	canvas.Get("style").Set("height", strconv.Itoa(imgHeight*imgScale)+"px")
 	document.Get("body").Call("appendChild", canvas)
 
-	setupConnection(canvas)
+	setupConnection()
 }
 
 func main() {
