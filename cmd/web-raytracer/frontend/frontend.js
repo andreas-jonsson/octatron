@@ -27967,7 +27967,7 @@ $packages["image/color/palette"] = (function() {
 	return $pkg;
 })();
 $packages["main"] = (function() {
-	var $pkg = {}, $init, json, errors, fmt, trace, js, websocket, image, palette, strconv, time, setupMessage, updateMessage, arrayType, ptrType, ptrType$1, sliceType, structType, sliceType$1, structType$1, ptrType$2, funcType, funcType$1, keys, colorFormat, imgRect, palImages, rgbaImages, finalImage, frameId, numFrames, canvas, camera, x, x$1, throw$1, assert, setupConnection, updateCamera, updateTitle, load, main;
+	var $pkg = {}, $init, json, errors, fmt, trace, js, websocket, image, color, palette, strconv, time, setupMessage, updateMessage, arrayType, ptrType, ptrType$1, sliceType, sliceType$1, structType, sliceType$2, arrayType$1, structType$1, ptrType$2, funcType, funcType$1, keys, colorFormat, imgRect, palImages, rgbaImages, finalImage, frameId, numFrames, canvas, camera, x, x$1, throw$1, assert, isRGBA, isPalette, createPalette, setupConnection, updateCamera, updateTitle, load, main;
 	json = $packages["encoding/json"];
 	errors = $packages["errors"];
 	fmt = $packages["fmt"];
@@ -27975,6 +27975,7 @@ $packages["main"] = (function() {
 	js = $packages["github.com/gopherjs/gopherjs/js"];
 	websocket = $packages["github.com/gopherjs/websocket"];
 	image = $packages["image"];
+	color = $packages["image/color"];
 	palette = $packages["image/color/palette"];
 	strconv = $packages["strconv"];
 	time = $packages["time"];
@@ -28005,9 +28006,11 @@ $packages["main"] = (function() {
 	arrayType = $arrayType($Float32, 3);
 	ptrType = $ptrType(image.Paletted);
 	ptrType$1 = $ptrType(image.RGBA);
-	sliceType = $sliceType($emptyInterface);
+	sliceType = $sliceType(color.Color);
+	sliceType$1 = $sliceType($emptyInterface);
 	structType = $structType([]);
-	sliceType$1 = $sliceType($Uint8);
+	sliceType$2 = $sliceType($Uint8);
+	arrayType$1 = $arrayType(ptrType, 2);
 	structType$1 = $structType([{prop: "Position", name: "Position", pkg: "", typ: arrayType, tag: "position"}, {prop: "XRot", name: "XRot", pkg: "", typ: $Float32, tag: "x_rot"}, {prop: "YRot", name: "YRot", pkg: "", typ: $Float32, tag: "y_rot"}]);
 	ptrType$2 = $ptrType(js.Object);
 	funcType = $funcType([ptrType$2], [], false);
@@ -28030,6 +28033,36 @@ $packages["main"] = (function() {
 		/* } */ case 2:
 		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: assert }; } $f.$ptr = $ptr; $f.err = err; $f.$s = $s; $f.$r = $r; return $f;
 	};
+	isRGBA = function(data) {
+		var $ptr, data;
+		if (data.$length === 230400) {
+			return true;
+		}
+		return false;
+	};
+	isPalette = function(data) {
+		var $ptr, data;
+		if (data.$length === 1024) {
+			return true;
+		}
+		return false;
+	};
+	createPalette = function(data) {
+		var $ptr, _i, _ref, b, data, g, i, pal, r, x$2, x$3, x$4, x$5;
+		pal = $makeSlice(sliceType, 256);
+		_ref = pal;
+		_i = 0;
+		while (true) {
+			if (!(_i < _ref.$length)) { break; }
+			i = _i;
+			r = (x$2 = $imul(i, 4), ((x$2 < 0 || x$2 >= data.$length) ? $throwRuntimeError("index out of range") : data.$array[data.$offset + x$2]));
+			g = (x$3 = ($imul(i, 4)) + 1 >> 0, ((x$3 < 0 || x$3 >= data.$length) ? $throwRuntimeError("index out of range") : data.$array[data.$offset + x$3]));
+			b = (x$4 = ($imul(i, 4)) + 2 >> 0, ((x$4 < 0 || x$4 >= data.$length) ? $throwRuntimeError("index out of range") : data.$array[data.$offset + x$4]));
+			((i < 0 || i >= pal.$length) ? $throwRuntimeError("index out of range") : pal.$array[pal.$offset + i] = (x$5 = new color.RGBA.ptr(r, g, b, 255), new x$5.constructor.elem(x$5)));
+			_i++;
+		}
+		return $subslice(new color.Palette(pal.$array), pal.$offset, pal.$offset + pal.$length);
+	};
 	setupConnection = function() {
 		var $ptr, _r, _r$1, _tuple, ctx, document, err, img, location, onMessage, onOpen, renderChan, ws, $s, $r;
 		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _tuple = $f._tuple; ctx = $f.ctx; document = $f.document; err = $f.err; img = $f.img; location = $f.location; onMessage = $f.onMessage; onOpen = $f.onOpen; renderChan = $f.renderChan; ws = $f.ws; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
@@ -28046,7 +28079,7 @@ $packages["main"] = (function() {
 		/* } */ case 2:
 		document = $global.document;
 		location = document.location;
-		_r = fmt.Sprintf("ws://%s/render", new sliceType([new $jsObjectPtr(location.host)])); /* */ $s = 4; case 4: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_r = fmt.Sprintf("ws://%s/render", new sliceType$1([new $jsObjectPtr(location.host)])); /* */ $s = 4; case 4: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
 		_r$1 = websocket.New(_r); /* */ $s = 5; case 5: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
 		_tuple = _r$1;
 		ws[0] = _tuple[0];
@@ -28067,17 +28100,20 @@ $packages["main"] = (function() {
 			/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._r$2 = _r$2; $f._tuple$1 = _tuple$1; $f.err$1 = err$1; $f.ev = ev; $f.msg = msg; $f.setup = setup; $f.$s = $s; $f.$r = $r; return $f;
 		}; })(ctx, img, renderChan, ws);
 		onMessage = (function(ctx, img, renderChan, ws) { return function $b(ev) {
-			var $ptr, _r$2, _r$3, _r$4, _tmp, _tmp$1, arrBuf, buf, data, ev, idx, imageA, imageB, $s, $r;
-			/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r$2 = $f._r$2; _r$3 = $f._r$3; _r$4 = $f._r$4; _tmp = $f._tmp; _tmp$1 = $f._tmp$1; arrBuf = $f.arrBuf; buf = $f.buf; data = $f.data; ev = $f.ev; idx = $f.idx; imageA = $f.imageA; imageB = $f.imageB; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-			_r$2 = $recv(renderChan[0]); /* */ $s = 1; case 1: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
-			_r$2[0];
-			idx = (_r$3 = frameId % 2, _r$3 === _r$3 ? _r$3 : $throwRuntimeError("integer divide by zero"));
-			data = $assertType($internalize(new ($global.Uint8Array)(ev.data), $emptyInterface), sliceType$1);
+			var $ptr, _r$2, _r$3, _tmp, _tmp$1, arrBuf, buf, data, ev, idx, imageA, imageB, pal, $s, $r;
+			/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r$2 = $f._r$2; _r$3 = $f._r$3; _tmp = $f._tmp; _tmp$1 = $f._tmp$1; arrBuf = $f.arrBuf; buf = $f.buf; data = $f.data; ev = $f.ev; idx = $f.idx; imageA = $f.imageA; imageB = $f.imageB; pal = $f.pal; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+			idx = (_r$2 = frameId % 2, _r$2 === _r$2 ? _r$2 : $throwRuntimeError("integer divide by zero"));
+			data = $assertType($internalize(new ($global.Uint8Array)(ev.data), $emptyInterface), sliceType$2);
+			if (isPalette(data)) {
+				pal = createPalette(data);
+				arrayType$1.copy(palImages, $toNativeArray($kindPtr, [image.NewPaletted(imgRect, pal), image.NewPaletted(imgRect, pal)]));
+				return;
+			}
 			_tmp = $ifaceNil;
 			_tmp$1 = $ifaceNil;
 			imageA = _tmp;
 			imageB = _tmp$1;
-			if (colorFormat === "RGBA") {
+			if (isRGBA(data)) {
 				((idx < 0 || idx >= rgbaImages.length) ? $throwRuntimeError("index out of range") : rgbaImages[idx]).Pix = data;
 				imageA = rgbaImages[0];
 				imageB = rgbaImages[1];
@@ -28086,15 +28122,15 @@ $packages["main"] = (function() {
 				imageA = palImages[0];
 				imageB = palImages[1];
 			}
-			_r$4 = trace.Reconstruct(imageA, imageB, finalImage); /* */ $s = 2; case 2: if($c) { $c = false; _r$4 = _r$4.$blk(); } if (_r$4 && _r$4.$blk !== undefined) { break s; }
-			$r = assert(_r$4); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+			_r$3 = trace.Reconstruct(imageA, imageB, finalImage); /* */ $s = 1; case 1: if($c) { $c = false; _r$3 = _r$3.$blk(); } if (_r$3 && _r$3.$blk !== undefined) { break s; }
+			$r = assert(_r$3); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 			arrBuf = js.NewArrayBuffer(finalImage.Pix);
 			buf = new ($global.Uint8ClampedArray)(arrBuf);
 			img[0].data.set(buf);
 			ctx[0].putImageData(img[0], 0, 0);
 			numFrames = numFrames + (1) >> 0;
 			frameId = frameId + (1) >> 0;
-			/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._tmp = _tmp; $f._tmp$1 = _tmp$1; $f.arrBuf = arrBuf; $f.buf = buf; $f.data = data; $f.ev = ev; $f.idx = idx; $f.imageA = imageA; $f.imageB = imageB; $f.$s = $s; $f.$r = $r; return $f;
+			/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._tmp = _tmp; $f._tmp$1 = _tmp$1; $f.arrBuf = arrBuf; $f.buf = buf; $f.data = data; $f.ev = ev; $f.idx = idx; $f.imageA = imageA; $f.imageB = imageB; $f.pal = pal; $f.$s = $s; $f.$r = $r; return $f;
 		}; })(ctx, img, renderChan, ws);
 		ws[0].Object.binaryType = $externalize("arraybuffer", $String);
 		ws[0].EventTarget.AddEventListener("open", false, onOpen);
@@ -28174,15 +28210,14 @@ $packages["main"] = (function() {
 			m = _tuple$1[0];
 			err = _tuple$1[1];
 			$r = assert(err); /* */ $s = 18; case 18: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-			$r = $send(renderChan, new structType.ptr()); /* */ $s = 19; case 19: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-			$r = assert(ws.Send(new $String($bytesToString(m)))); /* */ $s = 20; case 20: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+			$r = assert(ws.Send(new $String($bytesToString(m)))); /* */ $s = 19; case 19: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		/* } */ $s = 1; continue; case 2:
 		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: updateCamera }; } $f.$ptr = $ptr; $f._entry = _entry; $f._entry$1 = _entry$1; $f._entry$10 = _entry$10; $f._entry$2 = _entry$2; $f._entry$3 = _entry$3; $f._entry$4 = _entry$4; $f._entry$5 = _entry$5; $f._entry$6 = _entry$6; $f._entry$7 = _entry$7; $f._entry$8 = _entry$8; $f._entry$9 = _entry$9; $f._ok = _ok; $f._r = _r; $f._r$1 = _r$1; $f._ref = _ref; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.err = err; $f.m = m; $f.msg = msg; $f.renderChan = renderChan; $f.ws = ws; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	updateTitle = function() {
 		var $ptr, _r, title, $s, $r;
 		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; title = $f.title; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		_r = fmt.Sprintf("AJ's Raytracer - fps: %v", new sliceType([new $Int(numFrames)])); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_r = fmt.Sprintf("AJ's Raytracer - fps: %v", new sliceType$1([new $Int(numFrames)])); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
 		title = _r;
 		$global.document.title = $externalize(title, $String);
 		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: updateTitle }; } $f.$ptr = $ptr; $f._r = _r; $f.title = title; $f.$s = $s; $f.$r = $r; return $f;
@@ -28243,17 +28278,18 @@ $packages["main"] = (function() {
 		$r = js.$init(); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		$r = websocket.$init(); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		$r = image.$init(); /* */ $s = 7; case 7: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		$r = palette.$init(); /* */ $s = 8; case 8: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		$r = strconv.$init(); /* */ $s = 9; case 9: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		$r = time.$init(); /* */ $s = 10; case 10: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = color.$init(); /* */ $s = 8; case 8: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = palette.$init(); /* */ $s = 9; case 9: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = strconv.$init(); /* */ $s = 10; case 10: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = time.$init(); /* */ $s = 11; case 11: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		frameId = 0;
 		numFrames = 0;
 		canvas = null;
 		camera = new trace.FreeFlightCamera.ptr(arrayType.zero(), 0, 0);
 		keys = {};
-		colorFormat = "PALETTE";
+		colorFormat = "PALETTED";
 		imgRect = $clone(image.Rect(0, 0, 160, 180), image.Rectangle);
-		palImages = $toNativeArray($kindPtr, [image.NewPaletted(imgRect, (x = palette.Plan9, $subslice(new $packages["image/color"].Palette(x.$array), x.$offset, x.$offset + x.$length))), image.NewPaletted(imgRect, (x$1 = palette.Plan9, $subslice(new $packages["image/color"].Palette(x$1.$array), x$1.$offset, x$1.$offset + x$1.$length)))]);
+		palImages = $toNativeArray($kindPtr, [image.NewPaletted(imgRect, (x = palette.Plan9, $subslice(new color.Palette(x.$array), x.$offset, x.$offset + x.$length))), image.NewPaletted(imgRect, (x$1 = palette.Plan9, $subslice(new color.Palette(x$1.$array), x$1.$offset, x$1.$offset + x$1.$length)))]);
 		rgbaImages = $toNativeArray($kindPtr, [image.NewRGBA(imgRect), image.NewRGBA(imgRect)]);
 		finalImage = image.NewRGBA(image.Rect(0, 0, 320, 180));
 		if ($pkg === $mainPkg) {

@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	"image/color"
 	"image/color/palette"
 	"strconv"
 	"time"
@@ -60,7 +61,7 @@ type (
 
 var (
 	keys        = make(map[int]bool)
-	colorFormat = "PALETTE"
+	colorFormat = "PALETTED"
 	imgRect     = image.Rect(0, 0, imgWidth/2, imgHeight)
 	palImages   = [2]*image.Paletted{image.NewPaletted(imgRect, palette.Plan9), image.NewPaletted(imgRect, palette.Plan9)}
 	rgbaImages  = [2]*image.RGBA{image.NewRGBA(imgRect), image.NewRGBA(imgRect)}
@@ -80,6 +81,33 @@ func assert(err error) {
 	if err != nil {
 		throw(err)
 	}
+}
+
+func isRGBA(data []byte) bool {
+	if len(data) == imgWidth*imgHeight*4 {
+		return true
+	}
+	return false
+}
+
+func isPalette(data []byte) bool {
+	if len(data) == 256*4 {
+		return true
+	}
+	return false
+}
+
+func createPalette(data []byte) color.Palette {
+	pal := make([]color.Color, 256)
+	for i := range pal {
+		r := data[i*4]
+		g := data[i*4+1]
+		b := data[i*4+2]
+
+		pal[i] = color.RGBA{r, g, b, 0xFF}
+	}
+
+	return pal
 }
 
 func setupConnection() {
@@ -116,16 +144,25 @@ func setupConnection() {
 	}
 
 	onMessage := func(ev *js.Object) {
-		<-renderChan
+		//<-renderChan
 
 		idx := frameId % 2
 		data := js.Global.Get("Uint8Array").New(ev.Get("data")).Interface().([]uint8)
+
+		if isPalette(data) {
+			pal := createPalette(data)
+			palImages = [2]*image.Paletted{
+				image.NewPaletted(imgRect, pal),
+				image.NewPaletted(imgRect, pal),
+			}
+			return
+		}
 
 		var (
 			imageA, imageB image.Image
 		)
 
-		if colorFormat == "RGBA" {
+		if isRGBA(data) {
 			rgbaImages[idx].Pix = data
 			imageA = rgbaImages[0]
 			imageB = rgbaImages[1]
@@ -199,7 +236,7 @@ func updateCamera(ws *websocket.WebSocket, renderChan chan<- struct{}) {
 		m, err := json.Marshal(msg)
 		assert(err)
 
-		renderChan <- struct{}{}
+		//renderChan <- struct{}{}
 		assert(ws.Send(string(m)))
 	}
 }

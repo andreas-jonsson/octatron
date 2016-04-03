@@ -26,6 +26,7 @@ import (
 	"image/color"
 	"image/color/palette"
 	"image/draw"
+	_ "image/png"
 	"log"
 	"net/http"
 	"os"
@@ -48,6 +49,8 @@ var (
 var loadedTree struct {
 	maxDepth int
 	tree     trace.Octree
+	pal      color.Palette
+	rawPal   []byte
 }
 
 type (
@@ -87,13 +90,17 @@ func unmarshalMessage(data []byte, ty byte, v interface{}) error {
 }
 
 func loadTree(file string) error {
-	fp, err := os.Open(file)
+	pal := palette.Plan9
+	rawPal := make([]byte, 4*256)
+
+	treeFp, err := os.Open(file)
 	if err != nil {
 		return err
 	}
-	defer fp.Close()
+	defer treeFp.Close()
 
-	tree, vpa, err := trace.LoadOctree(fp)
+	log.Println("loading octree:", file)
+	tree, vpa, err := trace.LoadOctree(treeFp)
 	if err != nil {
 		return err
 	}
@@ -101,6 +108,39 @@ func loadTree(file string) error {
 	loadedTree.maxDepth = trace.TreeWidthToDepth(vpa)
 	loadedTree.tree = tree
 
+	paletteFile := file + ".png"
+	paletteFp, err := os.Open(paletteFile)
+	if err == nil {
+		src, _, err := image.Decode(paletteFp)
+
+		if err == nil {
+			size := src.Bounds().Max
+
+			if size.X == 16 && size.Y == 16 {
+				log.Println("loading palette:", paletteFile)
+				pal = make([]color.Color, 256)
+
+				for y := 0; y < 16; y++ {
+					for x := 0; x < 16; x++ {
+						r, g, b, _ := src.At(x, y).RGBA()
+						pal[y*16+x] = color.RGBA{uint8(r), uint8(g), uint8(b), 0xFF}
+					}
+				}
+			}
+		}
+	}
+	paletteFp.Close()
+
+	for i, c := range pal {
+		r, g, b, _ := c.RGBA()
+		rawPal[i*4] = byte(r)
+		rawPal[i*4+1] = byte(g)
+		rawPal[i*4+2] = byte(b)
+		rawPal[i*4+3] = 0xFF
+	}
+
+	loadedTree.pal = pal
+	loadedTree.rawPal = rawPal
 	return nil
 }
 
@@ -135,7 +175,7 @@ func renderServer(ws *websocket.Conn) {
 	}
 
 	rect := image.Rect(0, 0, setup.Width/2, setup.Height)
-	backBuffer := image.NewPaletted(rect, palette.Plan9)
+	backBuffer := image.NewPaletted(rect, loadedTree.pal)
 	surfaces := [2]*image.RGBA{
 		image.NewRGBA(rect),
 		image.NewRGBA(rect),
@@ -168,6 +208,15 @@ func renderServer(ws *websocket.Conn) {
 		}
 	}()
 
+	// Send palette.
+	if setup.ColorFormat == "PALETTED" {
+		log.Println("sending palette...")
+		if err := streamCodec.Send(ws, loadedTree.rawPal); err != nil {
+			log.Println(err)
+			return
+		}
+	}
+
 	for {
 		update := <-updateChan
 		camera := trace.FreeFlightCamera{
@@ -179,7 +228,7 @@ func renderServer(ws *websocket.Conn) {
 		frame := 1 + raytracer.Trace(&camera, loadedTree.tree, loadedTree.maxDepth)
 		idx := frame % 2
 
-		if setup.ColorFormat == "PALETTE" {
+		if setup.ColorFormat == "PALETTED" {
 			draw.Draw(backBuffer, rect, raytracer.Image(idx), image.ZP, draw.Src)
 			if err := streamCodec.Send(ws, backBuffer.Pix); err != nil {
 				log.Println(err)
