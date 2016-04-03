@@ -37,8 +37,6 @@ import (
 	"github.com/andreas-jonsson/octatron/trace"
 )
 
-const maxSessionTime = 3
-
 var closeFrameErr = errors.New("close-frame")
 
 var (
@@ -155,7 +153,7 @@ func renderServer(ws *websocket.Conn) {
 	go func() {
 		select {
 		case <-shutdownWatch:
-		case <-time.After(maxSessionTime * time.Minute):
+		case <-time.After(time.Duration(arguments.timeout) * time.Minute):
 			log.Println("session timeout")
 			ws.Close()
 		}
@@ -246,7 +244,8 @@ func renderServer(ws *websocket.Conn) {
 var arguments struct {
 	web,
 	tree string
-	port uint
+	port,
+	timeout uint
 }
 
 func init() {
@@ -258,6 +257,7 @@ func init() {
 	flag.StringVar(&arguments.web, "web", "cmd/web-raytracer/frontend", "web frontend location")
 	flag.StringVar(&arguments.tree, "tree", "tree.oct", "octree to serve clients")
 	flag.UintVar(&arguments.port, "port", 8080, "server port")
+	flag.UintVar(&arguments.timeout, "timeout", 3, "max session length in minutes")
 }
 
 func main() {
