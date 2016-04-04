@@ -35,10 +35,11 @@ import (
 )
 
 const (
-	imgWidth    = 320
-	imgHeight   = 180
-	imgScale    = 2
-	cameraSpeed = 0.1
+	imgWidth      = 320
+	imgHeight     = 180
+	imgScale      = 2
+	cameraSpeed   = 0.1
+	frameStacking = 2
 )
 
 type (
@@ -125,7 +126,7 @@ func setupConnection() {
 	ws, err := websocket.New(fmt.Sprintf("ws://%s/render", location.Get("host")))
 	assert(err)
 
-	renderChan := make(chan struct{}, 2)
+	renderChan := make(chan struct{}, frameStacking)
 
 	onOpen := func(ev *js.Object) {
 		setup := setupMessage{
@@ -146,8 +147,6 @@ func setupConnection() {
 	}
 
 	onMessage := func(ev *js.Object) {
-		//<-renderChan
-
 		idx := frameId % 2
 		data := js.Global.Get("Uint8Array").New(ev.Get("data")).Interface().([]uint8)
 
@@ -184,6 +183,8 @@ func setupConnection() {
 
 		numFrames++
 		frameId++
+
+		renderChan <- struct{}{}
 	}
 
 	ws.BinaryType = "arraybuffer"
@@ -191,7 +192,7 @@ func setupConnection() {
 	ws.AddEventListener("message", false, onMessage)
 }
 
-func updateCamera(ws *websocket.WebSocket, renderChan chan<- struct{}) {
+func updateCamera(ws *websocket.WebSocket, renderChan <-chan struct{}) {
 	const tick30hz = (1000 / 30) * time.Millisecond
 
 	var msg updateMessage
@@ -238,8 +239,8 @@ func updateCamera(ws *websocket.WebSocket, renderChan chan<- struct{}) {
 		m, err := json.Marshal(msg)
 		assert(err)
 
-		//renderChan <- struct{}{}
 		assert(ws.Send(string(m)))
+		<-renderChan
 	}
 }
 
