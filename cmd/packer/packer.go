@@ -25,6 +25,7 @@ import (
 	"math"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/andreas-jonsson/octatron/pack"
 	"github.com/ungerik/go3d/float64/mat4"
@@ -82,7 +83,7 @@ func init() {
 
 	flag.StringVar(&arguments.format, "format", "MipR8G8B8A8PackUI28", "octree packing format")
 	flag.StringVar(&arguments.bounds, "bounds", "0,0,0,1", "octree bounding-box X,Y,Z,SIZE")
-	flag.StringVar(&arguments.input, "input", "cloud.xyz", "")
+	flag.StringVar(&arguments.input, "input", "cloud.xyz", "input files \"cloud0.xyz,cloud1.xyz\"")
 	flag.StringVar(&arguments.output, "output", "tree.oct", "")
 
 	flag.StringVar(&arguments.rotate, "rotate", "0,0,0", "YAW,PITCH,ROLL")
@@ -101,14 +102,6 @@ func init() {
 func main() {
 	flag.Parse()
 
-	infile, err := os.Open(arguments.input)
-	assert(err)
-	defer infile.Close()
-
-	var reads int64
-	size, _ := infile.Seek(0, 2)
-	infile.Seek(0, 0)
-
 	outfile, err := os.Create(arguments.output)
 	assert(err)
 
@@ -123,57 +116,73 @@ func main() {
 	mat.AssignEulerRotation(yaw, pitch, roll)
 	mat.Translate(&trans)
 
+	inputFiles := strings.Split(arguments.input, ",")
+	box := pack.Box{pack.Point{math.MaxFloat64, math.MaxFloat64, math.MaxFloat64}, -math.MaxFloat64}
+
 	parser := func(samples chan<- pack.Sample) error {
-		scanner := bufio.NewScanner(infile)
-		progress := -1
-		box := pack.Box{pack.Point{math.MaxFloat64, math.MaxFloat64, math.MaxFloat64}, -math.MaxFloat64}
+		for num, file := range inputFiles {
+			infile, err := os.Open(file)
+			assert(err)
+			defer infile.Close()
 
-		var (
-			s       pack.Sample
-			r, g, b byte
-		)
+			var reads int64
+			size, _ := infile.Seek(0, 2)
+			infile.Seek(0, 0)
 
-		for scanner.Scan() {
-			text := scanner.Text()
+			scanner := bufio.NewScanner(infile)
+			progress := -1
 
-			var ref float64
-			if arguments.reflectComponent {
-				_, err := fmt.Sscan(text, &s.Pos.X, &s.Pos.Y, &s.Pos.Z, &ref, &r, &g, &b)
-				assert(err)
-			} else {
-				_, err := fmt.Sscan(text, &s.Pos.X, &s.Pos.Y, &s.Pos.Z, &r, &g, &b)
-				assert(err)
+			var (
+				s       pack.Sample
+				r, g, b byte
+			)
+
+			for scanner.Scan() {
+				text := scanner.Text()
+
+				var ref float64
+				if arguments.reflectComponent {
+					_, err := fmt.Sscan(text, &s.Pos.X, &s.Pos.Y, &s.Pos.Z, &ref, &r, &g, &b)
+					assert(err)
+				} else {
+					_, err := fmt.Sscan(text, &s.Pos.X, &s.Pos.Y, &s.Pos.Z, &r, &g, &b)
+					assert(err)
+				}
+
+				s.Col.R = float32(r) / 255
+				s.Col.G = float32(g) / 255
+				s.Col.B = float32(b) / 255
+				s.Col.A = 1
+
+				v := vec3.T{s.Pos.X, s.Pos.Y, s.Pos.Z}
+				mat.TransformVec3(&v)
+				s.Pos = pack.Point{v[0], v[1], v[2]}
+
+				box.Pos.X = math.Min(box.Pos.X, s.Pos.X)
+				box.Pos.Y = math.Min(box.Pos.Y, s.Pos.Y)
+				box.Pos.Z = math.Min(box.Pos.Z, s.Pos.Z)
+				box.Size = math.Max(math.Max(math.Max(s.Pos.X, s.Pos.Y), s.Pos.Z), box.Size) - math.Max(math.Max(box.Pos.X, box.Pos.Y), box.Pos.Z)
+
+				reads += int64(len(text) + 1)
+				p := int((float64(reads) / float64(size)) * 100)
+				if p > progress {
+					progress = p
+					fmt.Printf("\rProgress: %v%% (%v/%v)", p, num+1, len(inputFiles))
+				}
+
+				if !arguments.dryRun {
+					samples <- s
+				}
 			}
 
-			s.Col.R = float32(r) / 255
-			s.Col.G = float32(g) / 255
-			s.Col.B = float32(b) / 255
-			s.Col.A = 1
-
-			v := vec3.T{s.Pos.X, s.Pos.Y, s.Pos.Z}
-			mat.TransformVec3(&v)
-			s.Pos = pack.Point{v[0], v[1], v[2]}
-
-			box.Pos.X = math.Min(box.Pos.X, s.Pos.X)
-			box.Pos.Y = math.Min(box.Pos.Y, s.Pos.Y)
-			box.Pos.Z = math.Min(box.Pos.Z, s.Pos.Z)
-			box.Size = math.Max(math.Max(math.Max(s.Pos.X, s.Pos.Y), s.Pos.Z), box.Size) - math.Max(math.Max(box.Pos.X, box.Pos.Y), box.Pos.Z)
-
-			reads += int64(len(text) + 1)
-			p := int((float64(reads) / float64(size)) * 100)
-			if p > progress {
-				progress = p
-				fmt.Printf("\rProgress: %v%%", p)
-			}
-
-			if !arguments.dryRun {
-				samples <- s
+			if err := scanner.Err(); err != nil {
+				return err
 			}
 		}
 
 		fmt.Println("\rProgress: 100%")
 		fmt.Println("Bounds:", box)
-		return scanner.Err()
+		return nil
 	}
 
 	if arguments.dryRun {
