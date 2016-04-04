@@ -229,17 +229,17 @@ func renderServer(ws *websocket.Conn) {
 		frame := 1 + raytracer.Trace(&camera, loadedTree.tree, loadedTree.maxDepth)
 		idx := frame % 2
 
+		var err error
 		if setup.ColorFormat == "PALETTED" {
 			draw.Draw(backBuffer, rect, raytracer.Image(idx), image.ZP, draw.Src)
-			if err := streamCodec.Send(ws, backBuffer.Pix); err != nil {
-				log.Println(err)
-				return
-			}
+			err = streamCodec.Send(ws, backBuffer.Pix)
 		} else {
-			if err := streamCodec.Send(ws, raytracer.Image(idx).Pix); err != nil {
-				log.Println(err)
-				return
-			}
+			err = streamCodec.Send(ws, raytracer.Image(idx).Pix)
+		}
+
+		if err != nil {
+			log.Println(err)
+			return
 		}
 	}
 }

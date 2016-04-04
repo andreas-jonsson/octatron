@@ -219,6 +219,7 @@ func updateCamera(ws *websocket.WebSocket, renderChan <-chan struct{}) {
 		case keys[81]: // Q
 			camera.Lift(-cameraSpeed)
 		case keys[67]: // C
+			keys[67] = false
 			ws.Close()
 
 			if colorFormat == "RGBA" {
