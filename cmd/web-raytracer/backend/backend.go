@@ -30,6 +30,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime/pprof"
 	"time"
 
 	"golang.org/x/net/websocket"
@@ -58,6 +59,7 @@ type (
 		FieldOfView float32 `field_of_view`
 		ViewDist    float32 `view_dist`
 		ColorFormat string  `color_format`
+		ClearColor  [4]byte `clear_color`
 	}
 
 	updateMessage struct {
@@ -190,7 +192,8 @@ func renderServer(ws *websocket.Conn) {
 	}
 
 	raytracer := trace.NewRaytracer(cfg)
-	raytracer.SetClearColor(color.RGBA{127, 127, 127, 255})
+	clear := setup.ClearColor
+	raytracer.SetClearColor(color.RGBA{clear[0], clear[1], clear[2], clear[3]})
 	updateChan := make(chan updateMessage, 2)
 
 	go func() {
@@ -244,6 +247,7 @@ func renderServer(ws *websocket.Conn) {
 var arguments struct {
 	web,
 	tree string
+	pprof bool
 	port,
 	timeout uint
 }
@@ -256,12 +260,29 @@ func init() {
 
 	flag.StringVar(&arguments.web, "web", "cmd/web-raytracer/frontend", "web frontend location")
 	flag.StringVar(&arguments.tree, "tree", "tree.oct", "octree to serve clients")
+	flag.BoolVar(&arguments.pprof, "pprof", false, "enables cpu profiler and pprof over http, port 6060")
 	flag.UintVar(&arguments.port, "port", 8080, "server port")
 	flag.UintVar(&arguments.timeout, "timeout", 3, "max session length in minutes")
 }
 
 func main() {
 	flag.Parse()
+
+	if arguments.pprof {
+		log.Println("pprof enabled")
+		go func() {
+			log.Println(http.ListenAndServe("localhost:6060", nil))
+		}()
+
+		fp, err := os.Create("backend.pprof")
+		if err != nil {
+			panic(err)
+		}
+		defer fp.Close()
+
+		pprof.StartCPUProfile(fp)
+		defer pprof.StopCPUProfile()
+	}
 
 	if err := loadTree(arguments.tree); err != nil {
 		log.Println(err)

@@ -48,6 +48,7 @@ type (
 		FieldOfView float32 `field_of_view`
 		ViewDist    float32 `view_dist`
 		ColorFormat string  `color_format`
+		ClearColor  [4]byte `clear_color`
 	}
 
 	updateMessage struct {
@@ -84,7 +85,7 @@ func assert(err error) {
 }
 
 func isRGBA(data []byte) bool {
-	if len(data) == imgWidth*imgHeight*4 {
+	if len(data) == (imgWidth/2)*imgHeight*4 {
 		return true
 	}
 	return false
@@ -133,6 +134,7 @@ func setupConnection() {
 			FieldOfView: 45,
 			ViewDist:    20,
 			ColorFormat: colorFormat,
+			ClearColor:  [4]byte{127, 127, 127, 255},
 		}
 
 		msg, err := json.Marshal(setup)

@@ -27967,7 +27967,7 @@ $packages["image/color/palette"] = (function() {
 	return $pkg;
 })();
 $packages["main"] = (function() {
-	var $pkg = {}, $init, json, errors, fmt, trace, js, websocket, image, color, palette, strconv, time, setupMessage, updateMessage, arrayType, ptrType, ptrType$1, sliceType, sliceType$1, structType, sliceType$2, arrayType$1, structType$1, ptrType$2, funcType, funcType$1, keys, colorFormat, imgRect, palImages, rgbaImages, finalImage, frameId, numFrames, canvas, camera, x, x$1, throw$1, assert, isRGBA, isPalette, createPalette, setupConnection, updateCamera, updateTitle, load, main;
+	var $pkg = {}, $init, json, errors, fmt, trace, js, websocket, image, color, palette, strconv, time, setupMessage, updateMessage, arrayType, ptrType, ptrType$1, sliceType, sliceType$1, structType, arrayType$1, sliceType$2, arrayType$2, structType$1, ptrType$2, funcType, funcType$1, keys, colorFormat, imgRect, palImages, rgbaImages, finalImage, frameId, numFrames, canvas, camera, x, x$1, throw$1, assert, isRGBA, isPalette, createPalette, setupConnection, updateCamera, updateTitle, load, main;
 	json = $packages["encoding/json"];
 	errors = $packages["errors"];
 	fmt = $packages["fmt"];
@@ -27979,7 +27979,7 @@ $packages["main"] = (function() {
 	palette = $packages["image/color/palette"];
 	strconv = $packages["strconv"];
 	time = $packages["time"];
-	setupMessage = $pkg.setupMessage = $newType(0, $kindStruct, "main.setupMessage", "setupMessage", "main", function(Width_, Height_, FieldOfView_, ViewDist_, ColorFormat_) {
+	setupMessage = $pkg.setupMessage = $newType(0, $kindStruct, "main.setupMessage", "setupMessage", "main", function(Width_, Height_, FieldOfView_, ViewDist_, ColorFormat_, ClearColor_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Width = 0;
@@ -27987,6 +27987,7 @@ $packages["main"] = (function() {
 			this.FieldOfView = 0;
 			this.ViewDist = 0;
 			this.ColorFormat = "";
+			this.ClearColor = arrayType$1.zero();
 			return;
 		}
 		this.Width = Width_;
@@ -27994,6 +27995,7 @@ $packages["main"] = (function() {
 		this.FieldOfView = FieldOfView_;
 		this.ViewDist = ViewDist_;
 		this.ColorFormat = ColorFormat_;
+		this.ClearColor = ClearColor_;
 	});
 	updateMessage = $pkg.updateMessage = $newType(0, $kindStruct, "main.updateMessage", "updateMessage", "main", function(Camera_) {
 		this.$val = this;
@@ -28009,8 +28011,9 @@ $packages["main"] = (function() {
 	sliceType = $sliceType(color.Color);
 	sliceType$1 = $sliceType($emptyInterface);
 	structType = $structType([]);
+	arrayType$1 = $arrayType($Uint8, 4);
 	sliceType$2 = $sliceType($Uint8);
-	arrayType$1 = $arrayType(ptrType, 2);
+	arrayType$2 = $arrayType(ptrType, 2);
 	structType$1 = $structType([{prop: "Position", name: "Position", pkg: "", typ: arrayType, tag: "position"}, {prop: "XRot", name: "XRot", pkg: "", typ: $Float32, tag: "x_rot"}, {prop: "YRot", name: "YRot", pkg: "", typ: $Float32, tag: "y_rot"}]);
 	ptrType$2 = $ptrType(js.Object);
 	funcType = $funcType([ptrType$2], [], false);
@@ -28035,7 +28038,7 @@ $packages["main"] = (function() {
 	};
 	isRGBA = function(data) {
 		var $ptr, data;
-		if (data.$length === 230400) {
+		if (data.$length === 115200) {
 			return true;
 		}
 		return false;
@@ -28089,7 +28092,7 @@ $packages["main"] = (function() {
 		onOpen = (function(ctx, img, renderChan, ws) { return function $b(ev) {
 			var $ptr, _r$2, _tuple$1, err$1, ev, msg, setup, $s, $r;
 			/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r$2 = $f._r$2; _tuple$1 = $f._tuple$1; err$1 = $f.err$1; ev = $f.ev; msg = $f.msg; setup = $f.setup; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-			setup = new setupMessage.ptr(320, 180, 45, 20, colorFormat);
+			setup = new setupMessage.ptr(320, 180, 45, 20, colorFormat, $toNativeArray($kindUint8, [127, 127, 127, 255]));
 			_r$2 = json.Marshal(new setup.constructor.elem(setup)); /* */ $s = 1; case 1: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
 			_tuple$1 = _r$2;
 			msg = _tuple$1[0];
@@ -28106,7 +28109,7 @@ $packages["main"] = (function() {
 			data = $assertType($internalize(new ($global.Uint8Array)(ev.data), $emptyInterface), sliceType$2);
 			if (isPalette(data)) {
 				pal = createPalette(data);
-				arrayType$1.copy(palImages, $toNativeArray($kindPtr, [image.NewPaletted(imgRect, pal), image.NewPaletted(imgRect, pal)]));
+				arrayType$2.copy(palImages, $toNativeArray($kindPtr, [image.NewPaletted(imgRect, pal), image.NewPaletted(imgRect, pal)]));
 				return;
 			}
 			_tmp = $ifaceNil;
@@ -28266,7 +28269,7 @@ $packages["main"] = (function() {
 			$go(load, []);
 		}), funcType$1));
 	};
-	setupMessage.init([{prop: "Width", name: "Width", pkg: "", typ: $Int, tag: "width"}, {prop: "Height", name: "Height", pkg: "", typ: $Int, tag: "height"}, {prop: "FieldOfView", name: "FieldOfView", pkg: "", typ: $Float32, tag: "field_of_view"}, {prop: "ViewDist", name: "ViewDist", pkg: "", typ: $Float32, tag: "view_dist"}, {prop: "ColorFormat", name: "ColorFormat", pkg: "", typ: $String, tag: "color_format"}]);
+	setupMessage.init([{prop: "Width", name: "Width", pkg: "", typ: $Int, tag: "width"}, {prop: "Height", name: "Height", pkg: "", typ: $Int, tag: "height"}, {prop: "FieldOfView", name: "FieldOfView", pkg: "", typ: $Float32, tag: "field_of_view"}, {prop: "ViewDist", name: "ViewDist", pkg: "", typ: $Float32, tag: "view_dist"}, {prop: "ColorFormat", name: "ColorFormat", pkg: "", typ: $String, tag: "color_format"}, {prop: "ClearColor", name: "ClearColor", pkg: "", typ: arrayType$1, tag: "clear_color"}]);
 	updateMessage.init([{prop: "Camera", name: "Camera", pkg: "", typ: structType$1, tag: "camera"}]);
 	$init = function() {
 		$pkg.$init = function() {};
