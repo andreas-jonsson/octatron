@@ -117,6 +117,7 @@ func main() {
 	mat.Translate(&trans)
 
 	inputFiles := strings.Split(arguments.input, ",")
+	numFiles := len(inputFiles)
 	box := pack.Box{pack.Point{math.MaxFloat64, math.MaxFloat64, math.MaxFloat64}, -math.MaxFloat64}
 
 	parser := func(samples chan<- pack.Sample) error {
@@ -167,7 +168,7 @@ func main() {
 				p := int((float64(reads) / float64(size)) * 100)
 				if p > progress {
 					progress = p
-					fmt.Printf("\rProgress: %v%% (%v/%v)", p, num+1, len(inputFiles))
+					fmt.Printf("\rProgress: %v%% (%v/%v)", p, num+1, numFiles)
 				}
 
 				if !arguments.dryRun {
@@ -180,7 +181,7 @@ func main() {
 			}
 		}
 
-		fmt.Println("\rProgress: 100%")
+		fmt.Printf("\rProgress: 100%% (%v/%v)\n", numFiles, numFiles)
 		fmt.Println("Bounds:", box)
 		return nil
 	}

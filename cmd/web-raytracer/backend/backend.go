@@ -57,7 +57,6 @@ type (
 		Width       int     `width`
 		Height      int     `height`
 		FieldOfView float32 `field_of_view`
-		ViewDist    float32 `view_dist`
 		ColorFormat string  `color_format`
 		ClearColor  [4]byte `clear_color`
 	}
@@ -184,7 +183,7 @@ func renderServer(ws *websocket.Conn) {
 	cfg := trace.Config{
 		FieldOfView:   setup.FieldOfView,
 		TreeScale:     1,
-		ViewDist:      setup.ViewDist,
+		ViewDist:      float32(arguments.viewDistance),
 		Images:        surfaces,
 		Jitter:        true,
 		MultiThreaded: true,
@@ -250,6 +249,7 @@ var arguments struct {
 	pprof bool
 	port,
 	timeout uint
+	viewDistance float64
 }
 
 func init() {
@@ -263,6 +263,7 @@ func init() {
 	flag.BoolVar(&arguments.pprof, "pprof", false, "enables cpu profiler and pprof over http, port 6060")
 	flag.UintVar(&arguments.port, "port", 8080, "server port")
 	flag.UintVar(&arguments.timeout, "timeout", 3, "max session length in minutes")
+	flag.Float64Var(&arguments.viewDistance, "dist", 1, "max view-distance")
 }
 
 func main() {

@@ -47,7 +47,6 @@ type (
 		Width       int     `width`
 		Height      int     `height`
 		FieldOfView float32 `field_of_view`
-		ViewDist    float32 `view_dist`
 		ColorFormat string  `color_format`
 		ClearColor  [4]byte `clear_color`
 	}
@@ -133,7 +132,6 @@ func setupConnection() {
 			Width:       imgWidth,
 			Height:      imgHeight,
 			FieldOfView: 45,
-			ViewDist:    20,
 			ColorFormat: colorFormat,
 			ClearColor:  [4]byte{127, 127, 127, 255},
 		}
