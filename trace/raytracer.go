@@ -28,9 +28,9 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/andreas-jonsson/octatron/go3d/quaternion"
+	"github.com/andreas-jonsson/octatron/go3d/vec3"
 	"github.com/andreas-jonsson/octatron/pack"
-	"github.com/ungerik/go3d/quaternion"
-	"github.com/ungerik/go3d/vec3"
 )
 
 const maxUint28 = 1<<28 - 1

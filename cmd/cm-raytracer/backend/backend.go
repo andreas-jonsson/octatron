@@ -48,8 +48,8 @@ var cameraMatrix = [6]lookAtCamera{
 	{trace.Vec3{0, 0, 0}, trace.Vec3{-1, 0, 0}, trace.Vec3{0, 1, 0}}, // Right
 	{trace.Vec3{0, 0, 0}, trace.Vec3{1, 0, 0}, trace.Vec3{0, 1, 0}},  // Left
 
-	{trace.Vec3{0, 0, 0}, trace.Vec3{0, 1, 0}, trace.Vec3{0, 0, 1}},   // Up
-	{trace.Vec3{0, 0, 0}, trace.Vec3{0, -1, 0}, trace.Vec3{0, 0, -1}}, // Down
+	{trace.Vec3{0, 0, 0}, trace.Vec3{0, 1, 0}, trace.Vec3{0, 0, -1}}, // Up
+	{trace.Vec3{0, 0, 0}, trace.Vec3{0, -1, 0}, trace.Vec3{0, 0, 1}}, // Down
 
 	{trace.Vec3{0, 0, 0}, trace.Vec3{0, 0, 1}, trace.Vec3{0, 1, 0}},  // Backward
 	{trace.Vec3{0, 0, 0}, trace.Vec3{0, 0, -1}, trace.Vec3{0, 1, 0}}, // Forward
@@ -164,7 +164,7 @@ func renderServer(ws *websocket.Conn) {
 		surfaces[i] = image.NewRGBA(rect)
 
 		cfg := trace.Config{
-			FieldOfView:   90,
+			FieldOfView:   1.55,
 			TreeScale:     1,
 			ViewDist:      float32(arguments.viewDistance),
 			Images:        [2]*image.RGBA{surfaces[i], nil},
@@ -199,6 +199,10 @@ func renderServer(ws *websocket.Conn) {
 		for i := 0; i < 6; i++ {
 			camera := cameras[i]
 			camera.pos = update.Position
+			camera.at[0] += camera.pos[0]
+			camera.at[1] += camera.pos[1]
+			camera.at[2] += camera.pos[2]
+
 			raytracers[i].Trace(&camera, loadedTree.tree, loadedTree.maxDepth)
 		}
 
@@ -230,7 +234,7 @@ func init() {
 	flag.StringVar(&arguments.tree, "tree", "tree.oct", "octree to serve clients")
 	flag.BoolVar(&arguments.pprof, "pprof", false, "enables cpu profiler and pprof over http, port 6060")
 	flag.UintVar(&arguments.port, "port", 8080, "server port")
-	flag.UintVar(&arguments.timeout, "timeout", 3, "max session length in minutes")
+	flag.UintVar(&arguments.timeout, "timeout", 30, "max session length in minutes")
 	flag.Float64Var(&arguments.viewDistance, "dist", 1, "max view-distance")
 }
 

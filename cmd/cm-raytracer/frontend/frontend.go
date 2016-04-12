@@ -27,6 +27,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/andreas-jonsson/octatron/go3d/mat4"
 	"github.com/andreas-jonsson/octatron/trace"
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/gopherjs/webgl"
@@ -34,9 +35,7 @@ import (
 )
 
 const (
-	imgWidth        = 320
-	imgHeight       = 180
-	imgCmResolution = 512
+	imgCmResolution = 256
 	imgScale        = 2
 	cameraSpeed     = 0.1
 )
@@ -54,7 +53,6 @@ type (
 
 var (
 	keys       = make(map[int]bool)
-	backBuffer = image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
 	imgRect    = image.Rect(0, 0, imgCmResolution, imgCmResolution)
 	mapsImages = [6]*image.RGBA{
 		image.NewRGBA(imgRect),
@@ -65,9 +63,9 @@ var (
 		image.NewRGBA(imgRect),
 	}
 
-	frameId, numFrames int
-	canvas             *js.Object
-	camera             trace.FreeFlightCamera
+	frameId int
+	canvas,
+	uniformViewLocation *js.Object
 )
 
 func throw(err error) {
@@ -107,7 +105,7 @@ func setupShaders(gl *webgl.Context) *js.Object {
 	return program
 }
 
-func buildArrays() (*js.Object, *js.Object) {
+func buildArray() *js.Object {
 	jsPosArray := js.Global.Get("Float32Array").New(6 * 2)
 	posArray := jsPosArray.Interface().([]float32)
 
@@ -124,41 +122,16 @@ func buildArrays() (*js.Object, *js.Object) {
 		posArray[i] = v
 	}
 
-	jsUVArray := js.Global.Get("Float32Array").New(6 * 2)
-	uvArray := jsUVArray.Interface().([]float32)
-
-	uvData := []float32{
-		0, 0,
-		1, 0,
-		0, 1,
-		0, 1,
-		1, 0,
-		1, 1,
-	}
-
-	for i, v := range uvData {
-		uvArray[i] = v
-	}
-
-	return jsPosArray, jsUVArray
+	return jsPosArray
 }
 
 func setupGeometry(gl *webgl.Context, program *js.Object) {
-	posArray, _ := buildArrays()
-
 	gl.BindBuffer(gl.ARRAY_BUFFER, gl.CreateBuffer())
-	gl.BufferData(gl.ARRAY_BUFFER, posArray, gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, buildArray(), gl.STATIC_DRAW)
 
 	positionLocation := gl.GetAttribLocation(program, "a_position")
 	gl.EnableVertexAttribArray(positionLocation)
 	gl.VertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0)
-
-	/*gl.BindBuffer(gl.ARRAY_BUFFER, gl.CreateBuffer())
-	gl.BufferData(gl.ARRAY_BUFFER, uvArray, gl.STATIC_DRAW)
-
-	texCoordLocation := gl.GetAttribLocation(program, "a_texCoord")
-	gl.EnableVertexAttribArray(texCoordLocation)
-	gl.VertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0)*/
 }
 
 func setupTextures(gl *webgl.Context, program *js.Object) {
@@ -171,9 +144,14 @@ func setupTextures(gl *webgl.Context, program *js.Object) {
 
 	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+
+	/*
+		gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+		gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+	*/
+
 	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
 	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-	//gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE)
 
 	gl.Uniform1i(gl.GetUniformLocation(program, "s_texture"), 0)
 }
@@ -185,6 +163,8 @@ func setupGL(canvas *js.Object) *webgl.Context {
 	program := setupShaders(gl)
 	setupGeometry(gl, program)
 	setupTextures(gl, program)
+
+	uniformViewLocation = gl.GetUniformLocation(program, "u_view")
 
 	gl.ClearColor(0, 0, 0, 1)
 	gl.Clear(gl.COLOR_BUFFER_BIT)
@@ -199,6 +179,8 @@ func setupConnection(gl *webgl.Context) {
 	ws, err := websocket.New(fmt.Sprintf("ws://%s/render", location.Get("host")))
 	assert(err)
 
+	renderer := make(chan struct{})
+
 	onOpen := func(ev *js.Object) {
 		setup := setupMessage{
 			Resolution: imgCmResolution,
@@ -210,13 +192,21 @@ func setupConnection(gl *webgl.Context) {
 
 		assert(ws.Send(string(msg)))
 
-		go updateCamera(ws, gl)
+		go updateCamera(ws, gl, renderer)
 	}
 
 	onMessage := func(ev *js.Object) {
+		face := frameId % 6
+		fmt.Println("Received face:", face)
+
 		data := js.Global.Get("Uint8Array").New(ev.Get("data"))
-		gl.Call("texImage2D", gl.TEXTURE_CUBE_MAP_POSITIVE_X+(frameId%6), 0, gl.RGBA, imgCmResolution, imgCmResolution, 0, gl.RGBA, gl.UNSIGNED_BYTE, data)
+		gl.Call("texImage2D", gl.TEXTURE_CUBE_MAP_POSITIVE_X+face, 0, gl.RGBA, imgCmResolution, imgCmResolution, 0, gl.RGBA, gl.UNSIGNED_BYTE, data)
 		frameId++
+
+		select {
+		case renderer <- struct{}{}:
+		default:
+		}
 	}
 
 	ws.BinaryType = "arraybuffer"
@@ -224,13 +214,28 @@ func setupConnection(gl *webgl.Context) {
 	ws.AddEventListener("message", false, onMessage)
 }
 
-func updateCamera(ws *websocket.WebSocket, gl *webgl.Context) {
+func updateCamera(ws *websocket.WebSocket, gl *webgl.Context, renderer <-chan struct{}) {
 	const tick30hz = (1000 / 30) * time.Millisecond
 
 	var (
-		msg    updateMessage
-		camera trace.FreeFlightCamera
+		camera    trace.FreeFlightCamera
+		oldPos    [3]float32
+		positions = make(chan [3]float32, 1)
 	)
+
+	positions <- oldPos
+
+	go func() {
+		for {
+			pos := <-positions
+			fmt.Println("New position:", pos)
+
+			m, err := json.Marshal(updateMessage{Position: pos})
+			assert(err)
+			assert(ws.Send(string(m)))
+			<-renderer
+		}
+	}()
 
 	for _ = range time.Tick(tick30hz) {
 		switch {
@@ -256,34 +261,26 @@ func updateCamera(ws *websocket.WebSocket, gl *webgl.Context) {
 			camera.Lift(-cameraSpeed)
 		}
 
-		msg.Position = camera.Pos
-		//msg.Camera.XRot = camera.XRot
-		//msg.Camera.YRot = camera.YRot
+		if oldPos != camera.Pos {
+			select {
+			case positions <- camera.Pos:
+				oldPos = camera.Pos
+			default:
+			}
+		}
 
-		m, err := json.Marshal(msg)
-		assert(err)
+		mat := mat4.Ident
+		mat.AssignEulerRotation(camera.XRot, camera.YRot, 0)
+		mat.Transpose()
 
-		assert(ws.Send(string(m)))
-
+		gl.UniformMatrix4fv(uniformViewLocation, false, mat.Slice())
 		gl.DrawArrays(gl.TRIANGLES, 0, 6)
-		numFrames++
 	}
-}
-
-func updateTitle() {
-	title := fmt.Sprintf("AJ's Raytracer - fps: %v", numFrames)
-	js.Global.Get("document").Set("title", title)
 }
 
 func load() {
 	document := js.Global.Get("document")
-
-	go func() {
-		for _ = range time.Tick(time.Second) {
-			updateTitle()
-			numFrames = 0
-		}
-	}()
+	document.Set("title", "AJ's Cubemap Raytracer")
 
 	document.Set("onkeydown", func(e *js.Object) {
 		keys[e.Get("keyCode").Int()] = true
@@ -294,10 +291,10 @@ func load() {
 	})
 
 	canvas := document.Call("createElement", "canvas")
-	canvas.Call("setAttribute", "width", strconv.Itoa(imgWidth))
-	canvas.Call("setAttribute", "height", strconv.Itoa(imgHeight))
-	canvas.Get("style").Set("width", strconv.Itoa(imgWidth*imgScale)+"px")
-	canvas.Get("style").Set("height", strconv.Itoa(imgHeight*imgScale)+"px")
+	canvas.Call("setAttribute", "width", strconv.Itoa(imgCmResolution))
+	canvas.Call("setAttribute", "height", strconv.Itoa(imgCmResolution))
+	canvas.Get("style").Set("width", strconv.Itoa(imgCmResolution*imgScale)+"px")
+	canvas.Get("style").Set("height", strconv.Itoa(imgCmResolution*imgScale)+"px")
 	document.Get("body").Call("appendChild", canvas)
 	document.Get("body").Call("appendChild", canvas)
 
@@ -313,13 +310,16 @@ var vsSource = `
 
 	attribute vec2 a_position;
 	varying vec3 v_position;
-
-	uniform mat4 u_projection;
 	uniform mat4 u_view;
 
+	const float field_of_view = -1.2;
+
 	void main() {
-		gl_Position = vec4(a_position, -1, 1);
-		v_position = projection * view * gl_Position;
+		vec4 pos = vec4(a_position, -1, 1);
+		gl_Position = pos;
+
+		pos.z = field_of_view;
+		v_position = (u_view * pos).xyz;
 	}
 `
 
@@ -330,6 +330,6 @@ var psSource = `
 	uniform samplerCube s_texture;
 
 	void main() {
-		gl_FragColor = textureCube(s_texture, v_position);
+		gl_FragColor = vec4(textureCube(s_texture, v_position.xyz).rgb, 1);
 	}
 `
