@@ -27,9 +27,9 @@ import (
 	"path"
 	"strings"
 
+	"github.com/andreas-jonsson/octatron/go3d/float64/mat4"
+	"github.com/andreas-jonsson/octatron/go3d/float64/vec3"
 	"github.com/andreas-jonsson/octatron/pack"
-	"github.com/ungerik/go3d/float64/mat4"
-	"github.com/ungerik/go3d/float64/vec3"
 )
 
 type xyzSample struct {
